@@ -1,3 +1,8 @@
+---
+tags:
+  - My_CV_Project
+  - AWS
+---
 # CV Enhancement Recommendations for Infrastructure Project
 
 > **Project Context**: AWS-based infrastructure with Jenkins CI/CD, EKS, RDS, and Terraform IaC

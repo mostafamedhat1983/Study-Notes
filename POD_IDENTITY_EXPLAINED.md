@@ -1,3 +1,9 @@
+---
+tags:
+  - AWS
+  - EKS
+  - Kubernetes
+---
 # Pod Identity Flow - Simple Step-by-Step Explanation
 
 ## Scenario 1: App Pod Requests Secret from AWS Secrets Manager

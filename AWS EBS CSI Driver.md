@@ -4,7 +4,7 @@ tags:
   - EKS
   - Kubernetes
 ---
-# AWS EBS CSI Driver & EKS Pod Identity
+# AWS EBS CSI Driver & EKS Pod Identity [[POD_IDENTITY_EXPLAINED]]
 
 ## 1. The "Why" (Problem Statement)
 Kubernetes natively doesn't know how to talk to AWS services like EBS. It needs a translator.

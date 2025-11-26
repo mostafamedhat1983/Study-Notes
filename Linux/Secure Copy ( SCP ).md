@@ -1,6 +1,5 @@
 ---
 tags:
-  - linux
   - SSH
 ---
 # scp copy file from one pc to another pc

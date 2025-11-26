@@ -1,3 +1,7 @@
+---
+tags:
+  - Ansible
+---
 # install specific version of ansible using pip3
 
 sudo pip3 install ansible==4.9.0

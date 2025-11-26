@@ -1,7 +1,6 @@
 ---
 tags:
   - Jenkins
-  - Linux
   - AWS
   - SSM
 ---

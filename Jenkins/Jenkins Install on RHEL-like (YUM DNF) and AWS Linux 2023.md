@@ -2,7 +2,6 @@
 tags:
   - Jenkins
   - AWS
-  - Linux
 ---
 
 # 1) Update system packages

@@ -2,7 +2,6 @@
 tags:
   - AWS
   - SSM
-  - Linux
 ---
 
 # Step 1: Download the Installer

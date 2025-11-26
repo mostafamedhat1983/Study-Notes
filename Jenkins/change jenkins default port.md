@@ -1,7 +1,6 @@
 ---
 tags:
   - Jenkins
-  - Linux
 ---
 sudo vim /lib/systemd/system/jenkins.service
 

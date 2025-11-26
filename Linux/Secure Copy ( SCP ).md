@@ -1,3 +1,8 @@
+---
+tags:
+  - linux
+  - SSH
+---
 # scp copy file from one pc to another pc
 to avoid asking for password every time use password-less authentication  [[SSH]]
 

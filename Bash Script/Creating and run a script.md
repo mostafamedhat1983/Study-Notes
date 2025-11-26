@@ -1,3 +1,8 @@
+---
+tags:
+  - Linux
+  - Bash_Script
+---
 # to create a bash script file create any file with .sh extension and the first line must be
 #!/bin/bash
 This line is called a shebang or hashbang. It tells the operating system to execute the file using the bash interpreter located at /bin/bash.

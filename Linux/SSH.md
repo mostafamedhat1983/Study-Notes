@@ -1,6 +1,7 @@
 ---
 tags:
   - Linux
+  - SSH
 ---
 # ssh config file
 /etc/ssh/sshd_config  

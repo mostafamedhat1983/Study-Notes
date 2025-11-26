@@ -3,6 +3,7 @@ tags:
   - Jenkins
   - Linux
   - AWS
+  - SSM
 ---
 # Part 1: On the Jenkins Controller (Master)
 

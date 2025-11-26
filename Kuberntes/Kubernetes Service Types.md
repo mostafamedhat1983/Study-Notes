@@ -1,3 +1,7 @@
+---
+tags:
+  - Kubernetes
+---
 # Kubernetes Service Types: A Deep Dive
 
 Kubernetes Services provide a stable network endpoint (IP address and DNS name) to access applications running on a set of ephemeral Pods.  

@@ -50,6 +50,4 @@ Instead of giving permissions to the *Node*, we give them only to the *CSI Drive
 | **CSI Controller** | Deployment | Talks to AWS API (Create/Delete Vol) | **YES** (Heavy usage) |
 | **CSI Node** | DaemonSet | Linux Mount/Unmount commands | **YES** (Attach/Detach usage) |
 
-## 5. Setup Snippet (Terraform Context)
-*For the EKS Pod Identity approach:*
 

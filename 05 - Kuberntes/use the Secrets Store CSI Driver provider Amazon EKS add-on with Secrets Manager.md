@@ -1,3 +1,8 @@
+---
+tags:
+  - AWS
+  - Kubernetes
+---
 
 
 ### Phase 1: Infrastructure & Identity

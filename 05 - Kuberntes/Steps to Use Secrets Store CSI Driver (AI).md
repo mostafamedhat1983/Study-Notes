@@ -1,3 +1,8 @@
+---
+tags:
+  - AWS
+  - Kubernetes
+---
 
 
    Step 1: Create Secret in AWS Secrets Manager

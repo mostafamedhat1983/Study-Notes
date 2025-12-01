@@ -1,3 +1,7 @@
+---
+tags:
+  - Kubernetes
+---
 
 Bitnami Sealed Secrets is a Kubernetes add-on that lets you encrypt Kubernetes Secret manifests into a custom resource called `SealedSecret`, which is safe to commit to Git (even in public repos) and can only be decrypted by a controller running inside your cluster. [web:2][web:3] The workflow is: you create a normal Secret manifest locally, encrypt it with the `kubeseal` CLI using the controller’s public key, store the resulting `SealedSecret` in Git, and the in-cluster controller automatically decrypts it back into a normal `Secret` at runtime. [web:1][web:2][web:5]
 

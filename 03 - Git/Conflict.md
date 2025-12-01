@@ -1,3 +1,7 @@
+---
+tags:
+  - Git
+---
 The Problem:
    You edited files on PC #1 and pushed to GitHub. Then you edited files on PC #2 WITHOUT pulling the changes from PC #1 first.
     Now both versions have different changes and Git doesn't know which to keep.

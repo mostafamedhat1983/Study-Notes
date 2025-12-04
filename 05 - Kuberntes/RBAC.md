@@ -1,3 +1,7 @@
+---
+tags:
+  - Kubernetes
+---
 Direct Answer/Solution
 RBAC stands for **Role-Based Access Control**. It is an access control model where **permissions are assigned to roles, and users are then assigned to those roles**, instead of giving permissions directly to individual users[web:58][web:62].
 

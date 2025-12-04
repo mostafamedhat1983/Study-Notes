@@ -1,3 +1,7 @@
+---
+tags:
+  - memory-bank
+---
 # Technology Stack
 
 ## Programming Languages

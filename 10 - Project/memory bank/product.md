@@ -1,3 +1,7 @@
+---
+tags:
+  - memory-bank
+---
 # Product Overview
 
 ## Project Purpose

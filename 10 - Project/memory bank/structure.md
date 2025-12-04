@@ -1,3 +1,7 @@
+---
+tags:
+  - memory-bank
+---
 # Project Structure
 
 ## Multi-Repository Architecture

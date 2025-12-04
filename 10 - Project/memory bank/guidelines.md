@@ -1,3 +1,7 @@
+---
+tags:
+  - memory-bank
+---
 # Development Guidelines
 
 ## Code Quality Standards

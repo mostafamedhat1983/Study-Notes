@@ -2,6 +2,7 @@
 tags:
   - AWS
   - Kubernetes
+  - EKS
 ---
 Direct Answer/Solution
 

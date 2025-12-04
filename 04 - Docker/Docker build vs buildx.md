@@ -1,3 +1,7 @@
+---
+tags:
+  - Docker
+---
 Direct Answer/Solution
 
 `docker build` is the traditional Docker image build command, while `docker buildx` is an extended, BuildKit‑based build interface that exposes newer capabilities like multi‑arch builds, advanced caching, and multiple/remote builders. In modern Docker, `docker build` is effectively a compatibility wrapper around Buildx using the default builder, whereas `docker buildx build` lets you fully control BuildKit features and builder backends.

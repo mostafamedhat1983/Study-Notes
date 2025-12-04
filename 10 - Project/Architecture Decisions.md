@@ -1,3 +1,7 @@
+---
+tags:
+  - My_CV_Project
+---
 # Architecture Decisions - Detailed Explanation
 
 Complete breakdown of all technical approaches used in both repositories, including requirements, alternatives, and decision rationale.

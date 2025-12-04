@@ -1,3 +1,10 @@
+---
+tags:
+  - My_CV_Project
+  - EKS
+  - AWS
+  - Kubernetes
+---
 # EKS Network Policies - Implementation Guide
 
 **Security Best Practice:** Zero-trust networking for Kubernetes workloads

@@ -1,3 +1,10 @@
+---
+tags:
+  - My_CV_Project
+  - AWS
+  - EKS
+  - Kubernetes
+---
 # AWS Secrets Store CSI Driver Troubleshooting Journey
 
 ## Overview

@@ -1,3 +1,7 @@
+---
+tags:
+  - My_CV_Project
+---
 # Project Challenges and Solutions - Interview Guide
 
 **Project:** AWS EKS Infrastructure + AI Chatbot Platform  

@@ -1,3 +1,10 @@
+---
+tags:
+  - My_CV_Project
+  - AWS
+  - EKS
+  - Kubernetes
+---
 # AWS Backup for EKS - Implementation Guide
 
 **Feature Launch Date:** November 10, 2025 (Brand New Feature!)

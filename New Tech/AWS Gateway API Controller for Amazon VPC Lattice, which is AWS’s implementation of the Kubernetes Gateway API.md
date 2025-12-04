@@ -2,6 +2,7 @@
 tags:
   - AWS
   - Kubernetes
+  - New-Tech
 ---
 Direct Answer/Solution
 

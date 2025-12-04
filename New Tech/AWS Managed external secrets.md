@@ -1,6 +1,7 @@
 ---
 tags:
   - AWS
+  - New-Tech
 ---
 # Using AWS Secrets Manager managed external secrets to manage Third Party secrets
 

@@ -1,3 +1,9 @@
+---
+tags:
+  - AWS
+  - My_CV_Project
+  - Kubernetes
+---
 # Kubernetes Security & Operational Hardening Guide
 
 **Complete guide to production-grade Kubernetes security and operational excellence**

@@ -1,3 +1,7 @@
+---
+tags:
+  - My_CV_Project
+---
  Complete Secret Lifecycle - From Creation to Pod
 
    Let me trace the entire journey of your database credentials:

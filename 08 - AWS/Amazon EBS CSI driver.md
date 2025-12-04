@@ -2,6 +2,7 @@
 tags:
   - AWS
   - Kubernetes
+  - EKS
 ---
 The Amazon EBS CSI driver is a Kubernetes storage plugin that lets your cluster dynamically create, attach, mount, and delete Amazon EBS volumes for pods using the standard PersistentVolume (PV) and PersistentVolumeClaim (PVC) APIs. It is the supported, out‑of‑tree implementation that replaces the older in‑tree AWS EBS volume plugin and is the recommended way to use EBS as persistent block storage with EKS or any Kubernetes cluster running on AWS.
 ## Architectural Reasoning (What it does and why it exists)

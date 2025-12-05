@@ -548,3 +548,168 @@ error: timed out waiting for the condition
 3. Configure Route 53 DNS for ALB endpoints
 4. Set up GitHub webhooks for automatic application deployments
 5. Document DNS setup process
+
+### Issue 12: ALB Controller Missing EC2 Permissions and VPC ID Bug
+
+**Problem:** ALB controller couldn't create ALBs with two errors:
+1. `UnauthorizedOperation: ec2:DescribeRouteTables`
+2. `InvalidParameterValue: vpc-id` (value was "None")
+
+**Root Cause 1 - Missing IAM Permission:**
+- Official AWS Load Balancer Controller IAM policy (v2.7.2) missing `ec2:DescribeRouteTables`
+- Controller needs this permission for subnet auto-discovery
+- Without it, controller can't determine which subnets to use for ALB
+
+**Root Cause 2 - VPC ID Not Passing Between Agents:**
+- ALB controller Jenkinsfile had 2 stages with different agents:
+  - Stage 1: `agent any` (Jenkins EC2) - queried VPC ID, set `env.VPC_ID`
+  - Stage 2: `agent kubernetes` (EKS pod) - tried to use `env.VPC_ID`
+- Environment variables don't transfer between different agent types
+- Result: `env.VPC_ID` was undefined in Stage 2, passed as "None" to Helm
+
+**Investigation:**
+```bash
+# Check ingress events
+kubectl describe ingress chatbot-ingress
+# Shows: ec2:DescribeRouteTables permission denied
+
+# Check ALB controller deployment
+kubectl get deployment aws-load-balancer-controller -n kube-system -o yaml | grep vpc-id
+# Shows: --aws-vpc-id=None
+```
+
+**Solution 1 - Add Missing IAM Permission:**
+Created supplemental IAM policy in Terraform:
+```hcl
+# terraform/modules/eks/main.tf
+resource "aws_iam_policy" "aws_load_balancer_controller_supplement" {
+  name = "${var.cluster_name}-aws-load-balancer-controller-supplement"
+  
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["ec2:DescribeRouteTables"]
+      Resource = "*"
+    }]
+  })
+}
+
+# Attach both official and supplemental policies
+module "aws_load_balancer_controller_role" {
+  policy_arns = [
+    aws_iam_policy.aws_load_balancer_controller.arn,
+    aws_iam_policy.aws_load_balancer_controller_supplement.arn
+  ]
+}
+```
+
+**Solution 2 - Fix VPC ID Passing:**
+Merged stages to query VPC ID in same pod where it's used:
+```groovy
+// Jenkinsfile-alb-controller
+stage('Install AWS Load Balancer Controller') {
+    agent {
+        kubernetes {
+            yaml '''
+spec:
+  serviceAccountName: jenkins-sa
+  containers:
+  - name: kubectl
+    image: alpine/k8s:1.30.7
+'''
+        }
+    }
+    steps {
+        container('kubectl') {
+            sh """
+                apk add --no-cache aws-cli
+                
+                VPC_ID=\$(aws ec2 describe-vpcs --filters 'Name=tag:Name,Values=${vpcName}' --query 'Vpcs[0].VpcId' --output text)
+                echo "Found VPC ID: \$VPC_ID"
+                
+                helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-controller \\
+                  --set vpcId=\$VPC_ID
+            """
+        }
+    }
+}
+```
+
+**Why This Works:**
+- Query VPC ID and use it in same shell script (same execution context)
+- Install AWS CLI in pod to enable VPC query
+- Use shell variable `$VPC_ID` instead of Jenkins env variable
+- No data passing between different agents
+
+**Applied:**
+1. `terraform apply` in `terraform/dev` (added IAM permissions)
+2. Restart ALB controller pods: `kubectl rollout restart deployment aws-load-balancer-controller -n kube-system`
+3. Re-run ALB controller pipeline with fixed Jenkinsfile
+
+**Update - Additional Missing Permission:**
+After fixing VPC ID issue, discovered another missing permission:
+- `elasticloadbalancing:DescribeListenerAttributes` also missing from official v2.7.2 policy
+- Added to supplemental policy alongside `ec2:DescribeRouteTables`
+- Applied with `terraform apply` and restarted controller pods
+
+**The Lesson:**
+- Official AWS policies may be incomplete - always test and supplement as needed
+- Jenkins environment variables don't transfer between different agent types
+- When using multiple agents, keep related operations in same stage/agent
+- Shell variables (`$VAR`) work within same script, env variables (`env.VAR`) don't cross agents
+- Supplemental policies are cleaner than duplicating entire 200+ line policy inline
+- VPC Name tags must match between Terraform and pipeline queries (vpc-dev not platform-dev-vpc)
+
+---
+
+### Issue 13: Backend Rate Limiter Parameter Name Error
+
+**Problem:** Backend pods returning 500 Internal Server Error when users send messages
+```
+Exception: parameter 'request' must be an instance of starlette.requests.Request
+```
+
+**Root Cause:** slowapi rate limiter expects first parameter named `request` (HTTP Request object)
+
+Original function signature:
+```python
+@limiter.limit("5/minute")
+async def chat(http_request: Request, request: ChatRequest):
+```
+
+**Why This Happens:**
+- slowapi decorator inspects function signature looking for parameter named `request`
+- First parameter was named `http_request` instead of `request`
+- slowapi couldn't find Request object, threw exception
+- Rate limiter requirement: first parameter MUST be named `request`
+
+**Investigation:**
+```bash
+kubectl logs -l app=chatbot-backend -c chatbot-backend
+# Shows: Exception with full traceback pointing to slowapi expecting 'request' parameter
+```
+
+**Solution:** Rename parameters to match slowapi expectations
+```python
+@limiter.limit("5/minute")
+async def chat(request: Request, chat_request: ChatRequest):
+    # Update all references in function body
+    message = chat_request.message  # Was: request.message
+    session_id = chat_request.session_id  # Was: request.session_id
+```
+
+**Applied:**
+1. Fixed backend/main.py function signature
+2. Updated all references from `request.message` to `chat_request.message`
+3. Committed and pushed changes
+4. Jenkins pipeline build #21 deployed new backend image
+5. Chatbot now working correctly
+
+**The Lesson:**
+- Third-party decorators may have strict parameter naming requirements
+- slowapi specifically requires first parameter named `request` for rate limiting
+- Always check library documentation for decorator parameter expectations
+- Test rate limiting functionality after implementation, not just successful responses
+
+---

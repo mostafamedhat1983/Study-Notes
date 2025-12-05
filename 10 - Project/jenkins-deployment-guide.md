@@ -13,9 +13,11 @@ Complete guide for deploying applications via Jenkins pipelines and configuring 
 
 - ✅ Infrastructure deployed (VPC, EKS, RDS, Jenkins EC2)
 - ✅ Jenkins configured with Kubernetes plugin
-- ✅ kubectl access to EKS cluster from Jenkins
+- ✅ Jenkins global variable `TARGET_ENVIRONMENT` set to `dev` or `prod` (Manage Jenkins → System → Global properties)
 - ✅ ACM certificate validated for your domain
 - ✅ Route 53 hosted zone for your domain
+
+**Note:** Pipelines automatically configure kubectl using `TARGET_ENVIRONMENT` variable
 
 ---
 
@@ -24,6 +26,8 @@ Complete guide for deploying applications via Jenkins pipelines and configuring 
 Execute Jenkins jobs in this specific order:
 
 ```
+0. Setup Pipeline (ONCE per environment or when switching environments)
+   ↓
 1. ALB Controller Setup (once per environment)
    ↓
 2. Monitoring Stack (once per environment)
@@ -31,6 +35,44 @@ Execute Jenkins jobs in this specific order:
 3. Application Deployment (automated on commits)
    ↓
 4. Route 53 DNS Configuration
+```
+
+---
+
+## Step 0: Configure kubectl Context (One-Time Setup)
+
+**Purpose:** Configures kubectl on Jenkins EC2 to enable Kubernetes agent pods for all pipelines
+
+**Jenkins Job Setup:**
+1. Create new Pipeline job: `kubectl-setup`
+2. Configure:
+   - Pipeline script from SCM
+   - Repository: `platform-ai-chatbot`
+   - Script Path: `jenkins/Jenkinsfile-setup`
+3. Save
+
+**Execution:**
+```
+Run job → Build
+```
+
+**Note:** Run this pipeline once when first deploying, or whenever switching between dev/prod environments
+
+**Verification:**
+```bash
+# SSH to Jenkins EC2
+aws ssm start-session --target <jenkins-instance-id>
+
+# Verify kubectl context
+kubectl config current-context
+kubectl get nodes
+```
+
+**Expected Output:**
+```
+arn:aws:eks:us-east-2:586794447516:cluster/platform-dev
+NAME                         STATUS   ROLES    AGE
+ip-10-0-x-x.ec2.internal     Ready    <none>   1d
 ```
 
 ---
@@ -49,8 +91,10 @@ Execute Jenkins jobs in this specific order:
 
 **Execution:**
 ```
-Run job → Select environment (dev/prod) → Build
+Run job → Build
 ```
+
+**Note:** Uses global `TARGET_ENVIRONMENT` variable
 
 **Verification:**
 ```bash
@@ -80,8 +124,10 @@ aws-load-balancer-controller   2/2     Running   0          2m
 
 **Execution:**
 ```
-Run job → Select environment (dev/prod) → Build
+Run job → Build
 ```
+
+**Note:** Uses global `TARGET_ENVIRONMENT` variable
 
 **Verification:**
 ```bash

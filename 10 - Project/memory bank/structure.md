@@ -46,7 +46,7 @@ platform-ai-chatbot/
 ## Core Components
 
 ### Infrastructure Layer (terraform-aws-eks)
-- **Network Module**: Multi-AZ VPC with public/private subnets, NAT gateways, security groups
+- **Network Module**: Multi-AZ VPC with public/private subnets, Regional NAT Gateway, security groups
 - **Compute Module**: EC2 instances with encrypted EBS volumes and IAM roles
 - **Database Module**: RDS MySQL with Multi-AZ, encryption, and Secrets Manager integration
 - **Container Module**: EKS cluster with Pod Identity, node groups, and CSI drivers
@@ -55,8 +55,9 @@ platform-ai-chatbot/
 ### Application Layer (platform-ai-chatbot)
 - **Backend Service**: FastAPI REST API with async MySQL and Bedrock integration
 - **Frontend Service**: Streamlit web interface with session state management
-- **Deployment Layer**: Helm charts with multi-environment support and health monitoring
-- **Security Layer**: Pod Identity, init container secrets, RBAC, and encryption
+- **Deployment Layer**: Helm charts with multi-environment support, health monitoring, HPA
+- **Security Layer**: Pod Identity, init container secrets, RBAC, network policies, Pod Security Standards, Falco
+- **CI/CD Layer**: Jenkins pipelines with Trivy vulnerability scanning
 
 ## Architectural Patterns
 

@@ -16,7 +16,8 @@ Multi-repository AWS cloud platform demonstrating enterprise-grade DevOps practi
 ## Key Features
 
 ### Infrastructure (terraform-aws-eks)
-- **Multi-Environment Setup**: Development ($177/mo) and Production ($294/mo) with strategic cost optimization
+- **Multi-Environment Setup**: Development ($192/mo) and Production ($259/mo) with strategic cost optimization
+- **Regional NAT Gateway**: December 2024 AWS feature providing HA across all AZs at single NAT cost
 - **AWS EKS Cluster**: Kubernetes 1.34 with Pod Identity, EBS CSI Driver, and modern access management
 - **Immutable AMIs**: Packer + Ansible builds with Trivy vulnerability scanning
 - **Security Hardening**: Encryption at rest/transit, IAM least privilege, SSM Session Manager access
@@ -26,8 +27,9 @@ Multi-repository AWS cloud platform demonstrating enterprise-grade DevOps practi
 - **AI Integration**: AWS Bedrock DeepSeek V3.1 with serverless pay-per-use model
 - **Full-Stack Architecture**: FastAPI backend + Streamlit frontend with MySQL persistence
 - **Cloud-Native Deployment**: Kubernetes with Helm charts, health probes, and zero-downtime updates
-- **Enterprise Security**: Pod Identity authentication, init container secrets, end-to-end encryption
-- **High Availability**: Pod disruption budgets, anti-affinity rules, and rolling deployments
+- **Enterprise Security**: Pod Identity, init container secrets, network policies, Pod Security Standards, Falco runtime monitoring
+- **Vulnerability Scanning**: Trivy in CI/CD pipeline (fails on CRITICAL, archives reports)
+- **High Availability**: Pod disruption budgets, anti-affinity rules, rolling deployments, HPA
 
 ## Target Users
 - **DevOps Engineers**: Learning modern AWS and Kubernetes patterns

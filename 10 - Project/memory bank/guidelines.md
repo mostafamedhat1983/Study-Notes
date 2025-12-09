@@ -59,6 +59,17 @@ tags:
 - **Input Validation**: Pydantic models with length limits and type validation for all user inputs
 - **Rate Limiting**: API endpoint protection with per-IP rate limits (5 requests/minute)
 
+### Kubernetes Security
+- **Pod Security Standards**: Baseline enforcement with Restricted audit/warn
+- **Network Policies**: Zero-trust networking (default deny, explicit allow)
+- **Security Context**: Non-root containers with seccomp profiles and dropped capabilities
+- **RBAC**: Service account permissions limited to required resources
+
+### Vulnerability Management
+- **Trivy Scanning**: CI/CD pipeline scans (fails on CRITICAL, reports HIGH/MEDIUM/LOW)
+- **Dependency Updates**: Regular updates for security patches
+- **Runtime Monitoring**: Falco detects suspicious behavior and security events
+
 ### Error Information Disclosure
 - **Sanitized Error Messages**: Technical details logged but not exposed to end users
 - **Generic Error Responses**: Consistent error format without revealing internal system details

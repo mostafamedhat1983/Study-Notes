@@ -14,6 +14,7 @@ tags:
 
 ### Core AWS Services
 - **Amazon EKS 1.34**: Managed Kubernetes with Pod Identity and modern access patterns
+- **Regional NAT Gateway**: December 2024 feature with built-in HA across all AZs
 - **Amazon RDS MySQL 8.0**: Managed database with Multi-AZ, encryption, and automated backups
 - **AWS Bedrock DeepSeek V3.1**: Serverless AI model with 64K context window ($0.27/1M tokens)
 - **AWS Secrets Manager**: Encrypted credential storage with KMS and automatic rotation
@@ -21,6 +22,7 @@ tags:
 
 ### Infrastructure as Code
 - **Terraform >= 1.0**: Resource provisioning with S3 native state locking
+- **AWS Provider 6.25+**: Required for Regional NAT Gateway support
 - **Packer >= 1.8**: Immutable AMI builds with vulnerability scanning
 - **Ansible >= 2.9**: Configuration management and software provisioning
 - **Trivy v0.67.2**: Container and filesystem vulnerability scanning
@@ -45,15 +47,20 @@ tags:
 ### Development Dependencies
 ```python
 # Backend (backend/requirements.txt)
-fastapi==0.104.1
-uvicorn==0.24.0
-aiomysql==0.2.0
-boto3==1.34.0
-pydantic==2.5.0
+fastapi>=0.115.0
+uvicorn>=0.24.0
+aiomysql>=0.3.0
+PyMySQL>=1.1.1
+boto3>=1.34.0
+pydantic>=2.5.0
+python-multipart>=0.0.18
+slowapi>=0.1.9
+urllib3>=2.6.0
 
 # Frontend (frontend/requirements.txt)
-streamlit==1.28.1
-requests==2.31.0
+streamlit>=1.37.0
+requests>=2.32.4
+python-dotenv>=1.0.0
 ```
 
 ## Build Systems & Tools
@@ -112,7 +119,10 @@ curl http://localhost:8000/health  # Backend health check
 - **SSL/TLS**: End-to-end encryption for all network communications
 
 ## Monitoring & Observability
+- **Prometheus**: Metrics collection and alerting
+- **Grafana**: Visualization dashboards for cluster and application metrics
+- **Falco**: Runtime security monitoring with Falcosidekick UI
+- **Metrics Server**: Kubernetes metrics for HPA
 - **Kubernetes Health Probes**: Liveness and readiness checks for automatic recovery
 - **AWS CloudTrail**: API call logging and audit trails
 - **Container Logs**: Structured logging with kubectl and CloudWatch integration
-- **Resource Monitoring**: CPU/memory usage tracking with Kubernetes metrics

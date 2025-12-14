@@ -13,3 +13,4 @@ show all in all namespaces
 
 helm list --all-namespaces
 list all helm charts in all namesapces
+![[1765004260879.gif]]

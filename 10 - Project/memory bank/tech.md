@@ -28,9 +28,10 @@ tags:
 - **Trivy v0.67.2**: Container and filesystem vulnerability scanning
 
 ### Container & Orchestration
-- **Docker**: Container runtime and image building
+- **Docker**: Container runtime and image building with Docker-in-Docker (DinD) for CI/CD
 - **Kubernetes**: Container orchestration with health probes and rolling updates
 - **Helm 3.x**: Package manager for Kubernetes with multi-environment support
+- **Jenkins Kubernetes Plugin**: Dynamic pod agents for CI/CD workflows
 
 ## Application Technologies
 
@@ -48,19 +49,21 @@ tags:
 ```python
 # Backend (backend/requirements.txt)
 fastapi>=0.115.0
-uvicorn>=0.24.0
+uvicorn[standard]>=0.24.0
 aiomysql>=0.3.0
 PyMySQL>=1.1.1
 boto3>=1.34.0
+botocore>=1.34.0
 pydantic>=2.5.0
 python-multipart>=0.0.18
 slowapi>=0.1.9
 urllib3>=2.6.0
+python-dotenv>=1.0.0
 
 # Frontend (frontend/requirements.txt)
 streamlit>=1.37.0
 requests>=2.32.4
-python-dotenv>=1.0.0
+python-dotenv==1.0.0
 ```
 
 ## Build Systems & Tools

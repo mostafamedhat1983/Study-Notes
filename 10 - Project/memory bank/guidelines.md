@@ -60,10 +60,10 @@ tags:
 - **Rate Limiting**: API endpoint protection with per-IP rate limits (5 requests/minute)
 
 ### Kubernetes Security
-- **Pod Security Standards**: Baseline enforcement with Restricted audit/warn
 - **Network Policies**: Zero-trust networking (default deny, explicit allow)
-- **Security Context**: Non-root containers with seccomp profiles and dropped capabilities
+- **Security Context**: Non-root containers with dropped capabilities
 - **RBAC**: Service account permissions limited to required resources
+- **Runtime Monitoring**: Falco for detecting suspicious container behavior
 
 ### Vulnerability Management
 - **Trivy Scanning**: CI/CD pipeline scans (fails on CRITICAL, reports HIGH/MEDIUM/LOW)
@@ -107,6 +107,29 @@ tags:
 - **OpenAPI Integration**: FastAPI automatic documentation generation with descriptions
 - **Model Documentation**: Field descriptions and validation rules in Pydantic models
 - **Endpoint Documentation**: Clear docstrings explaining purpose, parameters, and responses
+
+## Architecture Decisions & Trade-offs
+
+### Pod Security Standards (Evaluated and Reverted)
+**Decision**: Initially implemented Kubernetes Pod Security Standards (Baseline enforcement) but reverted after encountering compatibility issues with CI/CD pipeline.
+
+**The Problem**:
+- Pod Security Standards Baseline policy blocks privileged containers
+- Jenkins pipeline uses Docker-in-Docker (DinD) which requires `privileged: true`
+- DinD needs host Docker daemon access to build images
+- Applying PSS to `default` namespace affected all pods (application + Jenkins agents)
+
+**Solutions Evaluated**:
+1. **Separate Jenkins namespace** (no Pod Security restrictions) - Complex, requires 6 file changes across 2 repos
+2. **Kaniko** (rootless container builds) - Simpler but encountered pip/frontend build issues
+3. **Relax Pod Security to privileged** - Loses security benefits
+
+**Final Decision**: Reverted to commit before Pod Security Standards, kept Falco Redis fix
+- Maintains working Docker-in-Docker build system
+- Keeps all other security features (network policies, RBAC, Falco, Trivy)
+- Trade-off: No Pod Security Standards enforcement for deployment simplicity
+
+**Learning**: Pod Security Standards are excellent for production workloads but can conflict with CI/CD tools requiring privileged access. Consider separate namespaces or rootless build tools (Kaniko) for future implementations.
 
 ## Deployment Considerations
 

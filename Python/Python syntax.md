@@ -54,9 +54,35 @@ else:
 ```
 
 
-## Naming rules and conventions
+## **Naming rules and conventions**
 - Names cannot contain spaces.
 - Names may be a mixture of upper and lower case characters.
 - Names can’t start with a number but may contain numbers after the first character.
 - Variable names and function names should be written in snake_case, which means that all letters are lowercase and words are separated using an underscore. 
 - Descriptive names are better than cryptic abbreviations because they help other programmers (and you) read and interpret your code. For example, student_name is better than sn. It may feel excessive when you write it, but when you return to your code you’ll find it much easier to understand
+
+## **Python data types**
+
+| Category | Data Type | Example |
+|--------|----------|---------|
+| Numeric | int | `10` |
+| Numeric | float | `3.14` |
+| Numeric | complex | `2 + 3j` |
+| Text | str | `"Hello"` |
+| Boolean | bool | `True` |
+| Boolean | bool | `False` |
+| Sequence | list | `[1, 2, 3]` |
+| Sequence | tuple | `(1, 2, 3)` |
+| Sequence | range | `range(5)` |
+| Mapping | dict | `{"a": 1, "b": 2}` |
+| Set | set | `{1, 2, 3}` |
+| Set | frozenset | `frozenset([1, 2, 3])` |
+| Binary | bytes | `b"abc"` |
+| Binary | bytearray | `bytearray(5)` |
+| Binary | memoryview | `memoryview(b"abc")` |
+| None | NoneType | `None` |
+How to check a datatype
+```python
+x = 10
+print(type(x))
+```

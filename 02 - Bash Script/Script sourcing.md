@@ -1,3 +1,8 @@
+---
+tags:
+  - Linux
+  - Bash_Script
+---
 Script sourcing in bash is a method of executing a script within the **current shell process** rather than spawning a new subshell. When you source a script using the `source` command or the dot (`.`) operator, all commands, variables, and functions defined in that script become part of your current shell environment and persist after the script finishes.​
 
 ## How to Source a Script

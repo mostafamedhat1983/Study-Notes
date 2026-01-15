@@ -1,3 +1,8 @@
+---
+tags:
+  - Linux
+  - Bash_Script
+---
 POSIX stands for **Portable Operating System Interface**, a family of standards developed by the IEEE Computer Society that defines operating system interfaces to maintain compatibility between different systems. The standard specifies application programming interfaces (APIs), command-line shells, and utility interfaces primarily based on Unix, enabling software portability across Unix, Linux, and other compatible operating systems.​
 
 ## Purpose and Benefits

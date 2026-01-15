@@ -1,3 +1,8 @@
+---
+tags:
+  - Bash_Script
+  - Linux
+---
 An alias in bash is a user-defined shortcut that maps a simple command name to a longer or more complex command sequence. When you execute an alias, the bash interpreter replaces the alias name with the full command string it represents, saving you from repetitive typing.​
 
 ## Syntax and Creation

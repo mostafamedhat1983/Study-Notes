@@ -1,3 +1,8 @@
+---
+tags:
+  - Linux
+  - Bash_Script
+---
 you can set a variable in Linux by writing `variable=value` 
 ```bash
 myVar="Hello World"

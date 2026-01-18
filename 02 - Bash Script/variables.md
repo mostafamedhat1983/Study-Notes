@@ -237,3 +237,299 @@ bash
 `#!/bin/bash # Script level typeset var1="local to script"     # Global, not exported declare var2="also global"         # Global, not exported declare -x var3="exported"         # Global AND exported export var4="also exported"        # Global AND exported # Inside function function my_func {     declare local_var="stays here"      # Local to function    declare -g global_from_func="global"  # Global from function    export always_global="exported"     # Global AND exported }`
 
 Use `declare` over `typeset` for better compatibility with modern Bash versions.[](https://www.baeldung.com/linux/declare-vs-typeset)​​
+
+---
+
+## DIRECT ANSWER
+
+Bash variable naming conventions differ based on variable scope and purpose:
+
+- **User-defined local variables**: Use lowercase with underscores: `my_variable`, `user_name` [web:47][web:50]
+- **Environment variables & constants**: Use UPPERCASE with underscores: `PATH`, `HOME`, `MAX_CONNECTIONS` [web:49][web:52]
+- **Function names**: Use lowercase with underscores: `process_file()`, `validate_input()` [web:49]
+
+**Core rule:** Variables can contain letters, numbers, and underscores, but **cannot start with a number** [web:48][web:51].
+
+---
+
+## WHY THESE CONVENTIONS EXIST
+
+The lowercase/UPPERCASE distinction serves a critical purpose:
+
+1. **Visual differentiation**: Instantly identify environment variables vs local variables [web:47][web:49]
+2. **Namespace collision avoidance**: Prevents overwriting system variables (e.g., `PATH`, `HOME`, `USER`) [web:49]
+3. **POSIX compatibility**: Environment variables are traditionally uppercase across Unix/Linux systems [web:47]
+
+**Trade-off:** Some teams use ALL_CAPS for all variables (older style [web:52]), but modern practice prefers lowercase for locals to avoid confusion with environment variables [web:47][web:49].
+
+---
+
+## OFFICIAL SYNTAX RULES (MANDATORY)
+
+### Rule 1: Allowed Characters
+**Valid:** Letters (a-z, A-Z), numbers (0-9), underscores (_)
+**Invalid:** Hyphens (-), spaces, special characters (@, #, $, %, !, etc.)
+
+```bash
+# CORRECT
+my_variable=10
+variable123="value"
+_private_var="data"
+VAR_NAME="config"
+
+# WRONG
+my-variable=10        # Hyphen not allowed
+my variable=10        # Space not allowed
+my@variable=10        # Special char not allowed
+my.variable=10        # Period not allowed
+```
+
+## Rule 2: Cannot Start with Number
+
+bash
+
+`# CORRECT var1=100 my_var_2="text" # WRONG 1var=100              # Syntax error 123name="John"        # Invalid`
+
+[web:47][web:48][web:51]
+
+## Rule 3: No Whitespace Around `=`
+
+bash
+
+`# CORRECT name="Alice" # WRONG name = "Alice"        # Interpreted as command 'name' with args '=' and 'Alice' name= "Alice"         # Sets name="" then runs "Alice" command name ="Alice"         # Runs command 'name' with arg '=Alice'`
+
+[web:48]
+
+## Rule 4: Case Sensitive
+
+bash
+
+`var="lowercase" VAR="uppercase" Var="mixed" echo $var    # Output: lowercase echo $VAR    # Output: uppercase echo $Var    # Output: mixed`
+
+[web:51]
+
+## Rule 5: Avoid Reserved Keywords
+
+**Don't use:** `if`, `then`, `else`, `elif`, `fi`, `case`, `esac`, `for`, `while`, `until`, `do`, `done`, `function`, `select`, `time` [web:48][web:51]
+
+bash
+
+`# BAD PRACTICE (causes confusion) if="some value"       # Confuses control flow for=10                # Overrides loop keyword context # Though technically allowed, these create unreadable code`
+
+---
+
+## GOOGLE SHELL STYLE GUIDE (INDUSTRY STANDARD)
+
+## Variable Naming
+
+- **Lowercase with underscores** for local variables: `my_variable` [web:49]
+    
+- **UPPERCASE with underscores** for environment/global constants: `GLOBAL_CONFIG` [web:49]
+    
+- **No camelCase or PascalCase** in shell scripts [web:49]
+    
+
+## Function Naming
+
+- **Lowercase with underscores**: `function process_data() { }` [web:49]
+    
+- Use `::` for namespacing in large projects: `mylib::get_value()` [web:49]
+    
+
+## Constants (readonly variables)
+
+bash
+
+`# Use uppercase with readonly declaration readonly MAX_RETRIES=3 readonly CONFIG_FILE="/etc/app.conf"`
+
+[web:49][web:53]
+
+---
+
+## BEST PRACTICES
+
+## 1. Use Descriptive Names
+
+bash
+
+`# GOOD: Self-explanatory user_name="Alice" max_connection_timeout=30 tmp_file_path="/tmp/process.tmp" # BAD: Unclear purpose x="Alice" n=30 f="/tmp/process.tmp"`
+
+[web:50]
+
+## 2. Multi-Word Variables (Use Underscores)
+
+bash
+
+`# CORRECT user_first_name="John" database_connection_string="mysql://localhost" # WRONG userfirstname="John"          # Hard to read user-first-name="John"        # Hyphen invalid user first name="John"        # Space invalid`
+
+[web:47][web:50][web:51]
+
+## 3. Prefix Conventions
+
+|Prefix|Purpose|Example|
+|---|---|---|
+|`tmp_`|Temporary variables|`tmp_result`, `tmp_file`|
+|`_`|Private/internal variables|`_internal_counter`|
+|`is_`, `has_`|Boolean flags|`is_valid`, `has_permission`|
+|`num_`, `count_`|Numeric counters|`num_users`, `count_errors`|
+
+[web:50]
+
+## 4. Avoid Cryptic Abbreviations
+
+bash
+
+`# GOOD customer_id=12345 database_connection="active" # BAD cid=12345                     # What is 'c'? dbc="active"                  # Unclear abbreviation`
+
+## 5. Consistency Across Scripts
+
+bash
+
+`# Pick ONE style and stick to it # Option A: Explicit naming max_retry_count=3 connection_timeout_seconds=30 # Option B: Shorter but consistent max_retries=3 timeout_sec=30`
+
+[web:50]
+
+## 6. Environment vs Local Variables
+
+**Environment Variables (UPPERCASE):**
+
+bash
+
+`export PATH="/usr/local/bin:$PATH" export DATABASE_URL="postgres://localhost" export LOG_LEVEL="debug"`
+
+**Local Variables (lowercase):**
+
+bash
+
+`local user_input="$1" local result="" local counter=0`
+
+[web:47][web:49]
+
+---
+
+## NAMING PATTERNS BY SCOPE
+
+## Script-Level Variables
+
+bash
+
+`#!/bin/bash # Constants (readonly, uppercase) readonly SCRIPT_NAME="$(basename "$0")" readonly VERSION="1.0.0" readonly MAX_ATTEMPTS=3 # Script-wide variables (lowercase) log_file="/var/log/app.log" debug_mode=false user_home="$HOME"`
+
+## Function-Local Variables
+
+bash
+
+`process_user() {     local user_name="$1"          # Function parameter    local user_id="$2"    local tmp_result=""           # Temporary variable         # Processing logic    tmp_result=$(validate_user "$user_name")    echo "$tmp_result" }`
+
+[web:49]
+
+## Loop Variables
+
+bash
+
+`# Use simple, short names for loop iterators for file in *.txt; do     echo "$file" done for i in {1..10}; do     echo "$i" done # Descriptive names for complex loops for server_name in "${servers[@]}"; do     ping -c 1 "$server_name" done`
+
+---
+
+## COMPARISON: COMPETING CONVENTIONS
+
+|Convention|Local Variables|Environment/Constants|Pros|Cons|
+|---|---|---|---|---|
+|**Google Style** [web:49]|lowercase_underscore|UPPERCASE_UNDERSCORE|Clear separation, POSIX-friendly|None|
+|**All UPPERCASE** [web:52]|ALL_UPPERCASE|ALL_UPPERCASE|Easy to spot variables|Conflicts with env vars|
+|**camelCase**|camelCase|UPPERCASE|Common in other languages|Non-standard for shell|
+
+**Recommendation:** Follow Google Shell Style Guide [web:49]—it's the de facto industry standard and prevents environment variable conflicts.
+
+---
+
+## SPECIAL CASES
+
+## Private/Internal Variables (Leading Underscore)
+
+bash
+
+`# Convention: _ prefix for "private" scope _internal_config="value" _temp_buffer="" function _helper_function() {     # Internal function, not for external use    echo "Internal helper" }`
+
+[web:50]
+
+## Boolean Variables
+
+bash
+
+`# Use is_, has_, should_ prefixes is_valid=true has_permission=false should_retry=true if [[ $is_valid == true ]]; then     echo "Valid" fi`
+
+## Counters and Indices
+
+bash
+
+`# Be explicit about what's being counted file_count=0 error_count=0 line_number=1 array_index=0`
+
+---
+
+## ANTI-PATTERNS (AVOID)
+
+## ❌ WRONG: Reserved Keywords as Variables
+
+bash
+
+`if="value"                # Confusing while="data"              # Bad practice for="loop"                # Don't do this`
+
+[web:48][web:51]
+
+## ❌ WRONG: Overwriting Shell Variables
+
+bash
+
+`# These are important shell variables—don't overwrite! PATH="/my/path"           # Breaks command execution HOME="/tmp"               # Breaks user environment IFS="custom"              # Breaks word splitting PS1=">"                   # Breaks prompt`
+
+## ❌ WRONG: Inconsistent Naming
+
+bash
+
+`userName="Alice"          # camelCase user_age=30               # snake_case UserEmail="a@b.com"       # PascalCase # Pick ONE convention!`
+
+## ❌ WRONG: Single-Letter Variables (Except Loops)
+
+bash
+
+`# BAD: Unclear purpose a="user data" x=100 z="/path/to/file" # EXCEPTION: Loop variables are OK for i in {1..5}; do echo "$i"; done`
+
+---
+
+## VALIDATION CHECKLIST
+
+Before finalizing variable names, verify:
+
+-  Starts with letter or underscore (not number)
+    
+-  Contains only letters, numbers, underscores
+    
+-  No spaces, hyphens, or special characters
+    
+-  Not a reserved keyword (`if`, `for`, `while`, etc.)
+    
+-  Doesn't conflict with environment variables (`PATH`, `HOME`)
+    
+-  Uses consistent casing (lowercase for locals, UPPERCASE for env)
+    
+-  Descriptive and meaningful
+    
+-  Follows project/team conventions
+    
+
+---
+
+## PRACTICAL EXAMPLES
+
+## Good Naming Convention
+
+bash
+
+`#!/bin/bash # Constants readonly MAX_RETRIES=3 readonly CONFIG_DIR="/etc/myapp" # Environment exports export DATABASE_HOST="localhost" export LOG_LEVEL="info" # Local variables script_name="$(basename "$0")" user_input="$1" tmp_file="/tmp/${script_name}.$$" # Function with local scope process_data() {     local input_file="$1"    local output_dir="$2"    local line_count=0         while IFS= read -r line; do        ((line_count++))        echo "$line" >> "${output_dir}/processed.txt"    done < "$input_file"         echo "Processed $line_count lines" }`
+
+## Bad Naming Convention
+
+bash
+
+`#!/bin/bash # Confusing mix of styles MAX_RETRIES=3             # Should be readonly ConfigDir="/etc/myapp"    # Inconsistent casing export db_host="localhost"  # Should be DATABASE_HOST # Poor variable names x="$1"                    # What is x? f="/tmp/temp.$$"          # Unclear purpose n=0                       # What does n represent? # Reserved keyword confusion for="data"                # Bad practice # Function with poor naming pd() {                    # What does 'pd' mean?     a="$1"                # Unclear    b="$2"                # Unclear    c=0 }`

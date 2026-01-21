@@ -10,8 +10,10 @@ An alias in bash is a user-defined shortcut that maps a simple command name to a
 The basic syntax for creating an alias is:​
 
 text
+``` bash
+alias shortname='longer command 
+```
 
-`alias shortname='longer command'`
 
 For example, `alias ll='ls -la'` creates a shortcut `ll` that executes `ls -la` to list all files in long format. The command string must be enclosed in quotes, with no spaces around the equal sign.​
 

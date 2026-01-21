@@ -104,3 +104,7 @@ set "This is" my new "set of" positional
 # $4 = "set of"
 # $5 = "positional"
 ```
+
+## Important Distinction
+
+Don't confuse positional parameters with **options** or **flags** (named parameters). Positional parameters depend on their order (like `cp source destination`), while options use flags and can appear in any order (like `cp --source file1 --destination file2`)

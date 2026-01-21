@@ -3,7 +3,7 @@ tags:
   - Linux
   - Bash_Script
 ---
-``The `read` builtin command reads one line of data from standard input (or a file descriptor) and assigns it to variables [web:14]. Basic syntax: ```bash read [options] [variable_names]``
+The `read` builtin command reads one line of data from standard input (or a file descriptor) and assigns it to variables [web:14]. Basic syntax: ```bash read [options] [variable_names]
 
 If no variable is specified, input is stored in the `$REPLY` variable 
 

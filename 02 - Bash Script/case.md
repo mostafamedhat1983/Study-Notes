@@ -20,7 +20,7 @@ esac
 
 ```
 
-Patterns support globs (`*`, `?`), alternation (`|`), and ranges; the `*` handles unmatched cases
+Patterns support globs (`*`, `?`), alternation (`|`) or , and ranges; the `*` handles unmatched cases
 
 ## Examples
 

@@ -87,14 +87,35 @@ myArray+=("new element")
 Associative arrays use string keys instead of numeric indices and must be declared with `-A`:[](https://docs.vultr.com/how-to-use-arrays-in-bash)
 
 ``` bash
-declare -A employee
-employee[name]="John Doe"
-employee[title]="Software Engineer"
-employee[department]="Development"
+declare -A fruits=(
+  [apple]="red"
+  [banana]="yellow"
+  [cherry]="red"
+)
 
-echo ${employee[name]}     # Output: John Doe
+
+echo ${fruits[apple]}     # Output: red
 ```
 
+## Print All Keys
+
+``` bash
+echo "${!fruits[@]}"
+```
+
+
+
+Outputs: `apple banana cherry` (words separated by spaces).[](https://linuxhandbook.com/bash-associative-arrays/)
+
+## Iterate Over Keys
+
+``` bash
+for key in "${!fruits[@]}"; do
+  echo "Key: $key, Value: ${fruits[$key]}"
+done
+```
+
+Quotes preserve keys with spaces; access values via `${array[$key]}`
 ## Important Notes
 
 Always use quotes around array expansions like `"${array[@]}"` to preserve elements with spaces. The `@` symbol treats each element as a separate word, while `*` treats all elements as a single string.

@@ -116,6 +116,43 @@ done
 ```
 
 Quotes preserve keys with spaces; access values via `${array[$key]}`
+
+**To check if a key has a value (exists and is set) in a Bash associative array, use `[[ -v array[key] ]]` (Bash 4.2+).**  
+This tests if the key is defined, regardless of empty value.[](https://stackoverflow.com/questions/59395145/bash-check-if-key-exists-in-associative-array)  
+For distinguishing set keys from unset ones (even if empty), use parameter expansion like `[[ ${array[key]+set} ]]`.[](https://stackoverflow.com/questions/59395145/bash-check-if-key-exists-in-associative-array)​
+
+## Preferred Method
+
+``` bash
+declare -A fruits=( [apple]="red" [banana]="" )
+
+if [[ -v fruits[apple] ]]; then
+  echo "apple exists"
+fi
+```
+
+Outputs "apple exists"; works for empty values too.[](https://nickjanetakis.com/blog/associative-arrays-in-bash-aka-key-value-dictionaries)
+
+## Alternative for Non-Empty
+
+``` bash
+if [[ -n "${fruits[banana]}" ]]; then
+  echo "banana has non-empty value"
+else
+  echo "banana empty or unset"
+fi
+```
+
+`-n` checks length >0; fails for empty strings.[](https://phoenixnap.com/kb/bash-associative-array)​
+
+## Key Existence Only
+
+``` bash
+if [[ ${fruits[cherry]+exists} ]]; then
+  echo "cherry key is set"
+fi
+```
+`+exists` expands only if key set; reliable for empty values.
 ## Important Notes
 
 Always use quotes around array expansions like `"${array[@]}"` to preserve elements with spaces. The `@` symbol treats each element as a separate word, while `*` treats all elements as a single string.

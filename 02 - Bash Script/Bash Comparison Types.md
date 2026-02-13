@@ -98,3 +98,26 @@ fi
 ## Important Notes
 
 Always quote variables in comparisons (`"$var"`) to avoid errors when variables are empty or contain spaces. Use integer operators for numeric comparisons and string operators for text comparisons—mixing them can produce unexpected results.
+
+---
+
+**`[[ ]]` vs `(( ))` - Complete Comparison**
+
+## Overview
+
+- `[[ ]]` = **String/pattern testing** (Bash keyword)
+    
+- `(( ))` = **Arithmetic evaluation** (compound command)
+    
+
+## Key Differences
+
+|Feature|`[[ ]]`|`(( ))`|
+|---|---|---|
+|**Purpose**|String comparison, file tests, regex|**Math operations, numeric tests**|
+|**Variables**|`$var` (strings)|`var` (no `$`, numeric)|
+|**Equality**|`==` (string), `=~` (regex)|`==` (**numeric**)|
+|**Operators**|`-lt`, `-gt`, `&&`, `\|`|`<`, `>`, `<=`, `|
+|**Empty vars**|Handles safely|Assumes 0|
+|**Context**|`if [[ $x == "yes" ]]`|`if (( x > 5 ))`|
+

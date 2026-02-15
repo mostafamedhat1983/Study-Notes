@@ -40,3 +40,23 @@ chmod +x filename
 bash filename
 
 or ./filename
+
+---
+
+### set -euo pipefail
+`set -euo pipefail` is a "strict mode" Bash declaration you put at the top of scripts to catch errors early and make them robust—perfect for your health check project.[](https://www.shkodenko.com/what-string-set-eeuo-pipefail-in-shell-script-does-mean/)
+
+## Breakdown of Each Flag
+
+- **`-e`**: Exit immediately if _any_ command fails (non-zero exit code). Without it, errors are ignored and the script continues.[](https://www.shkodenko.com/what-string-set-eeuo-pipefail-in-shell-script-does-mean/)​
+    
+- **`-u`**: Treat _unset variables_ as errors. If you reference `$foo` before setting it, the script exits—instead of silently expanding to empty.[](https://coderwall.com/p/fkfaqq/safer-bash-scripts-with-set-euxo-pipefail)​
+    
+- **`-o pipefail`**: In pipelines like `cmd1 | cmd2`, fail if _any_ command fails (not just the last one). Default Bash ignores early pipeline failures.[](https://gist.github.com/mikekeke/bb08b35144dc0ad5f42ab8dad6682e04)​
+    
+
+## Why Use It in Your Script
+
+Combined, it prevents "silent failures" common in Bash: typos, missing files, bad pipes. Your health check will stop on the _first_ real problem (e.g., `df` fails on weird mount), making debugging trivial.[](https://gist.github.com/vncsna/64825d5609c146e80de8b1fd623011ca)​
+
+**`set -euxo pipefail` produces trace output showing each command _before_ it runs, prefixed with `+`**

@@ -41,3 +41,18 @@ Value stream mapping is a Lean method for visually showing every step needed to 
 A value stream map usually includes the key process steps, waiting time, cycle time, inventory or work in progress, and how information moves between people or systems. In Lean, it is used to understand the current state and then design a better future state.
 
 ![[Pasted image 20260310052455.png]]
+
+---
+Lean software development principles:  
+  
+
+- **Eliminate Waste**: Focus on reducing unfinished work, extra features, poor documentation, delays, context switching, and defects.
+- **Amplify Learning**: Deliver working code in short cycles for immediate feedback.
+- **Decide as Late as Possible**: Make decisions with maximum feedback.
+- **Deliver as Fast as Possible**: Minimize the gap between customer needs and fulfillment.
+- **Empower the Team**: Push decision-making down to individuals and educate them to improve their work.
+- **Build Integrity In**: Find and eliminate bugs early in the process.
+- **See the Whole**: Keep the entire system in mind when making decisions, using visualizations to stay focused on the same goal.
+
+  
+These principles help in optimizing the development process and improving software quality.  

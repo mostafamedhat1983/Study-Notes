@@ -1,3 +1,7 @@
+---
+tags:
+  - concepts
+---
 The Theory of Constraints, or TOC, is a management method that says every system has at least one limiting factor, called a **constraint**, that controls how much the whole system can achieve. The idea is to find that bottleneck and improve it first, because improving non-bottleneck parts will not increase total throughput very much.
 
 ## Core idea

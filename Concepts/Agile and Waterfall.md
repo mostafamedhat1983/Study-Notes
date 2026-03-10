@@ -1,3 +1,7 @@
+---
+tags:
+  - concepts
+---
 Agile is an iterative approach built around short delivery cycles, customer feedback, collaboration, and adapting to change as the work evolves.  
 Waterfall is a linear model where teams finish one phase before moving to the next, such as requirements, design, implementation, testing, and maintenance.
 

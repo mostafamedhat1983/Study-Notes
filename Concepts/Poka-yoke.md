@@ -1,3 +1,7 @@
+---
+tags:
+  - concepts
+---
 Poka-yoke means mistake-proofing or error-proofing. It is a Lean approach that designs a process, product, or step so errors are either prevented completely or detected immediately before they become defects.
 
 ## Core idea

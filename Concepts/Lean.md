@@ -1,3 +1,7 @@
+---
+tags:
+  - concepts
+---
 - **Lean Principles**: Lean focuses on eliminating waste and maximizing value flow through a system. It has five principles: Identify value, map your value stream, create a flow, establish a pull system, and continuously improve.
 - **Types of Waste**: Lean identifies three types of waste: Muda (non-value creating work), Mura (unevenness), and Muri (overburdening).
 - **Value Stream Mapping**: This technique helps visualize where value is created and how it flows through the organization.

@@ -1,3 +1,7 @@
+---
+tags:
+  - concepts
+---
 ## What ITIL is
 
 ITIL originally stood for Information Technology Infrastructure Library, and modern ITIL 4 describes service management in a more holistic way across development, operations, governance, and business value. ITIL 4 includes practices such as incident management, problem management, change enablement, release management, service request management, monitoring and event management, and service level management.

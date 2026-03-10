@@ -1,3 +1,7 @@
+---
+tags:
+  - concepts
+---
 **systems thinking**, is a way of understanding problems by looking at the whole system, not just one part in isolation. It focuses on how parts connect, influence one another, and create patterns over time.
 
 ## Simple idea

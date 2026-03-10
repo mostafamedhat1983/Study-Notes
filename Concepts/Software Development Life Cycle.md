@@ -1,3 +1,7 @@
+---
+tags:
+  - concepts
+---
 ## Traditional SDLC Phases & Teams
 
 SDLC follows a structured flow: Planning, Design, Development, Testing, Deployment, and Maintenance. DevOps engineers engage throughout but lead in automation-heavy later phases.

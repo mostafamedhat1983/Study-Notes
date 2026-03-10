@@ -1,3 +1,7 @@
+---
+tags:
+  - concepts
+---
 Kaizen is a core part of Lean, not something separate from it. it is described as continuous improvement within Lean and as a foundational idea in lean manufacturing and the Toyota Way
 Lean focuses on delivering customer value while eliminating waste. Kaizen is one of the main ways Lean does that, by driving small, continuous improvements in processes, systems, and daily work.
 

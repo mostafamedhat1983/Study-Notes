@@ -18,3 +18,18 @@ In practice, Agile helps your team decide what to build next, while DevOps helps
 
 - The Agile Manifesto emphasizes four values: individuals and interactions, working software, customer collaboration, and responding to change.
 - Agile differs from traditional waterfall development by promoting frequent communication, iterative progress, and flexibility to adapt to changes, reducing risk and improving project visibility.
+
+## Agile principles 
+- **Customer Satisfaction**: Prioritize satisfying the customer through early and continuous delivery of valuable software.
+- **Welcoming Change**: Embrace changing requirements, even late in development, to gain a competitive advantage.
+- **Frequent Delivery**: Deliver working software frequently, with a preference for shorter timescales.
+- **Collaboration**: Ensure daily collaboration between business people and developers.
+- **Empowerment**: Build projects around motivated individuals and trust them to get the job done.
+- **Face-to-Face Communication**: Use face-to-face conversation as the most efficient method of conveying information.
+- **Working Software**: Measure progress primarily through working software.
+- **Sustainable Development**: Promote sustainable development practices for a constant pace of work.
+- **Technical Excellence**: Focus on continuous attention to technical excellence and good design.
+- **Simplicity**: Maximize the amount of work not done by focusing on simplicity.
+- **Self-Organizing Teams**: Encourage self-organizing teams for the best architectures, requirements, and designs.
+- **Continuous Improvement**: Reflect regularly on how to become more effective and adjust behavior accordingly.
+

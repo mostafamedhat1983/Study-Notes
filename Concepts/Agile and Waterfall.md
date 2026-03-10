@@ -33,3 +33,31 @@ In practice, Agile helps your team decide what to build next, while DevOps helps
 - **Self-Organizing Teams**: Encourage self-organizing teams for the best architectures, requirements, and designs.
 - **Continuous Improvement**: Reflect regularly on how to become more effective and adjust behavior accordingly.
 
+---
+
+Scrum and Kanban are two common ways teams apply Agile in real work. Scrum is more structured and uses fixed sprints, while Kanban is more flow-based and focuses on continuously moving work through a board.
+
+## Scrum
+
+Scrum is an Agile framework where teams work in short, time-boxed iterations called sprints, often 1 to 4 weeks long. It uses defined roles, shared backlogs, and regular events like sprint planning, daily standups, sprint review, and retrospective.
+
+In Scrum, the team chooses a set of work for the sprint, tries to meet a sprint goal, and reviews results at the end before planning again. It is useful when you want rhythm, predictability, and regular checkpoints.
+
+## Kanban
+
+Kanban is an Agile method that visualizes work on a board, usually with columns like To Do, In Progress, and Done. Its main idea is to manage flow, limit how much work is being done at the same time, and improve delivery continuously rather than in fixed sprints.
+
+Unlike Scrum, Kanban usually does not require sprint boundaries or specific roles like Scrum Master and Product Owner. Teams pull new work when they have capacity, which makes Kanban very useful for support, operations, platform, and ongoing DevOps tasks.
+
+## Main difference
+
+|Method|How work moves|Best fit|
+|---|---|---|
+|Scrum|Work is planned into fixed sprints.|Product development with clear iteration cycles.|
+|Kanban|Work flows continuously based on team capacity.|Ops, support, maintenance, and interrupt-driven work.|
+
+## For DevOps
+
+As a DevOps engineer, you will often see Scrum in application teams and Kanban in infrastructure or operations teams. That is because DevOps work often includes unplanned tasks like incidents, access requests, environment fixes, pipeline issues, and production support, which fit Kanban well.
+
+A simple way to remember it is this: Scrum is sprint-based, Kanban is flow-based. Many teams also mix them, using Scrum for planned feature work and Kanban for operational work

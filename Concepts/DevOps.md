@@ -1,3 +1,7 @@
+---
+tags:
+  - concepts
+---
 - **DevOps Definition**: DevOps involves operations and development engineers working together throughout the entire service lifecycle, from design to deployment and production support.
 - **Integration of Lean and Agile**: DevOps combines Agile development, Lean product management, and operations.
 - **Core Values of DevOps**: The initial values of DevOps are culture, automation, measurement, and sharing (CAMS), with Lean principles added, making it CALMS.

@@ -4,6 +4,16 @@ tags:
 ---
 - **Lean Principles**: Lean focuses on eliminating waste and maximizing value flow through a system. It has five principles: Identify value, map your value stream, create a flow, establish a pull system, and continuously improve.
 - **Types of Waste**: Lean identifies three types of waste: Muda (non-value creating work), Mura (unevenness), and Muri (overburdening).
+	**Muda**: Activities that consume resources but do not add value from the customer’s perspective.
+	    
+		**Type 1 Muda** : Non-value-adding work that may still be necessary under current conditions, such as compliance or regulatory steps.​
+		    
+		**Type 2 Muda** : Pure waste that adds no value and should be eliminated.​
+	    
+	- **Mura**: Unevenness, inconsistency, or irregularity in the workflow or process.
+    
+	- **Muri**: Overburden placed on people, equipment, or systems beyond reasonable capacity.
+	
 - **Value Stream Mapping**: This technique helps visualize where value is created and how it flows through the organization.
 - **Continuous Improvement**: Lean emphasizes continuous improvement (Kaizen) by empowering individuals and teams to analyze and improve their work processes.
 

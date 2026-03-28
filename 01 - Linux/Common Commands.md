@@ -115,3 +115,24 @@ ___
 prints the operating‑system identification data of your Linux system
  
 ---
+**sudo** run a command with elevated privileges, usually as `root`. It uses the system’s sudo policy and typically asks for **your** password
+
+- `sudo -u user command` → run as another user.
+    
+- `sudo -i` → open a login shell as root.
+    
+- `sudo -s` → open a shell with elevated privileges.
+    
+- `sudo -l` → list allowed commands.
+    
+- `sudo -v` → refresh cached credentials.
+    
+- `sudo -k` → require password again next time.
+    
+- `sudo -e file` → safely edit a protected file.
+    
+- `sudo -h` → help.
+    
+- `sudo -V` → version info.
+
+---

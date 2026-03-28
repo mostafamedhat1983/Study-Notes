@@ -108,3 +108,10 @@ ___
 |`ls -d`|List directory entries, not their contents.|
 
 ---
+
+**cat**  concatenate files and print on the standard output
+
+**cat /etc/os-release**
+prints the operating‑system identification data of your Linux system
+ 
+---

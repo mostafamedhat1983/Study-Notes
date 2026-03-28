@@ -136,4 +136,18 @@ prints the operating‑system identification data of your Linux system
 - `sudo -V` → version info.
 
 ---
+**cd** change the current working directory
 
+- `cd` → go to your home directory.[](https://en.wikipedia.org/wiki/Cd_\(command\))
+    
+- `cd /path/to/dir` → go to an absolute path.
+    
+- `cd dir_name` → go to a subdirectory using a relative path.
+    
+- `cd ..` → go up one directory.
+    
+- `cd -` → go back to the previous directory.[](https://www.youtube.com/watch?v=HErmdjrblvI)
+    
+- `cd /` → go to the root directory.[](https://www.geeksforgeeks.org/linux-unix/cd-command-in-linux-with-examples/)
+
+---

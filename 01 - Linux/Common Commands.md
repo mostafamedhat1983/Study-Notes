@@ -270,3 +270,23 @@ If the destination is a directory, the source is moved into it; if the destinati
 - `mv -u src dest` → move only if source is newer or destination does not exist
 
 ---
+
+**rm**  remove files and directories from the filesystem
+
+rm [options] file 
+rm [options] file1 file2 
+rm [options] directory
+
+- `rm -i file` → ask before each removal.
+    
+- `rm -I files` → ask once before deleting many files or doing recursive removal.
+    
+- `rm -f file` → force removal and never prompt.[](https://man7.org/linux/man-pages/man1/rm.1.html)
+    
+- `rm -r dir` or `rm -R dir` → remove directories and their contents recursively.
+    
+- `rm -d dir` → remove an empty directory.
+    
+- `rm -v file` → show what is being removed
+
+---

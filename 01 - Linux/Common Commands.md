@@ -223,6 +223,8 @@ prints the operating‑system identification data of your Linux system
 - `touch -t YYYYMMDDhhmm file` → set a specific timestamp.[](https://www.hostinger.com/in/tutorials/linux-touch-command)
     
 - `touch -r ref_file file` → copy the timestamp from another file.[](https://www.youtube.com/watch?v=hUyvx7H16cg)[](https://www.hostinger.com/in/tutorials/linux-touch-command)
-    
+
+touch file{1..10} 
+expands to: touch file1 file2 file3 file4 file5 file6 file7 file8 file9 file10
 
 ---

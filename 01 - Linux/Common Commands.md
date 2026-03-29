@@ -320,3 +320,116 @@ rm [options] directory
 
 ---
 
+`netstat` and `ss` are both Linux tools to inspect active sockets, connections, and listening ports, but `ss` is the modern, faster replacement for the now‑deprecated `netstat`. Below is a concise cheat‑sheet‑style note you can drop into Obsidian.
+
+
+
+## What they do
+
+- `netstat` (network statistics): shows network connections, listening ports, routing tables, and interface statistics.
+    
+- `ss` (socket statistics): shows detailed socket information directly from kernel space; faster and more feature‑rich than `netstat`.
+    
+
+
+
+## Common `netstat` options
+
+|Flag|Meaning|
+|---|---|
+|`-a`|all sockets (listening + established)|
+|`-t`|TCP only|
+|`-u`|UDP only|
+|`-l`|listening sockets only|
+|`-n`|numeric (no DNS/service name resolution)|
+|`-p`|show PID and program name|
+|`-r`|show routing table|
+|`-s`|protocol‑wise summary (stats)|
+
+Typical quick checks:
+
+- `netstat -tuln` – all TCP/UDP listening ports, numeric
+    
+- `netstat -tulnp` – add process info to above
+    
+
+
+
+## Common `ss` options
+
+|Flag|Meaning|
+|---|---|
+|`-t`|TCP sockets|
+|`-u`|UDP sockets|
+|`-l`|listening sockets|
+|`-a`|all sockets (listening + established)|
+|`-n`|numeric addresses/ports|
+|`-p`|show process info (PID, name)|
+|`-4`|IPv4 only|
+|`-6`|IPv6 only|
+|`-s`|per‑protocol summary stats|
+|`-o`|show socket timers|
+
+Typical quick checks:
+
+- `ss -tuln` – TCP/UDP listening ports, numeric (direct `netstat -tuln` replacement)
+    
+- `ss -tulnp` – add process info
+    
+
+
+## Key differences
+
+|Aspect|`netstat`|`ss`|
+|---|---|---|
+|Speed|Slower; parses `/proc` and other files|Faster; uses kernel Netlink interface|
+|Status|Deprecated; kept for backward compatibility|Recommended in modern Linux|
+|Output control|More compact, “friendlier” layout|More verbose, richer filtering (e.g. filters by state)|
+|Feature depth|Limited socket‑level detail [](https://www.geeksforgeeks.org/linux-unix/netstat-command-linux/)|More advanced (timers, filters, per‑socket details)|
+
+For new notes and scripts, prefer `ss`; keep `netstat` references only where you must support older distributions or legacy docs.
+
+---
+
+`df` (disk free) is a Linux command that shows disk space usage on mounted file systems: it reports total, used, and available space plus the percentage used for each mount point.
+`df` only looks at mounted filesystems (it cannot show unmounted devices)
+
+## Common `df` options
+
+| Option          | Meaning                                                             |
+| --------------- | ------------------------------------------------------------------- |
+| `df` (no flags) | total space in 1K blocks by default                                 |
+| `-h`            | human‑readable (KiB, MiB, GiB)                                      |
+| `-H`            | use powers of 1000 (MB, GB) instead of 1024                         |
+| `-a`            | show all filesystems (including pseudo / virtual ones like `tmpfs`) |
+| `-i`            | show inode usage instead of block usage                             |
+| `-l`            | show only local filesystems (skip network mounts such as NFS)       |
+| `-T`            | also print filesystem type (ext4, xfs, btrfs, etc.)                 |
+| `-t type`       | limit output to filesystems of given type (e.g., `df -t ext4`)      |
+| `-x type`       | exclude filesystems of given type                                   |
+
+---
+
+`lsof` stands for **“LiSt Open Files”**: it shows **all files currently opened by processes** on a Linux system, plus **network connections, sockets, pipes, devices, and more** (since everything in Linux is treated as a file).
+
+
+## What `lsof` is for
+
+- See which process is using a file, directory, or port (useful for debugging “device busy” errors or locked files).
+    
+- Inspect network connections (TCP/UDP) and see which processes are listening on or using which ports.
+
+## Most common `lsof` options
+
+| Option             | Meaning                                                              |
+| ------------------ | -------------------------------------------------------------------- |
+| `lsof`             | list **all** open files in the system (huge output).                 |
+| `lsof /path`       | show only files and processes using that file/path.                  |
+| `lsof -p PID`      | list all files opened by a specific process ID.                      |
+| `lsof -u username` | list files opened by a specific user.                                |
+| `lsof -c name`     | list files opened by processes whose name starts with `name`.        |
+| `lsof -i`          | show all network‑related files (sockets/connections).                |
+| `lsof -i :PORT`    | show which process is using a specific port (e.g., `:80` or `:22`).  |
+| `lsof +L1`         | find open **unlinked** (deleted but still held) files to free space. |
+
+---

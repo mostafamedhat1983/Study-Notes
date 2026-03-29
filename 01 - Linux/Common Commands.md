@@ -199,3 +199,14 @@ prints the operating‑system identification data of your Linux system
 - `uname -i` → show hardware platform.
     
 - `uname -o` → show operating system name, often
+---
+
+**mkdir** make directory
+
+- `mkdir -p path/to/dir` → create parent directories if needed.
+    
+- `mkdir -v dir` → show a message for each created directory.
+    
+- `mkdir -m 755 dir` → create the directory with specific permissions
+
+---

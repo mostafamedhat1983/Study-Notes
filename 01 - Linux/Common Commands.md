@@ -155,3 +155,47 @@ prints the operating‑system identification data of your Linux system
 **clear**  clear the terminal screen
 
 ---
+
+**uptime**  Tell how long the system has been running
+
+---
+
+**free** shows system memory usage
+
+- `free -h` → human-readable output.
+    
+- `free -b` → show values in bytes.
+    
+- `free -k` → show values in kilobytes.
+    
+- `free -m` → show values in megabytes.
+    
+- `free -g` → show values in gigabytes.
+    
+- `free -s N` → refresh output every `N` seconds.
+    
+- `free -c N` → repeat output `N` times, often used with `-s`.
+    
+- `free -w` → show buffers and cache as separate columns on supported versions.
+
+---
+
+**uname**  shows basic system information, mainly about the kernel and system architecture. If you run it without options, it usually prints the kernel name
+
+- `uname -a` → show all available system information.
+    
+- `uname -s` → show kernel name.
+    
+- `uname -n` → show hostname.
+    
+- `uname -r` → show kernel release.
+    
+- `uname -v` → show kernel version.
+    
+- `uname -m` → show machine hardware name or architecture, such as `x86_64`.
+    
+- `uname -p` → show processor type.
+    
+- `uname -i` → show hardware platform.
+    
+- `uname -o` → show operating system name, often

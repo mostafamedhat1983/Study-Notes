@@ -410,7 +410,7 @@ For new notes and scripts, prefer `ss`; keep `netstat` references only where 
 
 ---
 
-`lsof` stands for **“LiSt Open Files”**: it shows **all files currently opened by processes** on a Linux system, plus **network connections, sockets, pipes, devices, and more** (since everything in Linux is treated as a file).
+`lsof` stands for **“List Open Files”**: it shows **all files currently opened by processes** on a Linux system, plus **network connections, sockets, pipes, devices, and more** (since everything in Linux is treated as a file).
 
 
 ## What `lsof` is for

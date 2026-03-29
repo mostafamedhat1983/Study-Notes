@@ -228,3 +228,28 @@ touch file{1..10}
 expands to: touch file1 file2 file3 file4 file5 file6 file7 file8 file9 file10
 
 ---
+
+**cp**  copy files and directories from one location to another
+
+cp [options] source destination 
+cp [options] source1 source2 directory
+you can copy more than 2 source files with `cp` as long as the last argument is a destination directory
+
+- `cp -r dir1 dir2` or `cp -R dir1 dir2` → copy directories recursively.
+    
+- `cp -i file1 file2` → ask before overwrite.[](https://man7.org/linux/man-pages/man1/cp.1.html)
+    
+- `cp -n file1 file2` → do not overwrite existing files.
+    
+- `cp -v file1 file2` → show what is being copied.
+    
+- `cp -u file1 file2` → copy only if source is newer.
+    
+- `cp -p file1 file2` → preserve permissions, ownership, and timestamps.[](https://man7.org/linux/man-pages/man1/cp.1.html)
+    
+- `cp -a src dest` → archive mode; preserve attributes and copy recursively.[](https://man7.org/linux/man-pages/man1/cp.1.html)
+    
+- `cp -f file1 file2` → force copy if destination cannot be opened normally.
+
+---
+

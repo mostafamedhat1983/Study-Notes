@@ -290,3 +290,33 @@ rm [options] directory
 - `rm -v file` → show what is being removed
 
 ---
+
+**file** shows what type of file something is by examining its contents, not just its filename or extension. It can identify text files, executables, images, archives, directories, symlinks, and many other file types.
+
+- `file -b filename` → brief output, without the filename.
+    
+- `file -i filename` → show MIME type, such as `text/plain`.
+    
+- `file -s filename` → read special files too
+
+---
+
+**ln**  creates links to files, and in some cases directories, so another name can point to the same data or to another path. By default, `ln` creates a **hard link**, and with `-s` it creates a symbolic link, also called a symlink or soft link.
+
+- `ln -s target link` → create a symbolic link.
+    
+- `ln -f target link` → remove existing destination file first.[](https://man7.org/linux/man-pages/man1/ln.1.html)
+    
+- `ln -i target link` → ask before replacing destination.[](https://man7.org/linux/man-pages/man1/ln.1.html)
+    
+- `ln -v target link` → show each link created.[](https://man7.org/linux/man-pages/man1/ln.1.html)
+    
+- `ln -r -s target link` → create a relative symbolic link.[](https://man7.org/linux/man-pages/man1/ln.1.html)
+    
+- `ln -t dir target` → create link inside a target directory.[](https://man7.org/linux/man-pages/man1/ln.1.html)
+    
+- `ln -T target link` → treat link name as a normal file, not a directory.[](https://man7.org/linux/man-pages/man1/ln.1.html)
+
+
+---
+

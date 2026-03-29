@@ -210,3 +210,19 @@ prints the operating‑system identification data of your Linux system
 - `mkdir -m 755 dir` → create the directory with specific permissions
 
 ---
+**touch** is used to create an empty file or update the timestamps of an existing file. If the file does not exist, `touch` creates it; if it already exists, it updates its access and modification times without changing the file contents.
+
+- `touch -a file` → update access time only.
+    
+- `touch -m file` → update modification time only.
+    
+- `touch -c file` → do not create the file if it does not exist.[](https://www.youtube.com/watch?v=bP0dwXU8B64)[](https://www.hostinger.com/in/tutorials/linux-touch-command)
+    
+- `touch -d "date time" file` → set a specific date and time using a string.[](https://www.hostinger.com/in/tutorials/linux-touch-command)
+    
+- `touch -t YYYYMMDDhhmm file` → set a specific timestamp.[](https://www.hostinger.com/in/tutorials/linux-touch-command)
+    
+- `touch -r ref_file file` → copy the timestamp from another file.[](https://www.youtube.com/watch?v=hUyvx7H16cg)[](https://www.hostinger.com/in/tutorials/linux-touch-command)
+    
+
+---

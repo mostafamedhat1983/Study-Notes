@@ -151,3 +151,7 @@ prints the operating‑system identification data of your Linux system
 - `cd /` → go to the root directory.[](https://www.geeksforgeeks.org/linux-unix/cd-command-in-linux-with-examples/)
 
 ---
+
+**clear**  clear the terminal screen
+
+---

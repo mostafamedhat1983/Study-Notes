@@ -253,3 +253,20 @@ you can copy more than 2 source files with `cp` as long as the last argument
 
 ---
 
+**mv** move or rename files and directories
+
+mv [options] source destination
+mv [options] source1 source2 directory
+If the destination is a directory, the source is moved into it; if the destination is a new name, the source is renamed
+
+- `mv -i src dest` → ask before overwrite.
+    
+- `mv -f src dest` → force overwrite without prompting.
+    
+- `mv -n src dest` → do not overwrite existing files.
+    
+- `mv -v src dest` → show what is being moved or renamed.
+    
+- `mv -u src dest` → move only if source is newer or destination does not exist
+
+---

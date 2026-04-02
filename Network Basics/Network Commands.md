@@ -37,3 +37,10 @@ tags:
 - **`-p`**: Process ID/program name owning each socket
 
 
+**ss -tulnp** shows all listening TCP/UDP ports with process details (PIDs/programs). Run with sudo for full process info.
+
+- **`-t`**: TCP sockets
+- **`-u`**: UDP sockets
+- **`-l`**: Listening sockets only (services waiting for connections)
+- **`-n`**: Numeric IPs/ports (no DNS resolution)
+- **`-p`**: Process ID and program name

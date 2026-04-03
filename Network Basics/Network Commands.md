@@ -45,6 +45,8 @@ tags:
 - **`-n`**: Numeric IPs/ports (no DNS resolution)
 - **`-p`**: Process ID and program name
 
+**telnet** tests TCP connectivity to specific ports/services
+
 
 **nmap** is a network mapper/scanner for discovering hosts, open ports, services, and OS versions. Most common use is scanning open ports on targets
 

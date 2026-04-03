@@ -44,14 +44,15 @@ find /etc -type f -name "*.conf"        # Config files only
 
 ## Essential Options (Your Notes)
 
-| Option              | Purpose                         | Example                             |
-| ------------------- | ------------------------------- | ----------------------------------- |
-| **-name "pattern"** | Filename match (case-sensitive) | `find . -name "docker-compose.yml"` |
-| **-iname**          | Case-insensitive name           | `find ~ -iname "*.conf"`            |
-| **-type f/d**       | Files only / Dirs only          | `find /var/log -type f`             |
-| **-size +10M**      | Size > 10MB                     | `find / -size +100M 2>/dev/null`    |
-| **-mtime -7**       | Modified <7 days ago            | `find /tmp -mtime +7 -delete`       |
-| **-user mostafa**   | Your files only                 | `find /home -user mostafa`          |
+| Option              | Purpose                                                                                        | Example                                                       |
+| ------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| **-name "pattern"** | Filename match (case-sensitive)                                                                | `find . -name "docker-compose.yml"`                           |
+| **-iname**          | Case-insensitive name                                                                          | `find ~ -iname "*.conf"`                                      |
+| **-type f/d**       | Files only / Dirs only                                                                         | `find /var/log -type f`                                       |
+| **-size +10M**      | Size > 10MB                                                                                    | `find / -size +100M 2>/dev/null`                              |
+| **-mtime -7**       | Modified <7 days ago                                                                           | `find /tmp -mtime +7 -delete`                                 |
+| **-user mostafa**   | Your files only                                                                                | `find /home -user mostafa`                                    |
+| **-v**              | inverts the match, prints lines that **DO NOT** contain the pattern instead of matching lines. | `grep -v "error" logfile`        # Show lines WITHOUT "error" |
 
 ---
 

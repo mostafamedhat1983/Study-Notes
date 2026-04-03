@@ -31,3 +31,27 @@ docker logs nginx | grep "404"        # Filter container logs
 | **-w** | Whole words only           | `grep -w "docker" output` |
 
 ---
+
+**find** locates files and directories by name, type, size, time, permissions—recursively searches directory trees. 
+
+## Core Syntax
+
+```bash
+find [start_path] [options] [expression] 
+find ~ -name "*.yaml"                   # Your home dir, YAML files 
+find /etc -type f -name "*.conf"        # Config files only
+```
+
+## Essential Options (Your Notes)
+
+| Option              | Purpose                         | Example                             |
+| ------------------- | ------------------------------- | ----------------------------------- |
+| **-name "pattern"** | Filename match (case-sensitive) | `find . -name "docker-compose.yml"` |
+| **-iname**          | Case-insensitive name           | `find ~ -iname "*.conf"`            |
+| **-type f/d**       | Files only / Dirs only          | `find /var/log -type f`             |
+| **-size +10M**      | Size > 10MB                     | `find / -size +100M 2>/dev/null`    |
+| **-mtime -7**       | Modified <7 days ago            | `find /tmp -mtime +7 -delete`       |
+| **-user mostafa**   | Your files only                 | `find /home -user mostafa`          |
+
+---
+

@@ -20,7 +20,6 @@ tags:
     Runs a **single command** as the target user (usually root) and returns to your normal shell.  
     Example:
     
-    
     `sudo yum install git`
     
 - `sudo -i`  

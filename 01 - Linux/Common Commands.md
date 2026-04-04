@@ -433,3 +433,14 @@ For new notes and scripts, prefer `ss`; keep `netstat` references only where 
 | `lsof +L1`         | find open **unlinked** (deleted but still held) files to free space. |
 
 ---
+
+**less** and **more** are Linux pager commands used to read text one screen at a time instead of printing the whole file at once. For notes, the simplest way to remember them is: more is basic paging, while less is a more powerful pager with better navigation and search.
+
+**less** is an improved pager that includes the main features of **more** plus extra navigation and search capabilities. It is generally preferred because it supports moving through content more flexibly and is better suited for larger files.[](https://www.youtube.com/watch?v=msf13cIOYgM)
+
+## Common shortcuts
+
+For both commands, `q` quits the pager. In `less`, searching is a major feature, and it is commonly used with `/pattern` to find text inside the file.
+
+---
+

@@ -28,3 +28,46 @@ Vim works with **modes** instead of a normal “type‑as‑you‑go” editor
 | `:q!`         | quit without saving               |
 | `:wq` or `:x` | save and qui                      |
 
+## Replacing Text in Vim
+
+- **:s** : replace text in Vim using the substitute command.
+
+- Basic syntax:
+`:s/old/new/`
+
+
+- Replace first match in the current line.
+`:s/old/new/`
+
+- Replace all matches in the current line.
+`:s/old/new/g`
+
+- Replace all matches in the whole file.
+`:%s/old/new/g`
+
+- Replace in whole file with confirmation.
+`:%s/old/new/gc`
+
+- Replace between specific lines.
+`:10,20s/old/new/g`
+
+- Replace from current line to end of file.
+
+`:.,$s/old/new/g`
+
+- Replace whole word only.
+`:%s/\<old\>/new/g`
+
+- Case-insensitive replace.
+`:%s/old/new/gi`
+
+## Useful flags
+
+- **g**: replace all matches in a line.
+    
+- **c**: confirm each replacement.
+    
+- **i**: ignore case.
+    
+- **I**: case-sensitive search.
+

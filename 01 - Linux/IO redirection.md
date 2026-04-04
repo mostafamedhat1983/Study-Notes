@@ -76,4 +76,8 @@ echo "hello" >combined.log 2>&1
 
 Both versions send all output and errors to `combined.log`
 
+
+`/dev/null` is a **special “null device”** that **discards everything written to it** and always returns end-of-file (EOF) when read. In practice, it is used as a **black hole** for unwanted output
+`/dev/null` **is where you send output (or error) when you want it “thrown away”** instead of seeing it or writing it to a real file.
+
 ---

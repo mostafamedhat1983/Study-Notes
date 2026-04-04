@@ -444,3 +444,82 @@ For both commands, `q` quits the pager. In `less`, searching is a major featu
 
 ---
 
+
+**curl** is a command‑line tool for transferring data from or to a server using URLs. It is one of the most common ways to talk to web services, APIs, and remote servers directly from the terminal.
+
+## What `curl` is used for
+
+- **Fetch web pages or API responses**:
+    
+    `curl https://httpbin.org/get`
+    
+- **Download files**:
+    
+    `curl -O https://example.com/file.zip`
+    
+- **Send HTTP requests with specific methods** (GET, POST, PUT, DELETE) to APIs.
+    
+- **Test services, debug endpoints, or script data transfers**.
+    
+
+It supports many protocols: HTTP, HTTPS, FTP, SCP, and more.
+## Basic syntax
+
+bash
+
+`curl [options] [URL]`
+
+- Without options, `curl` sends a `GET` request and prints the response body to stdout.
+    
+- Example:
+    
+    `curl http://example.com`
+
+## Common options and patterns
+
+|Option|Meaning|Example|
+|---|---|---|
+|`-O`|Save response to a file using the URL’s filename.|`curl -O https://example.com/file.zip`|
+|`-o file`|Save response to a custom filename.|`curl -o mydata.json https://api.example.com/data`|
+|`-L`|Follow redirects (301, 302).|`curl -L https://shorturl.com/xyz`|
+|`-v`|Verbose: show headers, redirects, and connection details.|`curl -v https://example.com`|
+|`-I`|Fetch only headers (HTTP `HEAD`‑like).|`curl -I https://example.com`|
+|`-X METHOD`|Use a specific HTTP method.|`curl -X POST ...`|
+|`-H "Header: value"`|Add custom HTTP headers (e.g., `Content-Type`, `Authorization`).|`curl -H "Authorization: Bearer token" ...`|
+|`-d 'data'`|Send data in body (default becomes `POST`).|`curl -d 'name=alice' ...`|
+|`-F 'field=@file'`|Send form‑data or upload a file.|`curl -F 'file=@report.pdf' ...`|
+
+## Simple examples
+
+- Simple GET:
+    
+    `curl https://httpbin.org/json`
+    
+- Download a file:
+    
+    `curl -O https://example.com/script.sh`
+    
+- POST JSON to an API:
+    
+    `curl -X POST \   -H "Content-Type: application/json" \  -d '{"name":"Alice"}' \  https://api.example.com/users`
+    
+- Send form data (like an HTML form):
+    
+    `curl -F 'name=Bob' -F 'file=@avatar.png' https://example.com/upload`
+    
+## In DevOps / daily use
+
+- Check if an API is healthy:
+    
+    `curl -Is https://api.example.com/health | head -1`
+    
+- Debug redirects or headers:
+    
+    `curl -IL https://example.com`
+    
+- Script downloads or CI/CD steps:
+    
+    `curl -fsSL https://get.example.com/install.sh | sh`
+    
+    (where `-f` fails on HTTP error, `-s` silences progress, `-S` still shows errors).
+

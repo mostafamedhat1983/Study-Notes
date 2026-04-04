@@ -194,3 +194,32 @@ awk '{sum += $2} END {print sum}' file
 
 ---
 
+**sed** is a stream editor for text processing. It reads input line by line, applies commands like search/replace or delete, and outputs the result.
+
+## What it does
+
+- Replace text with patterns.
+- Delete matching lines.
+- Insert or change lines in files or command output.
+- Work well in shell pipelines and scripts.
+
+## Simple example
+```bash
+echo "hello world" | sed 's/world/universe/'
+```
+
+
+This changes `world` to `universe`.
+
+## Common syntax
+
+```bash
+sed 's/old/new/g' file.txt
+```
+- `s` means substitute.
+- `g` means replace all matches on each line.
+
+---
+
+
+

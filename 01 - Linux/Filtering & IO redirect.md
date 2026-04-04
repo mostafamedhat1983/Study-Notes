@@ -108,3 +108,89 @@ This prints the first field from `/etc/passwd`, which is typically the username
 Use `cut` when your input is **simple and consistently structured**, such as colon-separated, comma-separated, or fixed-position text. It is fast and script-friendly, but it is less suitable for messy data or complex parsing.
 
 ---
+
+
+- **awk**: text processing command used to scan lines, split them into fields, filter data, and print selected output.
+    
+- Default behavior:
+    
+    - Each input line is a record.
+        
+    - Fields are split by whitespace.
+        
+    - `$0` = whole line.
+        
+    - `$1`, `$2`, `$3` = fields/columns.
+        
+- Common syntax:
+
+```bash
+awk 'pattern { action }' file
+```
+
+
+- Special blocks:
+    
+    - `BEGIN`: runs before reading input.
+        
+    - `END`: runs after finishing input.
+        
+- Useful built-ins:
+    
+    - `NR`: current line number.
+        
+    - `NF`: number of fields in current line.
+        
+    - `FS`: input field separator.
+        
+    - `OFS`: output field separator.
+        
+
+## Examples
+
+- Print all lines:
+```bash
+awk '{print}' file
+```
+
+- Print first column:
+```bash
+awk '{print $1}' file
+```
+
+- Print line number with line:
+```bash
+awk '{print NR, $0}' file
+```
+
+- Print lines where column 3 is greater than 100:
+```bash
+awk '$3 > 100 {print $1, $3}' file
+```
+
+- Skip header row:
+```bash
+awk 'NR > 1 {print}' file
+```
+
+
+- Use `:` as separator:
+```bash
+awk -F: '{print $1, $3}' /etc/passwd
+```
+
+
+- Set output separator to comma:
+```bash
+awk 'BEGIN {OFS=","} {print $1, $2}' file
+```
+
+
+- Sum column 2:
+```bash
+awk '{sum += $2} END {print sum}' file
+```
+
+
+---
+

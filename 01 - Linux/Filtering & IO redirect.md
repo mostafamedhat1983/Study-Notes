@@ -56,3 +56,10 @@ find /etc -type f -name "*.conf"        # Config files only
 
 ---
 
+**head** shows the first lines of a file, and **tail** shows the last lines. Both display 10 lines by default. **tail -f** is used to monitor log files in real time.
+``` bash 
+head -n 20 file.txt | tail -n 10
+```
+This gets the first 20 lines, then prints the last 10 of that result, effectively showing lines 11 to 20.
+
+---

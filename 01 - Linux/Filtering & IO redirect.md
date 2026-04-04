@@ -219,6 +219,38 @@ sed 's/old/new/g' file.txt
 - `s` means substitute.
 - `g` means replace all matches on each line.
 
+**sed -i** tells **sed** to edit the file **in place**, i.e., overwrite the original file instead of just printing the result to the terminal.
+
+## Basic idea
+
+- Without `-i`, `sed` only shows modified text:
+```bash
+sed 's/foo/bar/' file.txt        # prints, does NOT change file.txt
+```
+
+- With `-i`, the file is changed directly:
+```bash
+sed -i 's/foo/bar/' file.txt      # actually modifies file.txt on disk
+```
+
+## Backups (optional)
+
+Many implementations let you take a backup before editing:
+
+```bash
+sed -i.bak 's/foo/bar/' file.txt    # changes file.txt, keeps old as file.txt.bak
+```
+
+
+The part after `-i` (here `.bak`) is the backup suffix; if you write `-i''` or `-i` alone, no backup is created.
+
+## Common caution
+
+Because `-i` overwrites the original file, it’s safer to:
+
+1. run without `-i` first to preview,
+2. add `-i` only when you’re sure the changes are correct.
+
 ---
 
 

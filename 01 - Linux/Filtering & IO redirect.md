@@ -63,3 +63,48 @@ head -n 20 file.txt | tail -n 10
 This gets the first 20 lines, then prints the last 10 of that result, effectively showing lines 11 to 20.
 
 ---
+
+**cut** is a Linux text-processing command used to extract specific parts of each line from a file or command output. It is commonly used to pull out columns, characters, or fields without modifying the original file.
+
+## What it does
+
+**cut** reads input line by line and prints only the part you ask for. You can select data by **bytes**, **characters**, or **fields separated by a delimiter**.
+
+## Main options
+
+The most important options are `-b` for bytes, `-c` for characters, and `-f` for fields. When using fields, you usually combine `-f` with `-d` to specify the delimiter, such as `,` or `:`.
+
+## Common syntax
+
+```bash
+cut OPTION [FILE] cut OPTION < file command | cut OPTION`
+```
+
+
+If no file is given, `cut` reads from standard input, which makes it very useful in pipelines. At least one of `-b`, `-c`, or `-f` is required.
+
+## Examples
+```bash
+cut -c 1-5 file.txt
+```
+This prints characters 1 through 5 from each line.
+
+
+```bash
+cut -d ',' -f 2 file.csv
+```
+This uses `,` as the delimiter and prints the second field from each line, which is a common way to extract a column from CSV-like data.
+
+
+```bash
+cut -d ':' -f 1 /etc/passwd
+```
+
+
+This prints the first field from `/etc/passwd`, which is typically the username column.
+
+## When to use it
+
+Use `cut` when your input is **simple and consistently structured**, such as colon-separated, comma-separated, or fixed-position text. It is fast and script-friendly, but it is less suitable for messy data or complex parsing.
+
+---

@@ -297,17 +297,110 @@ If data disappears after recreating a container, it probably lived in the writab
 - can create host-path dependency and permission issues
     
 
-## Interview angle
+## Volumes vs bind mounts
 
-I should be able to explain:
+## Why data inside the container layer is ephemeral
 
-- why data inside the container layer is ephemeral
+A container starts from read-only image layers plus a thin writable layer added at runtime. Anything the application writes inside the container filesystem, unless it is stored in a mounted volume or bind mount, goes into that writable layer.
+
+That writable layer belongs to the specific container instance. If I remove the container, that layer is removed too, so the data is lost. That is why storing important data only inside the container filesystem is risky.
+
+## When to use a volume
+
+A volume is better when I want data to outlive the container and be managed in a Docker-friendly way.
+
+Use volumes when:
+
+- the data must persist even if the container is recreated
     
-- when to use a volume
+- the application stores state, such as a database, uploaded files, or application data
     
-- when bind mounts are better
+- I want cleaner separation between container lifecycle and data lifecycle
     
-- common permission problems with bind mounts
+- I want a more portable and production-friendly storage approach
+    
+
+Good examples:
+
+- PostgreSQL data directory
+    
+- MySQL data
+    
+- Redis persistence files
+    
+- application uploads
+    
+- shared persistent app data
+    
+
+Simple rule: if the data is important and should survive container replacement, I should usually use a volume.
+
+## When bind mounts are better
+
+A bind mount is better when I want the container to use an exact file or directory from the host.
+
+Use bind mounts when:
+
+- I am developing locally and want code changes on the host to appear immediately inside the container
+    
+- I want to mount a host configuration file into the container
+    
+- I want the container to write files directly to a known host path
+    
+- I need explicit control over the exact filesystem path being mounted
+    
+
+Good examples:
+
+- mounting my source code into a dev container
+    
+- mounting an Nginx config file from the host
+    
+- mounting certificates stored on the host
+    
+- writing build artifacts to a host directory
+    
+
+Simple rule: bind mounts are usually better for code, config, and host-controlled files.
+
+## Common permission problems with bind mounts
+
+Bind mounts often cause permission issues because the container process and the host filesystem may not use the same user IDs, group IDs, or ownership rules.
+
+Common problems:
+
+- the container runs as a user that does not have permission to read or write the mounted host path
+    
+- files created by the container appear on the host with unexpected ownership
+    
+- a non-root process in the container cannot modify host files
+    
+- SELinux or host security settings block access
+    
+- the mounted file or directory already has restrictive permissions on the host
+    
+
+Example:
+
+- On the host, a folder may be owned by user `1000`
+    
+- Inside the container, the app may run as user `1001`
+    
+- The container can mount the path successfully, but the app may get “permission denied” when trying to write
+    
+
+## Practical comparison
+
+- **Container layer**: temporary runtime writes, lost when the container is removed
+    
+- **Volume**: persistent Docker-managed storage, usually best for app data
+    
+- **Bind mount**: direct host path mapping, usually best for development and host-managed files
+    
+
+## Good interview answer
+
+> Data inside the container layer is ephemeral because it lives in the container’s writable layer, which is removed with the container. I use volumes for persistent application data, and I use bind mounts when I need the container to access a specific host path directly, especially in development. Bind mounts can cause permission issues when host file ownership does not match the user running inside the container.
     
 
 ---
@@ -316,13 +409,116 @@ I should be able to explain:
 
 Docker creates software-defined networking for containers.
 
-Common modes to know:
+## Bridge
 
-- **Bridge**: default local container networking
+This is the default network mode for containers on a single Docker host.
+
+How it works:
+
+- the container gets its **own network namespace**
     
-- **Host**: container shares the host network namespace
+- the container usually gets its **own private IP**
     
-- **Overlay**: multi-host networking, often used in orchestration systems
+- that IP is usually reachable by other containers on the same bridge network
+    
+- it is **not directly reachable from outside the host** unless I publish ports with `-p`
+    
+
+So in bridge mode:
+
+- **container has its own IP**
+    
+- **host has its own IP**
+    
+- traffic from outside usually reaches the container through **port publishing/NAT**
+    
+
+## Host
+
+In host mode, the container **does not get its own separate network namespace**.
+
+How it works:
+
+- the container shares the **host network stack**
+    
+- the container does **not get its own separate container IP**
+    
+- if the app listens on port 8080, it is listening directly on the host’s network
+    
+
+So in host mode:
+
+- **container uses the host IP**
+    
+- **container does not have its own isolated container IP**
+    
+- there is no port mapping layer like normal bridge mode
+    
+
+This can improve simplicity or performance, but it reduces network isolation.
+
+## Overlay
+
+Overlay networking is used for **multi-host container communication**, such as in orchestration environments.
+
+How it works:
+
+- containers still get their **own network namespace**
+    
+- containers get their **own IP addresses** on the overlay network
+    
+- the overlay network connects containers across multiple hosts as if they are on one logical network
+    
+
+So in overlay mode:
+
+- **container has its own IP**
+    
+- that IP belongs to the overlay network
+    
+- communication can happen across hosts
+    
+
+## None
+
+In `none` mode:
+
+- the container gets its **own network namespace**
+    
+- but Docker does **not configure network interfaces for normal communication**
+    
+- the container does **not have a usable external network connection**
+    
+- typically, only the loopback interface (`lo`) exists
+    
+
+So in `none` mode:
+
+- **container does not have a normal network IP for communication**
+    
+- it cannot talk to other containers or the outside world unless networking is manually configured later
+    
+
+This is the mode you were thinking of when asking whether there is a network where the container has no IP.
+
+---
+
+## Simple summary
+
+- **Bridge**: container has **its own private IP**
+    
+- **Host**: container uses the **host IP/network stack**
+    
+- **Overlay**: container has **its own IP** on a multi-host virtual network
+    
+- **None**: container has **no normal external network interface/IP**
+    
+
+---
+
+## Easy interview phrasing
+
+> In bridge mode, the container gets its own private IP. In host mode, it shares the host network stack and uses the host IP. In overlay mode, it gets its own IP on a multi-host virtual network. In none mode, it has no normal network connectivity.
     
 
 ## Very important distinction

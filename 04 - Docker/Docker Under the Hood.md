@@ -598,23 +598,223 @@ Important concepts:
 - `CMD` vs `ENTRYPOINT`
     
 
-## Clarifications
-
 ## `COPY` vs `ADD`
 
-- use `COPY` for normal file copying
+Both `COPY` and `ADD` place files into a Docker image, but `COPY` is the simpler and safer default.
+
+## `COPY`
+
+Use `COPY` when I just want to copy files or directories from the build context into the image.
+
+Example:
+
+text
+
+`COPY app/ /app/`
+
+This does only one thing: it copies files from my local build context into the image.
+
+## `ADD`
+
+`ADD` can also copy files, but it has extra behavior.
+
+Its extra behavior includes:
+
+- copying files like `COPY`
     
-- use `ADD` only when I specifically need its extra behavior
+- automatically extracting local archive files such as `.tar`
+    
+- supporting remote URLs in some cases
     
 
+That is why the common best practice is:
+
+> Use `COPY` by default, and use `ADD` only when I specifically need its extra behavior.
+
+## Why `COPY` is preferred
+
+`COPY` is usually better because it is explicit and predictable.
+
+If I write:
+
+text
+
+`COPY . /app`
+
+it is clear that Docker will only copy files.
+
+But if I write:
+
+text
+
+`ADD app.tar.gz /app/`
+
+Docker may extract that archive into `/app/` instead of storing it as a normal file. That can surprise people and make the Dockerfile harder to reason about.
+
+## Security comparison
+
+`COPY` is generally safer than `ADD` because it only copies local files from the build context and does not perform extra actions automatically.
+
+`ADD` can introduce more risk because:
+
+- it may fetch remote content "**remote URL**"
+    
+- it can automatically extract local archives
+    
+- it can make builds less predictable
+    
+- it can introduce archive-related risks if the input is untrusted
+    
+
+For example, if I use `ADD` with an untrusted archive, Docker may unpack files into the image in unexpected ways. That is one reason `COPY` is the safer default.
+
+## Better secure pattern
+
+If I need to bring files into the image, I should usually use `COPY`.
+
+If I need remote content, a clearer pattern is to download it explicitly in a `RUN` step and validate it if needed, instead of relying on `ADD` to do more than plain copying.
+
+## Rule of thumb
+
+- use **`COPY`** for normal file and directory copying
+    
+- use **`ADD`** only when I intentionally want its special behavior
+    
+- prefer **explicit steps** over hidden magic
+    
+
+## Interview-friendly explanation
+
+> `COPY` is the safer default because it only copies files and is easy to understand. `ADD` has extra behavior, such as automatic archive extraction and remote-source support, so it should only be used when that behavior is actually needed.
 ## `CMD` vs `ENTRYPOINT`
 
-- `ENTRYPOINT` defines the main executable
+`CMD` vs `ENTRYPOINT`:
+
+- **`ENTRYPOINT`** = the main command the container is meant to run.
     
-- `CMD` provides default arguments or default command behavior
+- **`CMD`** = the default command or default arguments for that main command.
     
 
-A lot of interview answers become better if I explain how they work together instead of treating them as competitors.
+The easiest way to remember it is: **ENTRYPOINT sets the executable, CMD sets the default behavior**.
+
+## Simple explanation
+
+Use **`ENTRYPOINT`** when the container should always run a specific program.  
+Use **`CMD`** when you want to provide defaults that the user can easily override at runtime.
+
+So:
+
+- `ENTRYPOINT` is more **fixed**
+    
+- `CMD` is more **flexible**
+    
+
+## What gets overridden
+
+If you pass extra arguments to `docker run image ...`, Docker usually treats them as replacing **CMD**, not `ENTRYPOINT`.  
+If you want to override `ENTRYPOINT`, you usually need to use the `--entrypoint` flag explicitly.
+
+That is the key behavioral difference in practice.
+
+## Best mental model
+
+Think of it like this:
+
+- **ENTRYPOINT** = “what this container is”
+    
+- **CMD** = “what this container does by default”
+    
+
+For example, if the container is meant to always run `python`, then `ENTRYPOINT` can be `python`, and `CMD` can be `app.py`.
+
+## Example
+
+text
+
+`ENTRYPOINT ["python"] CMD ["app.py"]`
+
+If I run:
+
+bash
+
+`docker run myimage`
+
+Docker runs:
+
+bash
+
+`python app.py`
+
+If I run:
+
+bash
+
+`docker run myimage other.py`
+
+Docker runs:
+
+bash
+
+`python other.py`
+
+Here, `ENTRYPOINT` stayed the same, but `CMD` was overridden by the runtime argument.
+
+## When to use each
+
+## Use `CMD` when:
+
+- I want a default command
+    
+- I want users to easily replace that command
+    
+- the image is more general-purpose
+    
+
+## Use `ENTRYPOINT` when:
+
+- the image is built for one main executable
+    
+- I want the container to always run that executable
+    
+- I want runtime arguments to be passed to that executable
+    
+
+## Best practice together
+
+A very common and clean pattern is:
+
+- `ENTRYPOINT` for the fixed executable
+    
+- `CMD` for default arguments
+    
+
+Example:
+
+text
+
+`ENTRYPOINT ["nginx"] CMD ["-g", "daemon off;"]`
+
+That means the container always runs `nginx`, and `CMD` provides the default startup arguments.
+
+## Exec form vs shell form
+
+Prefer the **exec form**:
+
+text
+
+`ENTRYPOINT ["python", "app.py"] CMD ["--help"]`
+
+instead of shell form like:
+
+text
+
+`ENTRYPOINT python app.py`
+
+The exec form is usually better because signal handling and argument passing are cleaner, especially for PID 1 behavior in containers.
+
+## Interview-friendly explanation
+
+> `ENTRYPOINT` defines the main executable that always runs, while `CMD` provides the default command or arguments that can be overridden when the container starts
 
 ---
 
@@ -635,18 +835,6 @@ Important topics:
 - do not bake secrets into images
     
 
-## Practical interview angle
-
-I should be able to explain:
-
-- why root inside containers is risky
-    
-- why privileged containers are dangerous
-    
-- why shared-kernel architecture matters for security
-    
-- why secrets should be injected securely at runtime
-    
 
 ---
 
@@ -774,65 +962,6 @@ Ask:
 |Slow builds|Layer cache, Dockerfile order, build context|
 |Container won’t stop cleanly|PID 1, signal handling, entrypoint behavior|
 
----
-
-## Most important interview topics
-
-For junior/mid DevOps interviews, I should know:
-
-- Docker architecture: CLI, `dockerd`, containerd, runc, kernel
-    
-- what containerd is and what it does
-    
-- container vs VM
-    
-- namespaces and cgroups
-    
-- images and layers
-    
-- writable container layer
-    
-- volumes vs bind mounts
-    
-- bridge, host, and overlay networking
-    
-- port publishing
-    
-- `EXPOSE` vs `-p`
-    
-- PID 1 behavior
-    
-- Dockerfile best practices
-    
-- multi-stage builds
-    
-- `CMD` vs `ENTRYPOINT`
-    
-- `COPY` vs `ADD`
-    
-- basic container security
-    
-- troubleshooting workflow
-    
-
----
-
-## Strong interview answer pattern
-
-A strong answer should include:
-
-- **what happens**
-    
-- **why it happens**
-    
-- **how I would debug it**
-    
-
-## Example
-
-> If a container keeps restarting, I would first check its status, then logs, then inspect its config for environment variables, command, mounts, ports, restart policy, and resource limits. The root cause could be app startup failure, bad configuration, dependency failure, or OOM conditions.
-
-This sounds much stronger than just listing commands.
 
 ---
 
@@ -856,57 +985,3 @@ This sounds much stronger than just listing commands.
     
 
 ---
-
-## Study order
-
-Best learning order:
-
-1. Docker architecture and `docker run`
-    
-2. What containerd is and how it fits under Docker
-    
-3. Namespaces and cgroups
-    
-4. Image layers and writable layer
-    
-5. Volumes and bind mounts
-    
-6. Networking and port publishing
-    
-7. PID 1 and process model
-    
-8. Dockerfile optimization and caching
-    
-9. Security basics
-    
-10. Troubleshooting workflow
-    
-
----
-
-## Personal goal
-
-I should aim to explain Docker in terms of:
-
-- processes
-    
-- kernel isolation
-    
-- resource limits
-    
-- storage layers
-    
-- networking
-    
-- runtime components
-    
-- debugging logic
-    
-
-If I can explain those clearly with one or two examples, I will stand out much more in junior/mid DevOps interviews.
-
----
-
-## Fast recap
-
-When I use Docker, I am not launching a mini-VM. I am asking Docker to coordinate a stack of components that eventually starts an isolated process on the host. Docker provides the user workflow, containerd manages core runtime operations, runc creates the isolated process, and the Linux kernel enforces isolation and limits.

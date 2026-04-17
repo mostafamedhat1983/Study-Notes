@@ -982,6 +982,8 @@ Ask:
 - **PID 1 behavior affects signal handling and clean shutdown.**
     
 - **Good Docker troubleshooting means identifying which layer is failing: image, runtime setup, network, storage, resources, or app process.**
-    
+  
+- **You cant delete a Docker image if a running container is using it, Stop and remove the container first, then remove the image. Docker’s container removal command also supports `-f` to force removal of a running container .**
+ 
 
 ---

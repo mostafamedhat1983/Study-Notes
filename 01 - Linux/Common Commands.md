@@ -523,3 +523,51 @@ bash
     
     (where `-f` fails on HTTP error, `-s` silences progress, `-S` still shows errors).
 
+---
+
+## du
+
+`du` = **disk usage**; it shows how much space files and directories use. It works recursively by default for directories.
+
+## Common syntax
+
+bash
+
+`du [options] [file_or_directory]`
+
+## Most common arguments
+
+- `du -sh <path>` → show total size of a directory in human-readable form.
+    
+- `du -h <path>` → show sizes in human-readable units like KB, MB, GB.[](https://man7.org/linux/man-pages/man1/du.1.html)
+    
+- `du -ah <path>` → show sizes for all files and directories.
+    
+- `du -d 1 <path>` or `du --max-depth=1 <path>` → show size one level deep only.[](https://man7.org/linux/man-pages/man1/du.1.html)
+    
+- `du -c <paths>` → show a grand total at the end.[](https://man7.org/linux/man-pages/man1/du.1.html)
+    
+- `du -x <path>` → stay on the same filesystem; skip other mounted filesystems.[](https://man7.org/linux/man-pages/man1/du.1.html)
+    
+- `du --exclude="pattern" <path>` → exclude matching files or directories.[](https://man7.org/linux/man-pages/man1/du.1.html)
+    
+- `du -b <path>` → show size in bytes.[](https://man7.org/linux/man-pages/man1/du.1.html)
+    
+
+## Most useful examples
+
+bash
+
+`du -sh /var/log du -ah . du -d 1 /home du -sh * du -ch dir1 dir2`
+
+## Quick note
+
+- `-s` = summarize, one total only.[](https://man7.org/linux/man-pages/man1/du.1.html)
+    
+- `-h` = human-readable.[](https://man7.org/linux/man-pages/man1/du.1.html)
+    
+- `du` is for directory/file usage, while `df` is for filesystem free/used space
+
+---
+
+

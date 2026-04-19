@@ -311,8 +311,36 @@ Example:
 docker run -d --name web -p 8080:80 nginx
 ```
 
+```bash
+docker run -e DB_HOST=localhost -e DB_PORT=5432 myapp
+```
+
 ---
 
+## Environment variables
+
+### Set one variable
+```bash
+docker run -e APP_ENV=dev nginx
+```
+
+### Set multiple variables
+```bash
+docker run -e APP_ENV=dev -e DB_HOST=localhost myapp
+```
+
+### Use env file
+```bash
+docker run --env-file .env myapp
+```
+
+### Pass host variable through
+```bash
+export APP_ENV=dev
+docker run -e APP_ENV nginx
+```
+
+---
 ## Must memorize
 
 These are the commands you should know well for interviews and hands-on practice:

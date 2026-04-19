@@ -988,3 +988,34 @@ Ask:
  
 
 ---
+## Docker local files
+
+On Linux, Docker usually stores its local data in:
+
+```bash
+/var/lib/docker
+```
+
+Common subdirectories:
+
+- `/var/lib/docker/containers` — container-specific metadata, config, and logs
+- `/var/lib/docker/overlay2` — image layers and container writable layers
+- `/var/lib/docker/image` — image metadata
+- `/var/lib/docker/volumes` — Docker-managed volumes
+- `/var/lib/docker/network` — Docker network state
+
+### Useful commands
+```bash
+docker info | grep "Docker Root Dir"
+sudo ls /var/lib/docker
+sudo ls /var/lib/docker/containers
+sudo ls /var/lib/docker/volumes
+sudo du -sh /var/lib/docker
+docker system df
+```
+
+### Notes
+- A container is just a process with a thin writable layer.
+- Most filesystem data comes from image layers, usually under `overlay2`.
+- Docker volumes are stored under `/var/lib/docker/volumes`.
+- Do not manually edit files inside `/var/lib/docker`.

@@ -3,8 +3,6 @@ tags:
   - Docker
   - Linux
 ---
-
-
 Docker commands usually require elevated access because the Docker daemon runs with root-level privileges.
 
 ## Do I need to be root?
@@ -50,7 +48,8 @@ sudo usermod -aG docker $USER
 ```bash
 newgrp docker
 ```
-
+Starts a new shell session with `docker` as the active group, so the current terminal can use Docker commands immediately after adding the user to the `docker` group
+Because when you add your user to the `docker` group, the system usually does not apply that new group membership to your **current shell** automatically
 ### Test it
 ```bash
 docker ps

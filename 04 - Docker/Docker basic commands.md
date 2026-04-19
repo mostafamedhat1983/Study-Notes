@@ -1,6 +1,7 @@
 ---
 tags:
   - Linux
+  - Docker
 ---
 # Docker Basics
 

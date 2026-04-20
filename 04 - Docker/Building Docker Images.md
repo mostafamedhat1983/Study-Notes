@@ -744,7 +744,230 @@ So:
 - `docker container commit` is more of a manual snapshot tool.
 
 ---
+---
 
+## Image best practices
+
+When building Docker images, the goal is not only to make them work, but also to make them:
+- smaller
+- faster to build
+- easier to maintain
+- more secure
+- more reproducible
+
+---
+
+### Use a trusted and minimal base image
+
+Choose a base image from a trusted source such as:
+- official images
+- verified publisher images
+- well-maintained vendor images
+
+Also prefer a base image that is as small as possible for your use case.
+
+Why this matters:
+- smaller images download faster
+- smaller images usually contain fewer packages
+- fewer packages usually mean fewer vulnerabilities
+- minimal images reduce attack surface
+
+Examples:
+- `alpine`
+- slim runtime images
+- distroless images for production runtime stages
+
+---
+
+### Avoid relying only on `latest`
+
+Using `latest` can make builds less predictable because the image behind that tag may change over time.
+
+Instead, prefer versioned tags such as:
+
+```dockerfile
+FROM node:20-alpine
+```
+
+instead of:
+
+```dockerfile
+FROM node:latest
+```
+
+This makes builds more stable and easier to reproduce.
+
+---
+
+### Pin image versions more strictly when needed
+
+For stronger reproducibility, you can pin an image to a digest.
+
+Example:
+
+```dockerfile
+FROM alpine:3.21@sha256:<digest>
+```
+
+This ensures Docker always uses the exact same image version, even if the tag later points to something new.
+
+This is especially useful in:
+- production builds
+- security-sensitive environments
+- CI/CD pipelines
+
+---
+
+### Use multi-stage builds
+
+If your application needs build tools such as:
+- Maven
+- Gradle
+- npm
+- Go compiler
+
+do not keep those tools in the final runtime image unless they are actually needed.
+
+Use multi-stage builds to:
+- build the artifact in one stage
+- copy only the final output into the runtime stage
+
+This keeps the final image smaller and cleaner.
+
+---
+
+### Keep the final image minimal
+
+Only include what the application needs to run.
+
+Avoid keeping unnecessary things in the final image, such as:
+- build tools
+- package caches
+- source code if not needed
+- temporary files
+- debugging tools in production images
+
+A smaller runtime image is usually better for:
+- security
+- performance
+- portability
+
+---
+
+### Order Dockerfile instructions for better caching
+
+Docker reuses cached layers when possible.
+
+A good rule is:
+- put stable instructions earlier
+- put frequently changing instructions later
+
+For example:
+- install system packages first
+- copy dependency files next
+- copy application source code later
+
+This improves rebuild speed because Docker can reuse more cached layers.
+
+---
+
+### Use `.dockerignore`
+
+A `.dockerignore` file prevents unnecessary files from being sent in the build context.
+
+This helps by:
+- reducing build time
+- reducing context size
+- avoiding accidental inclusion of secrets
+- improving cache efficiency
+
+Example:
+
+```dockerignore
+.git
+node_modules
+.env
+*.log
+tmp
+target
+```
+
+---
+
+### Run as non-root when possible
+
+If possible, avoid running the container as root.
+
+Use the `USER` instruction to run the application with a non-root user.
+
+Example:
+
+```dockerfile
+RUN useradd -m appuser
+USER appuser
+```
+
+This reduces the impact of a potential container compromise.
+
+---
+
+### Rebuild images regularly
+
+Even if your Dockerfile does not change, the packages in your base image may receive updates for:
+- security patches
+- bug fixes
+- dependency improvements
+
+So rebuilding images regularly helps keep them updated.
+
+You may also use:
+
+```bash
+docker build --no-cache -t myimage .
+```
+
+when you want to force a fresh rebuild instead of reusing cached layers.
+
+---
+
+### Prefer Dockerfiles over manual image creation
+
+Although `docker container commit` can create an image from a running container, Dockerfiles are usually better because they are:
+- reproducible
+- version-controlled
+- easier to review
+- easier to automate
+
+Use `commit` mainly for:
+- quick experiments
+- temporary snapshots
+- debugging
+
+Use Dockerfiles for real projects.
+
+---
+
+### Simple rule of thumb
+
+A good Docker image should be:
+- minimal
+- predictable
+- reproducible
+- secure
+- easy to rebuild
+
+---
+
+### Must remember
+
+- Use trusted and minimal base images.
+- Prefer fixed versions over `latest`.
+- Use multi-stage builds when a build step is required.
+- Keep the final image as small as possible.
+- Use `.dockerignore` to reduce build context.
+- Order Dockerfile instructions to improve caching.
+- Run as non-root when possible.
+- Prefer Dockerfiles over manual image snapshots.
 ### Must memorize
 
 ``` bash

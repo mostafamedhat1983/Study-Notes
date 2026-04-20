@@ -77,6 +77,237 @@ It is similar to how Vagrant manages VMs using a config file.
 
 ---
 
+## Compose project naming
+
+Every Docker Compose application belongs to a **project**.
+
+A project name is important because Docker Compose uses it to group and name related resources such as:
+- containers
+- networks
+- volumes
+
+This helps Docker Compose know which resources belong together.
+
+---
+
+### Default project name
+
+If you do not specify a project name, Docker Compose usually uses the name of the directory that contains the Compose file.
+
+For example, if your project directory is:
+
+```bash
+myapp/
+```
+
+and you run:
+
+```bash
+docker compose up -d
+```
+
+Compose may create resources with names like:
+- `myapp-web-1`
+- `myapp-db-1`
+- `myapp_default`
+
+This makes it easier to identify which containers and networks belong to the same application.
+
+---
+
+### Why project naming matters
+
+Project naming is useful when:
+- you run multiple Compose applications on the same machine
+- you want cleaner resource names
+- you want to avoid naming conflicts
+- you want separate environments like dev, test, and prod
+- you want the same Compose file to be deployed more than once with different names
+
+---
+
+### Set project name with `-p`
+
+You can override the default project name using the `-p` flag.
+
+Example:
+
+```bash
+docker compose -p myproject up -d
+```
+
+Now Compose uses `myproject` instead of the directory name.
+
+This means resources may be named like:
+- `myproject-web-1`
+- `myproject-db-1`
+- `myproject_default`
+
+---
+
+### Set project name with environment variable
+
+You can also set the project name with:
+
+```bash
+COMPOSE_PROJECT_NAME=myproject
+```
+
+Example:
+
+```bash
+export COMPOSE_PROJECT_NAME=myproject
+docker compose up -d
+```
+
+This is useful in:
+- CI/CD pipelines
+- automation scripts
+- environment-specific deployments
+
+---
+
+### Set project name inside the Compose file
+
+Compose also supports a top-level `name` field.
+
+Example:
+
+```yaml
+name: myproject
+
+services:
+  web:
+    image: nginx
+```
+
+This tells Compose to use `myproject` as the project name unless a higher-precedence option overrides it.
+
+---
+
+### Order of precedence
+
+Docker Compose determines the project name in this order:
+
+1. `-p` command-line flag
+2. `COMPOSE_PROJECT_NAME` environment variable
+3. top-level `name:` in the Compose file
+4. directory name of the Compose project
+
+So the `-p` flag has the highest priority.
+
+---
+
+### Simple rule of thumb
+
+- use the default directory name for simple local projects
+- use `-p` when you want explicit control
+- use `COMPOSE_PROJECT_NAME` in scripts or pipelines
+- use top-level `name:` when you want the Compose file itself to define the project name
+
+---
+
+## Docker Compose `ls` command
+
+You can use `docker compose ls` to list Compose projects.
+
+```bash
+docker compose ls
+```
+
+This shows the running Compose projects on the machine.
+
+It is useful when:
+- you want to see active Compose applications
+- you forgot the project name
+- you are managing multiple Compose projects
+
+---
+
+### Show all Compose projects
+
+```bash
+docker compose ls -a
+```
+
+This can show stopped Compose projects as well.
+
+---
+
+### Why `docker compose ls` is useful
+
+It helps you quickly answer questions like:
+- which Compose projects are running
+- what project names exist
+- which project should I stop or inspect
+
+---
+
+## Docker Compose `restart` command
+
+You can restart services in a Compose project using:
+
+```bash
+docker compose restart
+```
+
+This stops and starts the running services again.
+
+It is useful when:
+- you want to restart the application
+- a service is stuck
+- a process inside the container needs a restart
+- you changed something that needs a service restart
+
+---
+
+### Restart one specific service
+
+```bash
+docker compose restart web
+```
+
+This restarts only the `web` service instead of the whole project.
+
+---
+
+### Restart with timeout
+
+```bash
+docker compose restart -t 10
+```
+
+This gives containers time to stop gracefully before Docker forcefully terminates them.
+
+---
+
+### Important note about restart
+
+`docker compose restart`:
+- restarts existing containers
+- does not rebuild images
+- does not recreate containers automatically
+
+If you changed the Dockerfile or want a rebuild, use:
+
+```bash
+docker compose up --build
+```
+
+If you changed Compose configuration significantly, you may prefer:
+
+```bash
+docker compose down
+docker compose up -d
+```
+
+---
+
+### Simple rule of thumb
+
+- use `docker compose restart` for restarting running services
+- use `docker compose up --build` when the image needs rebuilding
+- use `docker compose down` then `up` when you want a cleaner recreation
 ## Docker Compose installation note
 
 Docker Compose used to be a separate tool, but modern Docker uses **Docker Compose v2** as a Docker CLI plugin. On Linux, Docker documents installation of the Compose plugin separately from Docker Engine, and the modern command format is `docker compose` with a space rather than the old standalone `docker-compose` form. 

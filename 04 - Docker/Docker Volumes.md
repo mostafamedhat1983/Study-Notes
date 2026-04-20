@@ -56,6 +56,128 @@ Both allow data to persist outside the container lifecycle.
 
 ---
 
+## tmpfs mounts
+
+Docker provides a third storage option besides volumes and bind mounts: **tmpfs mounts**.
+
+A tmpfs mount stores data in the host machine's memory instead of on disk.
+
+This means:
+- data is temporary
+- data is not persisted after the container stops
+- data does not live in the container writable layer
+- data is not stored as a normal host directory like a bind mount
+
+tmpfs is useful when the container needs fast temporary storage that should not remain after shutdown.
+
+---
+
+### When tmpfs is useful
+
+Use tmpfs when:
+- the data is temporary
+- the data should not persist
+- the application writes lots of short-lived files
+- you want to avoid writing sensitive temporary data to disk
+- you want fast in-memory storage
+
+Good examples:
+- cache directories
+- temporary processing files
+- session-like temporary data
+- short-lived secrets or temporary credentials
+- application scratch space
+
+---
+
+### Important behavior
+
+A tmpfs mount is:
+- stored in memory
+- removed when the container stops
+- non-persistent
+
+So unlike a volume or bind mount, data inside tmpfs does **not** survive container removal or restart.
+
+This makes tmpfs very different from normal persistent storage.
+
+---
+
+### Basic example
+
+```bash
+docker run -d --name myapp --mount type=tmpfs,target=/app/cache nginx
+```
+
+This creates a tmpfs mount at `/app/cache` inside the container.
+
+Anything written there is stored in memory, not on disk.
+
+---
+
+### Example with options
+
+```bash
+docker run -d \
+  --name myapp \
+  --mount type=tmpfs,target=/app/cache,tmpfs-size=64m,tmpfs-mode=1777 \
+  nginx
+```
+
+This creates a tmpfs mount with:
+- size limit of 64 MB
+- mode `1777`
+
+This is useful when you want more control over memory-backed temporary storage.
+
+---
+
+### Short syntax
+
+Docker also supports a shorter form:
+
+```bash
+docker run -d --tmpfs /app/cache nginx
+```
+
+This is convenient for simple cases.
+
+---
+
+### tmpfs vs volume vs bind mount
+
+| Type | Stored where | Persistent | Best for |
+|---|---|---|---|
+| Bind mount | Specific host path | Yes | Development, host-controlled files |
+| Docker volume | Docker-managed storage | Yes | Databases, application data, persistent state |
+| tmpfs | Host memory | No | Temporary files, caches, sensitive short-lived data |
+
+---
+
+### Best practices
+
+- Use tmpfs only for data that does not need to survive container stop or removal.
+- Set size limits when possible to avoid uncontrolled memory usage.
+- Do not use tmpfs for important database or application state.
+- Use volumes for persistent data.
+- Use bind mounts when you need a specific host path.
+
+---
+
+### Simple rule of thumb
+
+- Use a **volume** for persistent app data.
+- Use a **bind mount** when the container must access a real host path.
+- Use **tmpfs** when the data is temporary and should live only in memory.
+
+---
+
+### Must memorize
+
+```bash
+docker run --mount type=tmpfs,target=/app/cache nginx
+docker run --tmpfs /app/cache nginx
+```
 ## How to find volume paths and ports
 
 Before running a container, you can inspect the image to find useful metadata.

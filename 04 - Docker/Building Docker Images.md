@@ -142,6 +142,7 @@ VOLUME ["/var/log/apache2"]
 ```
 
 Useful for data or logs you may want to persist.
+If you run the container without an explicit volume mapping, Docker can create an **anonymous volume** for that container path automatically.
 
 ---
 
@@ -167,6 +168,20 @@ WORKDIR /var/www/html
 ```
 
 This means later commands will run relative to that directory.
+if the `WORKDIR` path does not exist, Docker will generally **create it automatically** during the image build
+## Important detail
+
+A small caveat is that the directory may be created with **root ownership**, even if you set `USER` earlier, so relying on implicit creation can sometimes cause permission issues.[](https://github.com/docker/docs/issues/13574)
+
+## Best practice
+
+It is safer to create it explicitly when permissions matter:
+
+`RUN mkdir -p /app && chown appuser:appuser /app 
+`WORKDIR /app 
+`USER appuser`
+
+That gives you more control over ownership and permissions
 
 ---
 

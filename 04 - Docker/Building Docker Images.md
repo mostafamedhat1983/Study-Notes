@@ -553,3 +553,209 @@ Docker Hardened Images follow a distroless or minimal-image philosophy and are i
 - Good for security-focused production environments.
 - Often used when compliance, CVE reduction, and provenance matter.
 - They trade some debugging convenience for stronger security.
+
+---
+
+## Image management commands
+
+After building an image, you often need to manage it locally or publish it to a registry.
+
+### Pull an image
+
+```bash
+docker image pull ubuntu:20.04
+```
+
+Downloads an image from a registry such as Docker Hub.
+
+If the image is not available locally, Docker will pull it automatically in many cases when you run a container.
+
+---
+
+### List local images
+
+```bash
+docker image ls
+```
+
+Shows images stored on your machine.
+
+Useful columns include:
+- repository
+- tag
+- image ID
+- created time
+- size
+
+---
+
+### Inspect an image
+
+```bash
+docker image inspect ubuntu:20.04
+```
+
+Displays detailed JSON metadata about the image.
+
+This can help you check:
+- environment variables
+- default command
+- entrypoint
+- exposed ports
+- layers
+- labels
+
+---
+
+### Tag an image
+
+```bash
+docker image tag myimage:latest mostafamedhat1983/myimage:v1
+```
+
+Creates another reference for the same image.
+
+This is commonly used before pushing an image to Docker Hub or another registry.
+
+---
+
+### Push an image
+
+```bash
+docker image push mostafamedhat1983/myimage:v1
+```
+
+Uploads the tagged image to a registry.
+
+Before pushing, you usually need to log in:
+
+```bash
+docker login
+```
+
+---
+
+### Remove an image
+
+```bash
+docker image rm ubuntu:20.04
+```
+
+Removes an image from the local machine.
+
+If a container is still using the image, Docker may refuse to remove it until the container is removed first.
+
+---
+
+### Useful notes
+
+- `docker image ls` shows local images.
+- `docker image inspect` shows detailed metadata.
+- `docker image tag` adds another name or tag to an image.
+- `docker image push` uploads an image to a registry.
+- `docker image rm` removes a local image.
+- Images can be identified by name, tag, or image ID.
+
+---
+
+## Image history and commit
+
+Docker images are built in layers.
+
+Each significant image-building step usually creates a new layer, which is one reason Docker builds can reuse cache efficiently.
+
+### Show image history
+
+```bash
+docker image history myimage:latest
+```
+
+This shows the history of the image layers.
+
+It helps you understand:
+- which instructions created layers
+- image size growth
+- whether large layers were added unexpectedly
+
+This is useful when:
+- troubleshooting large image size
+- understanding how the image was built
+- reviewing Dockerfile impact on layers
+
+---
+
+### Create an image from a container
+
+```bash
+docker container commit mycontainer myimage:snapshot
+```
+
+This creates a new image from the current state of a container.
+
+This means Docker captures the container filesystem changes and saves them as a new image.
+
+### Example
+
+```bash
+docker run -it --name testcontainer ubuntu bash
+```
+
+Make some changes inside the container, then from another terminal or after exiting:
+
+```bash
+docker container commit testcontainer ubuntu-custom:v1
+```
+
+Now you have a new image called `ubuntu-custom:v1`.
+
+---
+
+### When `commit` can be useful
+
+`docker container commit` can be useful for:
+- quick experiments
+- debugging
+- taking a snapshot of a modified container
+- temporary testing
+
+---
+
+### Why Dockerfiles are usually better
+
+Even though `docker container commit` works, it is usually **not the best long-term approach**.
+
+A Dockerfile is usually better because it is:
+- reproducible
+- version-controlled
+- easier to review
+- easier to automate in CI/CD
+- easier for other people to understand
+
+So:
+
+- use `docker container commit` for quick temporary work
+- use a Dockerfile for real projects
+
+---
+
+### Simple rule
+
+- `docker build` is the normal way to create images for real projects.
+- `docker container commit` is more of a manual snapshot tool.
+
+---
+
+### Must memorize
+
+``` bash
+
+docker image pull ubuntu:20.04
+docker image ls
+docker image inspect ubuntu:20.04
+docker image tag myimage:latest mostafamedhat1983/myimage:v1
+docker image push mostafamedhat1983/myimage:v1
+docker image rm ubuntu:20.04
+docker image history myimage:latest
+docker container commit mycontainer myimage:snapshot
+
+```

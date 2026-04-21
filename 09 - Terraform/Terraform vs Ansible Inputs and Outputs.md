@@ -4,4 +4,4 @@ tags:
   - Ansible
 ---
 ## terraform  takes arguments , return attributes
-## ansible takes parameters and return return values
+## ansible takes parameters and return values

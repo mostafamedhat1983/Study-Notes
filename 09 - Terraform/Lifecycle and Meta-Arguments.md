@@ -258,7 +258,35 @@ This is useful for very important resources such as:
 It adds protection against accidental deletion.
 
 ---
+## `replace_triggered_by`
 
+`replace_triggered_by` is a lifecycle rule that tells Terraform to replace a resource when another referenced resource or attribute changes.
+
+This is useful when a resource should be recreated because of a related change that Terraform would not normally treat as a replacement trigger.
+
+Example:
+
+```hcl
+resource "aws_instance" "web" {
+  ami           = var.ami_id
+  instance_type = "t3.micro"
+
+  lifecycle {
+    replace_triggered_by = [aws_subnet.public.id]
+  }
+}
+```
+
+In this example, Terraform replaces the instance if the referenced subnet attribute changes.
+
+Use this when:
+- one resource depends on another in a replacement-sensitive way
+- a related infrastructure change should force recreation
+- you want more explicit replacement control
+
+Important note:
+- `replace_triggered_by` works with managed resources and their attributes
+- it does not directly use plain input variables or locals as triggers
 ## `ignore_changes`
 
 This tells Terraform to ignore changes to selected attributes.

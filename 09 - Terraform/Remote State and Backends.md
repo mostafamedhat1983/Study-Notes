@@ -209,6 +209,20 @@ State locking helps prevent two Terraform operations from modifying the same sta
 
 For AWS-based setups, DynamoDB is commonly used with S3 backends for locking. In general, choosing a backend with locking support is a strong operational practice. [web:717][web:599]
 
+## Force unlock
+
+Sometimes a state lock may remain in place if Terraform fails during an operation.
+
+In that case, you can use:
+
+```bash
+terraform force-unlock LOCK_ID
+```
+
+This manually removes the lock so Terraform can use the state again.
+
+Use this very carefully and only when you are sure no other Terraform operation is currently using the same state.
+
 ---
 
 ## Versioning

@@ -202,6 +202,15 @@ This is often useful for:
 - temporary infrastructure
 - cleanup after experiments
 
+## Preview destroy changes
+
+```bash
+terraform plan -destroy
+```
+
+Creates a destroy plan preview showing everything Terraform intends to remove without deleting resources yet.
+This is useful when you want to review destructive changes before running `terraform destroy`.
+
 ---
 
 ## `terraform show`

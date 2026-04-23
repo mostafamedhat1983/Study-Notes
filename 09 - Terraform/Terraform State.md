@@ -55,6 +55,17 @@ This helps Terraform:
 Because the state file may contain sensitive information, it should be stored and protected carefully.
 
 ---
+## Local backup behavior
+
+With local state, Terraform commonly keeps a `terraform.tfstate.backup` file as the previous state snapshot.
+
+With remote backends such as S3, Terraform normally stores state remotely instead of using the same local backup behavior.
+
+In S3-based backends, versioning is commonly used to preserve older state versions and support recovery.
+
+In remote backend error cases, Terraform may still write a local recovery file such as `errored.tfstate`.
+
+---
 
 ## Why this matters
 

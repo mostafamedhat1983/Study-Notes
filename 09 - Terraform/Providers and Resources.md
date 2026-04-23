@@ -168,7 +168,65 @@ For AWS, this often includes things like:
 The exact arguments depend on the provider.
 
 ---
+## Provider alias
 
+Terraform lets you define multiple configurations for the same provider by using the `alias` argument.
+
+This is useful when you want to work with:
+- multiple regions
+- multiple accounts
+- multiple subscriptions
+- different provider settings in one configuration
+
+Example:
+
+```hcl
+provider "aws" {
+  region = "eu-central-1"
+}
+
+provider "aws" {
+  alias  = "use1"
+  region = "us-east-1"
+}
+```
+
+In this example:
+- the first provider block is the default AWS provider
+- the second provider block is an aliased provider named `use1`
+
+You can tell a resource to use the aliased provider like this:
+
+```hcl
+resource "aws_s3_bucket" "example" {
+  provider = aws.use1
+  bucket   = "my-example-bucket"
+}
+```
+
+If a resource does not specify a provider explicitly, Terraform uses the default provider configuration that matches the resource type.
+
+---
+
+## Provider alias with modules
+
+Aliased providers can also be passed into modules.
+
+Example:
+
+```hcl
+module "app" {
+  source = "./modules/app"
+
+  providers = {
+    aws = aws.use1
+  }
+}
+```
+
+This tells the module to use the aliased provider instead of the default one.
+
+In child modules, provider aliases must be declared with `configuration_aliases` in the `required_providers` block when needed.
 ## Full example
 
 ```hcl

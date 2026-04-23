@@ -148,7 +148,15 @@ A common example is:
 This is a normal path when a small project grows into a shared team workflow. [web:653][web:716]
 
 ---
+### Migrate state to a new backend
 
+```bash
+terraform init -migrate-state
+```
+
+This reinitializes Terraform after backend changes and attempts to copy the existing state to the new backend.
+
+Use this when moving state, such as from local storage to an S3 backend.
 ## Remote state data source
 
 Terraform can also read outputs from another state file by using the `terraform_remote_state` data source. This allows one Terraform configuration to consume outputs produced by another configuration. [web:717]

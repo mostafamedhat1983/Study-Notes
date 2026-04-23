@@ -2,7 +2,7 @@
 tags:
   - Terraform
 ---
- Terraform outputs are used to display useful values after Terraform creates or updates infrastructure.
+Terraform outputs are used to display useful values after Terraform creates or updates infrastructure.
 
 They help you expose important information from your Terraform configuration, such as:
 - instance public IP
@@ -12,7 +12,7 @@ They help you expose important information from your Terraform configuration, su
 - database endpoint
 
 Outputs make it easier to:
-- read important values after `apply`
+- read important values after apply
 - pass values between modules
 - reference infrastructure details clearly
 
@@ -48,7 +48,7 @@ For example, after creating an EC2 instance, you may want Terraform to show:
 
 ## Basic output syntax
 
-An output is defined with an `output` block.
+An output is defined with an output block.
 
 Example:
 
@@ -252,8 +252,6 @@ terraform output
 
 This lists all defined output values.
 
----
-
 ### Show one output
 
 ```bash
@@ -261,6 +259,24 @@ terraform output instance_id
 ```
 
 This shows the value of a specific output.
+
+### Show raw output
+
+```bash
+terraform output -raw instance_ip
+```
+
+This prints a single output value as plain text without extra formatting.
+
+This is useful for:
+- shell scripts
+- piping output into other commands
+- reading a clean value quickly
+
+Use `-raw` for simple values such as:
+- strings
+- numbers
+- booleans
 
 ---
 
@@ -324,6 +340,7 @@ Outputs should usually expose values that are useful to:
 - forgetting that outputs often depend on resource attributes
 - using unclear output names
 - adding too many outputs that provide little value
+- trying to use `-raw` with complex structured values
 
 ---
 
@@ -335,6 +352,7 @@ Outputs should usually expose values that are useful to:
 - mark secret values as sensitive
 - keep outputs meaningful and practical
 - use outputs to share values from child modules
+- use `-raw` when scripts need plain text output
 
 ---
 
@@ -344,6 +362,7 @@ Outputs should usually expose values that are useful to:
 - Outputs help expose useful infrastructure information.
 - Outputs can reference resources, variables, locals, and expressions.
 - `terraform output` shows defined outputs.
+- `terraform output -raw` prints a plain-text value.
 - `terraform output -json` is useful for automation.
 - Sensitive outputs should be marked with `sensitive = true`.
 
@@ -376,6 +395,7 @@ output "db_password" {
 ```bash
 terraform output
 terraform output instance_id
+terraform output -raw instance_ip
 terraform output -json
 ```
 

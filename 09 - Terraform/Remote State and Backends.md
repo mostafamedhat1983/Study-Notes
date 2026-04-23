@@ -121,17 +121,35 @@ Terraform initializes the backend during `terraform init`. HashiCorp’s backend
 
 ## Partial backend config
 
-Terraform supports partial backend configuration, which means some backend values can be supplied later instead of being fully hardcoded in the configuration. This is useful when you do not want to commit all backend details directly in source files. [web:653]
+Terraform supports partial backend configuration, which means some backend values can be supplied later instead of being fully hardcoded in the configuration.
+
+This is useful when you do not want to commit all backend details directly in source files.
 
 This is commonly used with `-backend-config` during initialization.
 
-Example:
+### Inline backend config
 
 ```bash
 terraform init -backend-config="bucket=my-company-tf-state"
 ```
 
-That pattern helps keep some backend details outside the main Terraform configuration. [web:653]
+This lets you pass a backend setting directly in the command.
+
+### Backend config file
+
+```bash
+terraform init -backend-config=backend.hcl
+```
+
+This tells Terraform to read backend settings from a separate file during initialization.
+
+This is useful when backend values are:
+- dynamic
+- environment-specific
+- sensitive
+- kept outside the main Terraform configuration
+
+Using a backend config file can make backend setup cleaner and easier to manage.
 
 ---
 

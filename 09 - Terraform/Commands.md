@@ -48,6 +48,19 @@ Run it:
 - after changing backend settings
 - after adding providers or modules
 
+### Upgrade providers and modules
+
+```bash
+terraform init -upgrade
+```
+
+This tells Terraform to upgrade providers and modules to newer allowed versions based on your version constraints.
+
+Use this when:
+- you want newer allowed provider versions
+- you want newer allowed module versions
+- you intentionally want to refresh dependencies
+
 ---
 
 ## `terraform validate`
@@ -106,6 +119,23 @@ This makes changes safer and easier to review.
 
 ---
 
+## Save a plan to a file
+
+```bash
+terraform plan -out=tfplan
+```
+
+This saves the generated execution plan to a file instead of only printing it to the terminal.
+
+This is useful when:
+- you want to review the exact saved plan later
+- you want to apply the exact reviewed plan
+- you use CI/CD or approval-based workflows
+
+A saved plan is often more controlled than generating a fresh plan again later.
+
+---
+
 ## `terraform apply`
 
 ```bash
@@ -119,6 +149,40 @@ Terraform usually shows the execution plan and asks for confirmation before proc
 After apply:
 - infrastructure is created, updated, or destroyed as needed
 - state is updated
+
+---
+
+## Apply a saved plan file
+
+```bash
+terraform apply tfplan
+```
+
+This applies the exact saved plan file instead of recalculating a new plan.
+
+This is useful when:
+- the reviewed plan must exactly match what gets applied
+- you want a more controlled workflow
+- you use automation or approval-based pipelines
+
+When using a saved plan file, Terraform applies the actions already stored in that file.
+
+---
+
+## Apply without confirmation
+
+```bash
+terraform apply -auto-approve
+```
+
+This applies changes without asking for interactive confirmation.
+
+This is useful in:
+- automation
+- CI/CD pipelines
+- quick lab environments
+
+Use it carefully because it removes the manual confirmation step.
 
 ---
 
@@ -152,6 +216,21 @@ This can help when you want to inspect what Terraform currently knows.
 
 ---
 
+## Show a saved plan file
+
+```bash
+terraform show tfplan
+```
+
+This displays the contents of a saved plan file in a human-readable format.
+
+This is useful when:
+- you want to inspect the exact plan saved earlier
+- you want to review changes before applying that saved plan
+- you want to debug or confirm what Terraform is about to do
+
+---
+
 ## `terraform output`
 
 ```bash
@@ -173,6 +252,19 @@ Useful for:
 - automation
 - troubleshooting
 - verifying deployments
+
+### Show raw output
+
+```bash
+terraform output -raw instance_ip
+```
+
+This prints a single output value as plain text without extra formatting.
+
+This is useful for:
+- shell scripts
+- piping output into other commands
+- reading a clean value quickly
 
 ---
 
@@ -291,6 +383,21 @@ It is more useful in advanced troubleshooting or learning scenarios.
 
 ---
 
+## `terraform providers`
+
+```bash
+terraform providers
+```
+
+Shows which providers the current Terraform configuration depends on.
+
+This is useful when:
+- inspecting project dependencies
+- troubleshooting provider-related issues
+- understanding module provider usage
+
+---
+
 ## `terraform workspace`
 
 Terraform also includes workspace-related commands such as:
@@ -299,6 +406,7 @@ Terraform also includes workspace-related commands such as:
 terraform workspace list
 terraform workspace new dev
 terraform workspace select dev
+terraform workspace show
 ```
 
 These are used to manage workspaces.
@@ -328,6 +436,23 @@ This gives you a clean and safe flow:
 
 ---
 
+## Saved plan workflow
+
+A common controlled workflow is:
+
+```bash
+terraform plan -out=tfplan
+terraform show tfplan
+terraform apply tfplan
+```
+
+This is useful when:
+- you want the reviewed plan and the applied plan to be exactly the same
+- you need a more controlled change process
+- you use CI/CD or approval-based deployment workflows
+
+---
+
 ## Common destroy workflow
 
 For cleanup:
@@ -349,6 +474,7 @@ This is especially useful in learning environments and short-lived infrastructur
 - assuming `import` creates configuration automatically
 - editing infrastructure manually and forgetting Terraform state
 - ignoring formatting and validation
+- reviewing one plan but later applying a newly recalculated plan instead of the saved one when exact consistency matters
 
 ---
 
@@ -357,6 +483,7 @@ This is especially useful in learning environments and short-lived infrastructur
 - run `terraform fmt` regularly
 - run `terraform validate` before planning
 - review `terraform plan` carefully
+- use saved plan files when you need stricter control
 - avoid applying changes blindly
 - treat `destroy` with caution
 - use state-related commands carefully
@@ -367,14 +494,23 @@ This is especially useful in learning environments and short-lived infrastructur
 ## Important notes
 
 - `terraform init` prepares the working directory.
+- `terraform init -upgrade` refreshes allowed provider and module versions.
 - `terraform fmt` formats Terraform files.
 - `terraform validate` checks configuration correctness.
 - `terraform plan` previews infrastructure changes.
+- `terraform plan -out=tfplan` saves a plan to a file.
 - `terraform apply` makes real changes.
+- `terraform apply tfplan` applies a previously saved plan file.
+- `terraform apply -auto-approve` skips interactive approval.
+- `terraform show` can inspect state or a saved plan.
+- `terraform show tfplan` displays a saved plan file.
 - `terraform destroy` removes managed infrastructure.
 - `terraform output` reads output values.
+- `terraform output -raw instance_ip` prints a plain-text output value.
 - `terraform state` commands inspect managed resources.
 - `terraform import` brings existing resources into Terraform state.
+- `terraform providers` shows provider dependencies.
+- `terraform workspace show` displays the current workspace.
 
 ---
 
@@ -384,6 +520,7 @@ This is especially useful in learning environments and short-lived infrastructur
 - use `validate` to catch mistakes
 - use `init` to prepare the project
 - use `plan` before `apply`
+- use `plan -out` when exact reviewed execution matters
 - use `destroy` carefully
 - use state commands only when needed
 
@@ -396,11 +533,18 @@ terraform fmt
 terraform fmt -recursive
 terraform validate
 terraform init
+terraform init -upgrade
 terraform plan
+terraform plan -out=tfplan
 terraform apply
+terraform apply tfplan
+terraform apply -auto-approve
 terraform destroy
 terraform show
+terraform show tfplan
 terraform output
+terraform output instance_id
+terraform output -raw instance_ip
 terraform state list
 terraform state show aws_instance.web
 terraform taint aws_instance.web
@@ -408,6 +552,11 @@ terraform untaint aws_instance.web
 terraform import aws_instance.web i-1234567890abcdef0
 terraform console
 terraform graph
+terraform providers
+terraform workspace list
+terraform workspace new dev
+terraform workspace select dev
+terraform workspace show
 ```
 
 ---
@@ -417,6 +566,7 @@ terraform graph
 - Terraform commands are the main way to interact with Terraform projects.
 - The most common workflow is `init`, `plan`, and `apply`.
 - `fmt` and `validate` help improve safety and consistency.
+- Saved plan files help make review and execution more controlled.
 - `destroy` removes infrastructure and should be used carefully.
 - State commands help inspect what Terraform manages.
 - `import` is used for existing resources not originally created by Terraform.

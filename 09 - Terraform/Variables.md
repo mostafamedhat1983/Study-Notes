@@ -130,6 +130,8 @@ variable "instance_count" {
 
 Using types helps Terraform validate input values.
 
+If `type` is not specified, Terraform defaults the variable to `any`. This means Terraform will accept any value without type validation. This works, but it is better to always specify a type for clarity and safety.
+
 ---
 
 ### `default`
@@ -467,6 +469,7 @@ variable "instance_count" {
 - storing sensitive values carelessly
 - mixing environment-specific values directly into main configuration
 - using too many CLI `-var` arguments instead of structured `.tfvars` files
+- not specifying a type and relying on `any` without realizing it
 
 ---
 

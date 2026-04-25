@@ -405,6 +405,41 @@ Returns the values of a map.
 values({dev = "small", prod = "large"})
 ```
 
+### `merge`
+
+Combines multiple maps or objects into one.
+
+```hcl
+merge(
+  { env = "dev" },
+  { owner = "mostafa" },
+  { env = "prod" }
+)
+```
+
+Result:
+
+```hcl
+{
+  env   = "prod"
+  owner = "mostafa"
+}
+```
+
+If the same key appears in more than one map, the later value wins.
+
+This is very commonly used for combining tag maps.
+
+Example:
+
+```hcl
+locals {
+  common_tags = merge(
+    var.default_tags,
+    { Environment = var.environment }
+  )
+}
+```
 ---
 
 ## Useful conversion functions

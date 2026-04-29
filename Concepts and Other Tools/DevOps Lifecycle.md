@@ -2,9 +2,6 @@
 tags:
   - concepts
 ---
-![[Pasted image 20260311054540.png]]
-![[Pasted image 20260311054706.png]]
-
 # DevOps Lifecycle
 
 ## Definition

@@ -47,7 +47,6 @@ A good interview answer is: “Yes, they are very close. Continuous delivery mea
 
 If your pipeline builds, tests, scans, and deploys to staging automatically, then waits for someone to approve production, that is continuous delivery. If the same pipeline pushes to production automatically after all checks pass, that is continuous deployment.
 
-
 ---
 
 - CI = merge code frequently and run automated build and test checks.

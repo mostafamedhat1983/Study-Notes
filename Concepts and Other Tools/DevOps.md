@@ -19,8 +19,6 @@ tags:
     
 - Sharing:  Teams openly share knowledge, documentation, feedback, and lessons learned across development, operations, and other stakeholders; this includes practices like blameless postmortems, where incident learnings are documented and shared to prevent repeat failures
 
-![[Pasted image 20260310210431.png]]
-
 ---
 
 ## The three ways of DevOps

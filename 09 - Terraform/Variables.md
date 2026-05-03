@@ -206,6 +206,116 @@ variable "instance_count" {
 
 This helps catch invalid values early.
 
+## Validation condition examples
+
+The `condition` inside a `validation` block can use many built-in functions.
+
+### `contains`
+
+Checks if a value exists in a list.
+
+```hcl
+variable "environment" {
+  type = string
+
+  validation {
+    condition     = contains(["dev", "staging", "prod"], var.environment)
+    error_message = "environment must be dev, staging, or prod."
+  }
+}
+```
+
+---
+
+### `startswith`
+
+Checks if a string starts with a specific prefix.
+
+```hcl
+variable "bucket_name" {
+  type = string
+
+  validation {
+    condition     = startswith(var.bucket_name, "myapp-")
+    error_message = "bucket_name must start with myapp-."
+  }
+}
+```
+
+---
+
+### `endswith`
+
+Checks if a string ends with a specific suffix.
+
+```hcl
+variable "region" {
+  type = string
+
+  validation {
+    condition     = endswith(var.region, "-1")
+    error_message = "region must end with -1."
+  }
+}
+```
+
+---
+
+### `length`
+
+Checks the length of a string or list.
+
+```hcl
+variable "project_name" {
+  type = string
+
+  validation {
+    condition     = length(var.project_name) > 0
+    error_message = "project_name must not be empty."
+  }
+}
+```
+
+---
+
+### `can` and `regex`
+
+`can` tests if an expression runs without error.
+`regex` matches a string against a pattern.
+
+Used together to validate string format.
+
+```hcl
+variable "ami_id" {
+  type = string
+
+  validation {
+    condition     = can(regex("^ami-[a-z0-9]+$", var.ami_id))
+    error_message = "ami_id must start with ami- followed by alphanumeric characters."
+  }
+}
+```
+
+Simple idea:
+- `regex` does the pattern match
+- `can` catches the error if the match fails, so Terraform returns your `error_message` instead of crashing
+
+---
+
+### Combining conditions
+
+You can combine conditions using `&&` (and) or `||` (or).
+
+```hcl
+variable "instance_count" {
+  type = number
+
+  validation {
+    condition     = var.instance_count >= 1 && var.instance_count <= 10
+    error_message = "instance_count must be between 1 and 10."
+  }
+}
+```
 ---
 
 ## Common variable types

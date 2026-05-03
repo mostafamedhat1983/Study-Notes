@@ -310,7 +310,7 @@ docker compose up -d
 - use `docker compose down` then `up` when you want a cleaner recreation
 ## Docker Compose installation note
 
-Docker Compose used to be a separate tool, but modern Docker uses **Docker Compose v2** as a Docker CLI plugin. On Linux, Docker documents installation of the Compose plugin separately from Docker Engine, and the modern command format is `docker compose` with a space rather than the old standalone `docker-compose` form. 
+Docker Compose used to be a separate tool, but modern Docker uses **Docker Compose v2** as a Docker CLI plugin. On Linux, Docker documents installation of the Compose plugin separately from Docker Engine, and the modern command format is `docker compose` with a space rather than the old standalone `docker-compose` form.
 
 ### Check if Compose is installed
 ```bash
@@ -416,7 +416,7 @@ environment:
 ```
 
 ### `depends_on`
-Defines startup dependency order between services. Docker Compose starts and stops services in dependency order, but if your app needs a dependency to be truly ready, you may still need `healthcheck` plus `depends_on` conditions. 
+Defines startup dependency order between services. Docker Compose starts and stops services in dependency order, but if your app needs a dependency to be truly ready, you may still need `healthcheck` plus `depends_on` conditions.
 
 ### `restart`
 Defines restart behavior for the container.
@@ -427,7 +427,7 @@ Example:
 restart: unless-stopped
 ```
 
-Useful for services that should restart automatically. Docker will try to restart the container if it exits or if Docker starts again, **unless you explicitly stopped that container yourself**
+Useful for services that should restart automatically. Docker will try to restart the container if it exits or if Docker starts again, **unless you explicitly stopped that container yourself**
 
 ---
 
@@ -545,9 +545,9 @@ Docker Compose may:
 - build images for services that use `build`,
 - pull images for services that use `image`,
 - create volumes,
-- create and start containers. [web:243][web:244][web:249]
+- create and start containers.
 
-By default, services in the same Compose project can talk to each other on the project network using **service names** as hostnames, so the web app can usually connect to Redis using `redis` as the hostname. [web:249][web:257]
+By default, services in the same Compose project can talk to each other on the project network using **service names** as hostnames, so the web app can usually connect to Redis using `redis` as the hostname.
 
 ---
 
@@ -752,7 +752,7 @@ services:
     restart: unless-stopped
 ```
 
-If the application truly requires Redis to be ready before startup, use `healthcheck` with dependency conditions instead of relying only on simple startup order. [web:249]
+If the application truly requires Redis to be ready before startup, use `healthcheck` with dependency conditions instead of relying only on simple startup order.
 
 ---
 
@@ -972,7 +972,7 @@ docker network create shared-net
 If you do **not** use `external: true`, Compose can create the network automatically, but it will usually be managed only within that Compose project.
 
 ### Note about manual container-to-container communication
-There are two common manual ways to let containers use each other’s names:
+There are two common manual ways to let containers use each other's names:
 
 - **Legacy way:** use `--link`
 - **Modern way:** put both containers on the same user-defined network and use their container names as hostnames

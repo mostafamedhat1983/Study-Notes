@@ -464,6 +464,27 @@ Common ways include:
 
 ---
 
+## Variable precedence
+
+When the same variable is set in more than one place, Terraform uses a fixed order of precedence.
+
+The order from lowest to highest priority is:
+
+| Priority | Source |
+|----------|--------|
+| 1 (lowest) | `default` value in the `variable` block |
+| 2 | Environment variables `TF_VAR_<name>` |
+| 3 | `terraform.tfvars` file |
+| 4 | `*.auto.tfvars` files (loaded alphabetically) |
+| 5 (highest) | `-var` and `-var-file` flags on the command line |
+
+Simple rule:
+- command-line flags always win
+- defaults always lose
+- if the same variable is in `terraform.tfvars` and also passed with `-var`, the `-var` value is used
+
+---
+
 ## Using `terraform.tfvars`
 
 A common way to assign values is with a `terraform.tfvars` file.
@@ -603,6 +624,7 @@ variable "instance_count" {
 - Variables without defaults usually require a value.
 - `terraform.tfvars` is a common way to assign variable values.
 - Environment variables can be passed using the `TF_VAR_<name>` format.
+- Command-line `-var` flags have the highest precedence and override all other sources.
 
 ---
 
@@ -613,6 +635,7 @@ variable "instance_count" {
 - use `.tfvars` files for environment-specific values
 - use `sensitive = true` for secrets
 - use validation when bad input could cause problems
+- remember: CLI flags override everything
 
 ---
 
@@ -653,3 +676,4 @@ region = "us-west-2"
 - Values can come from defaults, `.tfvars` files, CLI flags, or environment variables.
 - Types, validation, and descriptions improve clarity and safety.
 - Sensitive variables help reduce accidental exposure in output.
+- CLI `-var` flags have the highest precedence; `default` has the lowest.

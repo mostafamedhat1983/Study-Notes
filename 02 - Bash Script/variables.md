@@ -3,7 +3,7 @@ tags:
   - Linux
   - Bash_Script
 ---
-you can set a variable in Linux by writing `variable=value` 
+you can set a variable in Linux by writing `variable=value` 
 ```bash
 myVar="Hello World"
 ```
@@ -12,15 +12,15 @@ to reference the variable value use $
 ```bash
  echo $PATH
 ```
-The command `echo $PATH` displays the current value of the **PATH environment variable**, which is a list of directories your system searches to find the commands you type.​
+The command `echo $PATH` displays the current value of the **PATH environment variable**, which is a list of directories your system searches to find the commands you type.​
 
 * Why is it important?
 
-When you type a command (like `ls` or `python`) without specifying its full location (like `/bin/ls`), Linux doesn't check every folder on your hard drive. Instead, it looks through the directories listed in `$PATH`, in order, from left to right.
-**Order matters**: If you have two versions of a program, the system runs the one found in the _first_ directory listed
+When you type a command (like `ls` or `python`) without specifying its full location (like `/bin/ls`), Linux doesn't check every folder on your hard drive. Instead, it looks through the directories listed in `$PATH`, in order, from left to right.
+**Order matters**: If you have two versions of a program, the system runs the one found in the _first_ directory listed
 ## Environment Variables
 
-To make a variable available to child processes and other programs, you need to export it using the `export`
+To make a variable available to child processes and other programs, you need to export it using the `export`
 ```bash
 export VARIABLE_NAME=value
 ```
@@ -39,42 +39,42 @@ DESCRIPTION="Value with spaces"
 
 ---
 ## export vs declare
-Both `export` and `declare` are shell built-in commands used to manage variables, but they serve different primary purposes.
+Both `export` and `declare` are shell built-in commands used to manage variables, but they serve different primary purposes.
 
 ## Quick Comparison
 
 |Feature|`export`|`declare`|
 |---|---|---|
-|**Primary Purpose**|Makes variables available to **child processes** (subshells) ​.|Defines variable **attributes** (type, scope, read-only status) [](https://stackoverflow.com/questions/56627534/in-bash-should-i-use-declare-instead-of-local-and-export)​.|
-|**Inheritance**|Variables are inherited by child processes [](https://www.digitalocean.com/community/tutorials/export-command-linux)​.|Variables are **local** to the current shell unless combined with `-x` [](https://stackoverflow.com/questions/56627534/in-bash-should-i-use-declare-instead-of-local-and-export)​.|
-|**Portability**|Standard POSIX command; works in almost all shells (`sh`, `bash`, `zsh`) [](https://stackoverflow.com/questions/56627534/in-bash-should-i-use-declare-instead-of-local-and-export)​.|Bash-specific builtin; may not work in basic `sh` or other shells ​.|
-|**Data Types**|Treats everything as a string.|Can enforce types like **integers** (`-i`) or **arrays** (`-a`) [](https://stackoverflow.com/questions/56627534/in-bash-should-i-use-declare-instead-of-local-and-export)​.|
+|**Primary Purpose**|Makes variables available to **child processes** (subshells) ​.|Defines variable **attributes** (type, scope, read-only status) [](https://stackoverflow.com/questions/56627534/in-bash-should-i-use-declare-instead-of-local-and-export)​.|
+|**Inheritance**|Variables are inherited by child processes [](https://www.digitalocean.com/community/tutorials/export-command-linux)​.|Variables are **local** to the current shell unless combined with `-x` [](https://stackoverflow.com/questions/56627534/in-bash-should-i-use-declare-instead-of-local-and-export)​.|
+|**Portability**|Standard POSIX command; works in almost all shells (`sh`, `bash`, `zsh`) [](https://stackoverflow.com/questions/56627534/in-bash-should-i-use-declare-instead-of-local-and-export)​.|Bash-specific builtin; may not work in basic `sh` or other shells ​.|
+|**Data Types**|Treats everything as a string.|Can enforce types like **integers** (`-i`) or **arrays** (`-a`) [](https://stackoverflow.com/questions/56627534/in-bash-should-i-use-declare-instead-of-local-and-export)​.|
 
 ## When to Use Which?
 
-- **Use `export`** when you simply need to make a variable (like `PATH` or `JAVA_HOME`) available to other programs or scripts you run from your terminal. It is the standard way to set environment variables.[](https://www.digitalocean.com/community/tutorials/export-command-linux)​
+- **Use `export`** when you simply need to make a variable (like `PATH` or `JAVA_HOME`) available to other programs or scripts you run from your terminal. It is the standard way to set environment variables.[](https://www.digitalocean.com/community/tutorials/export-command-linux)​
     
     bash
     
     `export MY_VAR="available to child processes"`
     
-- **Use `declare`** when writing complex Bash scripts where you need strict control over variable behavior.[](https://stackoverflow.com/questions/56627534/in-bash-should-i-use-declare-instead-of-local-and-export)​
+- **Use `declare`** when writing complex Bash scripts where you need strict control over variable behavior.[](https://stackoverflow.com/questions/56627534/in-bash-should-i-use-declare-instead-of-local-and-export)​
     
-    - **Read-only variables:** `declare -r constant="cannot change"`
+    - **Read-only variables:** `declare -r constant="cannot change"`
         
-    - **Integers:** `declare -i count=10` (performs math automatically, e.g., `count=10+5` becomes 15)
+    - **Integers:** `declare -i count=10` (performs math automatically, e.g., `count=10+5` becomes 15)
         
-    - **Arrays:** `declare -a my_list`
+    - **Arrays:** `declare -a my_list`
         
 
 ## Can they work together?
 
-Yes. `declare -x variable=value` is functionally equivalent to `export variable=value` in Bash. However, `export` is preferred for this specific task because it is more readable and universally understood as "making this variable global".[](https://stackoverflow.com/questions/56627534/in-bash-should-i-use-declare-instead-of-local-and-export)​
+Yes. `declare -x variable=value` is functionally equivalent to `export variable=value` in Bash. However, `export` is preferred for this specific task because it is more readable and universally understood as "making this variable global".[](https://stackoverflow.com/questions/56627534/in-bash-should-i-use-declare-instead-of-local-and-export)​
 
 ___
 
 ### Declare command
-The `declare` command in Bash is a built-in shell command used to declare variables and set their attributes. It provides fine-grained control over variable behavior, making it particularly useful for scripts requiring typed variables, arrays, or read-only values.​
+The `declare` command in Bash is a built-in shell command used to declare variables and set their attributes. It provides fine-grained control over variable behavior, making it particularly useful for scripts requiring typed variables, arrays, or read-only values.​
 
 ## Syntax
 
@@ -140,7 +140,7 @@ bash
 ---
 ### Typeset command
 
-The `typeset` command in Bash is a built-in command that declares and modifies variables with specific attributes. It is functionally identical to the `declare` command—they are exact synonyms in Bash.​
+The `typeset` command in Bash is a built-in command that declares and modifies variables with specific attributes. It is functionally identical to the `declare` command—they are exact synonyms in Bash.​
 
 ## Syntax
 
@@ -150,7 +150,7 @@ bash
 
 ## Relationship to declare
 
-`typeset` was provided primarily for compatibility with the Korn shell (ksh). However, **`typeset` has been deprecated since Bash version 4.0**, and the `declare` command should be used instead for better forward compatibility. Modern Bash versions may display deprecation warnings when using `typeset`.​
+`typeset` was provided primarily for compatibility with the Korn shell (ksh). However, **`typeset` has been deprecated since Bash version 4.0**, and the `declare` command should be used instead for better forward compatibility. Modern Bash versions may display deprecation warnings when using `typeset`.​
 
 ## Common Options
 
@@ -195,27 +195,27 @@ bash
 
 `typeset -u name="hello"  # Automatically converts to HELLO`
 
-Since `typeset` is deprecated, use `declare` instead for all new Bash scripts to ensure compatibility with current and future Bash versions.[](https://www.baeldung.com/linux/declare-vs-typeset)
+Since `typeset` is deprecated, use `declare` instead for all new Bash scripts to ensure compatibility with current and future Bash versions.[](https://www.baeldung.com/linux/declare-vs-typeset)
 
 ---
 
-Here's a comparison of variable scope behavior when using `typeset`, `declare`, and `export` in Bash:
+Here's a comparison of variable scope behavior when using `typeset`, `declare`, and `export` in Bash:
 
 ## Scope Comparison Table
 
 |Command|Script-Level Scope|Function-Level Scope|Exported to Child Processes|Notes|
 |---|---|---|---|---|
-|`typeset VAR=value`|Global [](https://stackoverflow.com/questions/4419704/differences-between-declare-typeset-and-local-variable-in-bash)​|Local [](https://stackoverflow.com/questions/4419704/differences-between-declare-typeset-and-local-variable-in-bash)​|No|Deprecated; identical to `declare` [](https://stackoverflow.com/questions/4419704/differences-between-declare-typeset-and-local-variable-in-bash)​|
-|`declare VAR=value`|Global [](https://stackoverflow.com/questions/4419704/differences-between-declare-typeset-and-local-variable-in-bash)​|Local [](https://stackoverflow.com/questions/4419704/differences-between-declare-typeset-and-local-variable-in-bash)​|No|Preferred modern approach [](https://www.baeldung.com/linux/declare-vs-typeset)​|
-|`declare -x VAR=value`|Global [](https://www.baeldung.com/linux/declare-vs-typeset)​|Local [](https://delightlylinux.wordpress.com/2024/03/23/bash-typed-variables-with-declare/)​|Yes ​|Same as `export`|
-|`export VAR=value`|Global [](https://delightlylinux.wordpress.com/2024/03/23/bash-typed-variables-with-declare/)​|Global [](https://delightlylinux.wordpress.com/2024/03/23/bash-typed-variables-with-declare/)​|Yes [](https://delightlylinux.wordpress.com/2024/03/23/bash-typed-variables-with-declare/)​|Always creates global variables|
-|`VAR=value` (simple assignment)|Global|Global [](https://stackoverflow.com/questions/4419704/differences-between-declare-typeset-and-local-variable-in-bash)​|No|No export unless preceded by `export`|
+|`typeset VAR=value`|Global [](https://stackoverflow.com/questions/4419704/differences-between-declare-typeset-and-local-variable-in-bash)​|Local [](https://stackoverflow.com/questions/4419704/differences-between-declare-typeset-and-local-variable-in-bash)​|No|Deprecated; identical to `declare` [](https://stackoverflow.com/questions/4419704/differences-between-declare-typeset-and-local-variable-in-bash)​|
+|`declare VAR=value`|Global [](https://stackoverflow.com/questions/4419704/differences-between-declare-typeset-and-local-variable-in-bash)​|Local [](https://stackoverflow.com/questions/4419704/differences-between-declare-typeset-and-local-variable-in-bash)​|No|Preferred modern approach [](https://www.baeldung.com/linux/declare-vs-typeset)​|
+|`declare -x VAR=value`|Global [](https://www.baeldung.com/linux/declare-vs-typeset)​|Local [](https://delightlylinux.wordpress.com/2024/03/23/bash-typed-variables-with-declare/)​|Yes ​|Same as `export`|
+|`export VAR=value`|Global [](https://delightlylinux.wordpress.com/2024/03/23/bash-typed-variables-with-declare/)​|Global [](https://delightlylinux.wordpress.com/2024/03/23/bash-typed-variables-with-declare/)​|Yes [](https://delightlylinux.wordpress.com/2024/03/23/bash-typed-variables-with-declare/)​|Always creates global variables|
+|`VAR=value` (simple assignment)|Global|Global [](https://stackoverflow.com/questions/4419704/differences-between-declare-typeset-and-local-variable-in-bash)​|No|No export unless preceded by `export`|
 
 ## Key Differences
 
 ## At Script Level (Outside Functions)
 
-All three commands create global variables accessible throughout the script. However, only `declare -x` and `export` make variables available to child processes (subshells or external scripts).​
+All three commands create global variables accessible throughout the script. However, only `declare -x` and `export` make variables available to child processes (subshells or external scripts).​
 
 ## Inside Functions
 
@@ -228,7 +228,7 @@ All three commands create global variables accessible throughout the script. How
 
 ## Child Process Visibility
 
-Variables must be exported using `export` or `declare -x` to be accessible in subshells or external scripts. Without export, variables remain in the current shell's environment only.​
+Variables must be exported using `export` or `declare -x` to be accessible in subshells or external scripts. Without export, variables remain in the current shell's environment only.​
 
 ## Example
 
@@ -236,7 +236,7 @@ bash
 
 `#!/bin/bash # Script level typeset var1="local to script"     # Global, not exported declare var2="also global"         # Global, not exported declare -x var3="exported"         # Global AND exported export var4="also exported"        # Global AND exported # Inside function function my_func {     declare local_var="stays here"      # Local to function    declare -g global_from_func="global"  # Global from function    export always_global="exported"     # Global AND exported }`
 
-Use `declare` over `typeset` for better compatibility with modern Bash versions.[](https://www.baeldung.com/linux/declare-vs-typeset)​​
+Use `declare` over `typeset` for better compatibility with modern Bash versions.[](https://www.baeldung.com/linux/declare-vs-typeset)​​
 
 ---
 
@@ -244,11 +244,11 @@ Use `declare` over `typeset` for better compatibility with modern Bash versi
 
 Bash variable naming conventions differ based on variable scope and purpose:
 
-- **User-defined local variables**: Use lowercase with underscores: `my_variable`, `user_name` [web:47][web:50]
-- **Environment variables & constants**: Use UPPERCASE with underscores: `PATH`, `HOME`, `MAX_CONNECTIONS` [web:49][web:52]
-- **Function names**: Use lowercase with underscores: `process_file()`, `validate_input()` [web:49]
+- **User-defined local variables**: Use lowercase with underscores: `my_variable`, `user_name`
+- **Environment variables & constants**: Use UPPERCASE with underscores: `PATH`, `HOME`, `MAX_CONNECTIONS`
+- **Function names**: Use lowercase with underscores: `process_file()`, `validate_input()`
 
-**Core rule:** Variables can contain letters, numbers, and underscores, but **cannot start with a number** [web:48][web:51].
+**Core rule:** Variables can contain letters, numbers, and underscores, but **cannot start with a number** .
 
 ---
 
@@ -256,11 +256,11 @@ Bash variable naming conventions differ based on variable scope and purpose:
 
 The lowercase/UPPERCASE distinction serves a critical purpose:
 
-1. **Visual differentiation**: Instantly identify environment variables vs local variables [web:47][web:49]
-2. **Namespace collision avoidance**: Prevents overwriting system variables (e.g., `PATH`, `HOME`, `USER`) [web:49]
-3. **POSIX compatibility**: Environment variables are traditionally uppercase across Unix/Linux systems [web:47]
+1. **Visual differentiation**: Instantly identify environment variables vs local variables
+2. **Namespace collision avoidance**: Prevents overwriting system variables (e.g., `PATH`, `HOME`, `USER`)
+3. **POSIX compatibility**: Environment variables are traditionally uppercase across Unix/Linux systems
 
-**Trade-off:** Some teams use ALL_CAPS for all variables (older style [web:52]), but modern practice prefers lowercase for locals to avoid confusion with environment variables [web:47][web:49].
+**Trade-off:** Some teams use ALL_CAPS for all variables (older style ), but modern practice prefers lowercase for locals to avoid confusion with environment variables .
 
 ---
 
@@ -290,15 +290,11 @@ bash
 
 `# CORRECT var1=100 my_var_2="text" # WRONG 1var=100              # Syntax error 123name="John"        # Invalid`
 
-[web:47][web:48][web:51]
-
-## Rule 3: No Whitespace Around `=`
+## Rule 3: No Whitespace Around `=`
 
 bash
 
 `# CORRECT name="Alice" # WRONG name = "Alice"        # Interpreted as command 'name' with args '=' and 'Alice' name= "Alice"         # Sets name="" then runs "Alice" command name ="Alice"         # Runs command 'name' with arg '=Alice'`
-
-[web:48]
 
 ## Rule 4: Case Sensitive
 
@@ -306,11 +302,9 @@ bash
 
 `var="lowercase" VAR="uppercase" Var="mixed" echo $var    # Output: lowercase echo $VAR    # Output: uppercase echo $Var    # Output: mixed`
 
-[web:51]
-
 ## Rule 5: Avoid Reserved Keywords
 
-**Don't use:** `if`, `then`, `else`, `elif`, `fi`, `case`, `esac`, `for`, `while`, `until`, `do`, `done`, `function`, `select`, `time` [web:48][web:51]
+**Don't use:** `if`, `then`, `else`, `elif`, `fi`, `case`, `esac`, `for`, `while`, `until`, `do`, `done`, `function`, `select`, `time`
 
 bash
 
@@ -322,18 +316,18 @@ bash
 
 ## Variable Naming
 
-- **Lowercase with underscores** for local variables: `my_variable` [web:49]
+- **Lowercase with underscores** for local variables: `my_variable`
     
-- **UPPERCASE with underscores** for environment/global constants: `GLOBAL_CONFIG` [web:49]
+- **UPPERCASE with underscores** for environment/global constants: `GLOBAL_CONFIG`
     
-- **No camelCase or PascalCase** in shell scripts [web:49]
+- **No camelCase or PascalCase** in shell scripts
     
 
 ## Function Naming
 
-- **Lowercase with underscores**: `function process_data() { }` [web:49]
+- **Lowercase with underscores**: `function process_data() { }`
     
-- Use `::` for namespacing in large projects: `mylib::get_value()` [web:49]
+- Use `::` for namespacing in large projects: `mylib::get_value()`
     
 
 ## Constants (readonly variables)
@@ -341,8 +335,6 @@ bash
 bash
 
 `# Use uppercase with readonly declaration readonly MAX_RETRIES=3 readonly CONFIG_FILE="/etc/app.conf"`
-
-[web:49][web:53]
 
 ---
 
@@ -354,26 +346,20 @@ bash
 
 `# GOOD: Self-explanatory user_name="Alice" max_connection_timeout=30 tmp_file_path="/tmp/process.tmp" # BAD: Unclear purpose x="Alice" n=30 f="/tmp/process.tmp"`
 
-[web:50]
-
 ## 2. Multi-Word Variables (Use Underscores)
 
 bash
 
 `# CORRECT user_first_name="John" database_connection_string="mysql://localhost" # WRONG userfirstname="John"          # Hard to read user-first-name="John"        # Hyphen invalid user first name="John"        # Space invalid`
 
-[web:47][web:50][web:51]
-
 ## 3. Prefix Conventions
 
 |Prefix|Purpose|Example|
 |---|---|---|
-|`tmp_`|Temporary variables|`tmp_result`, `tmp_file`|
+|`tmp_`|Temporary variables|`tmp_result`, `tmp_file`|
 |`_`|Private/internal variables|`_internal_counter`|
-|`is_`, `has_`|Boolean flags|`is_valid`, `has_permission`|
-|`num_`, `count_`|Numeric counters|`num_users`, `count_errors`|
-
-[web:50]
+|`is_`, `has_`|Boolean flags|`is_valid`, `has_permission`|
+|`num_`, `count_`|Numeric counters|`num_users`, `count_errors`|
 
 ## 4. Avoid Cryptic Abbreviations
 
@@ -386,8 +372,6 @@ bash
 bash
 
 `# Pick ONE style and stick to it # Option A: Explicit naming max_retry_count=3 connection_timeout_seconds=30 # Option B: Shorter but consistent max_retries=3 timeout_sec=30`
-
-[web:50]
 
 ## 6. Environment vs Local Variables
 
@@ -402,8 +386,6 @@ bash
 bash
 
 `local user_input="$1" local result="" local counter=0`
-
-[web:47][web:49]
 
 ---
 
@@ -421,8 +403,6 @@ bash
 
 `process_user() {     local user_name="$1"          # Function parameter    local user_id="$2"    local tmp_result=""           # Temporary variable         # Processing logic    tmp_result=$(validate_user "$user_name")    echo "$tmp_result" }`
 
-[web:49]
-
 ## Loop Variables
 
 bash
@@ -435,11 +415,11 @@ bash
 
 |Convention|Local Variables|Environment/Constants|Pros|Cons|
 |---|---|---|---|---|
-|**Google Style** [web:49]|lowercase_underscore|UPPERCASE_UNDERSCORE|Clear separation, POSIX-friendly|None|
-|**All UPPERCASE** [web:52]|ALL_UPPERCASE|ALL_UPPERCASE|Easy to spot variables|Conflicts with env vars|
+|**Google Style** |lowercase_underscore|UPPERCASE_UNDERSCORE|Clear separation, POSIX-friendly|None|
+|**All UPPERCASE** |ALL_UPPERCASE|ALL_UPPERCASE|Easy to spot variables|Conflicts with env vars|
 |**camelCase**|camelCase|UPPERCASE|Common in other languages|Non-standard for shell|
 
-**Recommendation:** Follow Google Shell Style Guide [web:49]—it's the de facto industry standard and prevents environment variable conflicts.
+**Recommendation:** Follow Google Shell Style Guide —it's the de facto industry standard and prevents environment variable conflicts.
 
 ---
 
@@ -450,8 +430,6 @@ bash
 bash
 
 `# Convention: _ prefix for "private" scope _internal_config="value" _temp_buffer="" function _helper_function() {     # Internal function, not for external use    echo "Internal helper" }`
-
-[web:50]
 
 ## Boolean Variables
 
@@ -474,8 +452,6 @@ bash
 bash
 
 `if="value"                # Confusing while="data"              # Bad practice for="loop"                # Don't do this`
-
-[web:48][web:51]
 
 ## ❌ WRONG: Overwriting Shell Variables
 
@@ -501,21 +477,21 @@ bash
 
 Before finalizing variable names, verify:
 
--  Starts with letter or underscore (not number)
+-  Starts with letter or underscore (not number)
     
--  Contains only letters, numbers, underscores
+-  Contains only letters, numbers, underscores
     
--  No spaces, hyphens, or special characters
+-  No spaces, hyphens, or special characters
     
--  Not a reserved keyword (`if`, `for`, `while`, etc.)
+-  Not a reserved keyword (`if`, `for`, `while`, etc.)
     
--  Doesn't conflict with environment variables (`PATH`, `HOME`)
+-  Doesn't conflict with environment variables (`PATH`, `HOME`)
     
--  Uses consistent casing (lowercase for locals, UPPERCASE for env)
+-  Uses consistent casing (lowercase for locals, UPPERCASE for env)
     
--  Descriptive and meaningful
+-  Descriptive and meaningful
     
--  Follows project/team conventions
+-  Follows project/team conventions
     
 
 ---

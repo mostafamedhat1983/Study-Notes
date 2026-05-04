@@ -2,27 +2,27 @@
 tags:
   - Terraform
 ---
-Terraform uses a state file to track real infrastructure and map it to your configuration. A backend controls where that state is stored and how Terraform accesses it. [web:653][web:654]
+Terraform uses a state file to track real infrastructure and map it to your configuration. A backend controls where that state is stored and how Terraform accesses it. 
 
-By default, Terraform uses the local backend, which stores state on the machine running Terraform. Remote backends store state in a shared location, which is better for team use, automation, and safer state management. [web:653][web:654][web:599]
+By default, Terraform uses the local backend, which stores state on the machine running Terraform. Remote backends store state in a shared location, which is better for team use, automation, and safer state management. 
 
 ---
 
 ## Main idea
 
-A backend is Terraform’s state storage configuration.
+A backend is Terraform's state storage configuration.
 
 Simple idea:
-- state = Terraform’s record of real infrastructure
+- state = Terraform's record of real infrastructure
 - backend = where that state lives and how it is managed
 
-If state is only local, collaboration becomes harder and state can be lost with the machine. Remote backends improve sharing, consistency, and operational safety. [web:653][web:654][web:598]
+If state is only local, collaboration becomes harder and state can be lost with the machine. Remote backends improve sharing, consistency, and operational safety. 
 
 ---
 
 ## Why remote state matters
 
-Remote state is useful because it helps teams work from the same source of truth. It also reduces the risk of losing state files that only exist on a local laptop or server. [web:654][web:598][web:601]
+Remote state is useful because it helps teams work from the same source of truth. It also reduces the risk of losing state files that only exist on a local laptop or server. 
 
 Good remote backends often support:
 - centralized storage
@@ -31,26 +31,26 @@ Good remote backends often support:
 - access control
 - versioning
 
-These features help prevent corruption, reduce conflicts, and improve recovery options. [web:599][web:601]
+These features help prevent corruption, reduce conflicts, and improve recovery options. 
 
 ---
 
 ## Local backend
 
-If you do not configure a backend, Terraform uses the local backend. In that setup, the state file is stored locally in the working directory environment rather than in a shared remote system. [web:653][web:654]
+If you do not configure a backend, Terraform uses the local backend. In that setup, the state file is stored locally in the working directory environment rather than in a shared remote system. 
 
 Local state can be acceptable for:
 - personal labs
 - small experiments
 - short-lived learning projects
 
-It is usually a weak choice for team environments, production systems, or CI/CD workflows. [web:654][web:598]
+It is usually a weak choice for team environments, production systems, or CI/CD workflows. 
 
 ---
 
 ## Remote backends
 
-A remote backend stores Terraform state outside the local machine. HashiCorp’s backend documentation describes backends as the mechanism used to control where state is stored, and remote backends make collaboration and shared operations easier. [web:653][web:715]
+A remote backend stores Terraform state outside the local machine. HashiCorp's backend documentation describes backends as the mechanism used to control where state is stored, and remote backends make collaboration and shared operations easier. 
 
 Common remote backend options include:
 - Amazon S3
@@ -58,7 +58,7 @@ Common remote backend options include:
 - Google Cloud Storage
 - Terraform Cloud / remote backend
 
-Different backends have different features, but the common goal is centralized and safer state management. [web:598][web:653]
+Different backends have different features, but the common goal is centralized and safer state management. 
 
 ---
 
@@ -78,7 +78,7 @@ terraform {
 }
 ```
 
-The backend block tells Terraform where to store or read the state file. Backend configuration is part of Terraform settings, not a provider resource. [web:653][web:717]
+The backend block tells Terraform where to store or read the state file. Backend configuration is part of Terraform settings, not a provider resource. 
 
 ---
 
@@ -103,7 +103,7 @@ terraform {
 }
 ```
 
-This setup is widely used because S3 provides centralized storage, while DynamoDB locking helps prevent concurrent Terraform runs from corrupting state. [web:717][web:599]
+This setup is widely used because S3 provides centralized storage, while DynamoDB locking helps prevent concurrent Terraform runs from corrupting state. 
 
 ---
 
@@ -115,7 +115,7 @@ After adding or changing backend configuration, run:
 terraform init
 ```
 
-Terraform initializes the backend during `terraform init`. HashiCorp’s backend documentation notes that changing backend configuration requires reinitialization. [web:653]
+Terraform initializes the backend during `terraform init`. HashiCorp's backend documentation notes that changing backend configuration requires reinitialization. 
 
 ---
 
@@ -155,7 +155,7 @@ Using a backend config file can make backend setup cleaner and easier to manage.
 
 ## Backend migration
 
-Terraform supports changing backend configuration and migrating state from one backend to another. HashiCorp documents backend reconfiguration and migration as part of backend management. [web:653]
+Terraform supports changing backend configuration and migrating state from one backend to another. HashiCorp documents backend reconfiguration and migration as part of backend management. 
 
 A common example is:
 - start with local state
@@ -163,7 +163,7 @@ A common example is:
 - reinitialize Terraform
 - migrate the existing state
 
-This is a normal path when a small project grows into a shared team workflow. [web:653][web:716]
+This is a normal path when a small project grows into a shared team workflow. 
 
 ---
 ### Migrate state to a new backend
@@ -177,7 +177,7 @@ This reinitializes Terraform after backend changes and attempts to copy the exis
 Use this when moving state, such as from local storage to an S3 backend.
 ## Remote state data source
 
-Terraform can also read outputs from another state file by using the `terraform_remote_state` data source. This allows one Terraform configuration to consume outputs produced by another configuration. [web:717]
+Terraform can also read outputs from another state file by using the `terraform_remote_state` data source. This allows one Terraform configuration to consume outputs produced by another configuration. 
 
 Example:
 
@@ -193,7 +193,7 @@ data "terraform_remote_state" "network" {
 }
 ```
 
-This is commonly used when one stack, such as an application stack, needs values from another stack, such as a networking stack. [web:717]
+This is commonly used when one stack, such as an application stack, needs values from another stack, such as a networking stack. 
 
 ---
 
@@ -212,28 +212,28 @@ resource "aws_instance" "web" {
 }
 ```
 
-This allows one Terraform project to reuse important values exposed by another project’s outputs. [web:717]
+This allows one Terraform project to reuse important values exposed by another project's outputs. 
 
 ---
 
 ## Security concerns
 
-Terraform state can contain sensitive information, so backend security matters. Best-practice guidance commonly recommends strong access control, encryption at rest, encryption in transit, and avoiding public exposure of state storage. [web:599][web:598][web:601]
+Terraform state can contain sensitive information, so backend security matters. Best-practice guidance commonly recommends strong access control, encryption at rest, encryption in transit, and avoiding public exposure of state storage. 
 
 For example, S3 state buckets are commonly configured with:
 - versioning
 - server-side encryption
 - blocked public access
 
-Those controls help reduce risk and improve recoverability. [web:717][web:601]
+Those controls help reduce risk and improve recoverability. 
 
 ---
 
 ## Locking
 
-State locking helps prevent two Terraform operations from modifying the same state at the same time. This reduces the risk of corruption and conflicting updates. [web:599][web:601]
+State locking helps prevent two Terraform operations from modifying the same state at the same time. This reduces the risk of corruption and conflicting updates. 
 
-For AWS-based setups, DynamoDB is commonly used with S3 backends for locking. In general, choosing a backend with locking support is a strong operational practice. [web:717][web:599]
+For AWS-based setups, DynamoDB is commonly used with S3 backends for locking. In general, choosing a backend with locking support is a strong operational practice. 
 
 ## Force unlock
 
@@ -253,22 +253,22 @@ Use this very carefully and only when you are sure no other Terraform operation 
 
 ## Versioning
 
-Versioning allows you to keep historical copies of the state file. This is useful if you need to inspect or recover from accidental changes. [web:717][web:601]
+Versioning allows you to keep historical copies of the state file. This is useful if you need to inspect or recover from accidental changes. 
 
-For S3-based backends, enabling bucket versioning is a common recommendation because Terraform state is a critical operational asset. [web:717]
+For S3-based backends, enabling bucket versioning is a common recommendation because Terraform state is a critical operational asset. 
 
 ---
 
 ## Environment separation
 
-Best-practice guidance often recommends separate state files per environment or logical system. This reduces blast radius and keeps production, staging, and development more isolated. [web:599]
+Best-practice guidance often recommends separate state files per environment or logical system. This reduces blast radius and keeps production, staging, and development more isolated. 
 
 Examples:
 - `environments/dev/terraform.tfstate`
 - `environments/staging/terraform.tfstate`
 - `environments/prod/terraform.tfstate`
 
-This approach makes state easier to organize and safer to manage at scale. [web:717][web:599]
+This approach makes state easier to organize and safer to manage at scale. 
 
 ---
 
@@ -282,7 +282,7 @@ This approach makes state easier to organize and safer to manage at scale. [web:
 - exposing state storage publicly
 - assuming backend configuration can freely use normal input variables
 
-Backend configuration has special rules, and examples for S3 backends often note that values must be hardcoded or passed through backend-specific configuration rather than normal Terraform variables. [web:717][web:653]
+Backend configuration has special rules, and examples for S3 backends often note that values must be hardcoded or passed through backend-specific configuration rather than normal Terraform variables. 
 
 ---
 
@@ -297,19 +297,19 @@ Backend configuration has special rules, and examples for S3 backends often note
 - review backend changes carefully
 - use `terraform init` after backend changes
 
-These practices are repeatedly recommended in Terraform backend and state-management guidance because state is one of the most sensitive operational files in a Terraform workflow. [web:653][web:599][web:601]
+These practices are repeatedly recommended in Terraform backend and state-management guidance because state is one of the most sensitive operational files in a Terraform workflow. 
 
 ---
 
 ## Important notes
 
-- Terraform state tracks real infrastructure. [web:654]
-- A backend controls where state is stored and accessed. [web:653]
-- Local backend is the default when no backend is configured. [web:653][web:654]
-- Remote backends are better for collaboration and automation. [web:654][web:598]
-- S3 with DynamoDB locking is a common AWS pattern. [web:717]
-- `terraform init` is used to initialize or reinitialize backend settings. [web:653]
-- `terraform_remote_state` can read outputs from another state file. [web:717]
+- Terraform state tracks real infrastructure.
+- A backend controls where state is stored and accessed.
+- Local backend is the default when no backend is configured.
+- Remote backends are better for collaboration and automation.
+- S3 with DynamoDB locking is a common AWS pattern.
+- `terraform init` is used to initialize or reinitialize backend settings.
+- `terraform_remote_state` can read outputs from another state file.
 
 ---
 
@@ -357,8 +357,8 @@ data "terraform_remote_state" "network" {
 
 ## Key ideas
 
-- Terraform state is critical because it maps configuration to real infrastructure. [web:654]
-- Backends define how and where that state is stored. [web:653]
-- Remote backends improve collaboration, reliability, and safety. [web:654][web:598]
-- Locking, encryption, versioning, and access control are important backend features. [web:599][web:601]
-- Remote state outputs can be shared across Terraform configurations with `terraform_remote_state`. [web:717]
+- Terraform state is critical because it maps configuration to real infrastructure.
+- Backends define how and where that state is stored.
+- Remote backends improve collaboration, reliability, and safety.
+- Locking, encryption, versioning, and access control are important backend features.
+- Remote state outputs can be shared across Terraform configurations with `terraform_remote_state`.

@@ -43,13 +43,13 @@ Typical flow:
 
 ## Pros & Cons vs “classic” approaches
 
-| Dimension                  | ALB Ingress / NLB + Ingress           | VPC Lattice + Gateway API Controller             |
-|---------------------------|----------------------------------------|--------------------------------------------------|
-| Scope                     | Per‑cluster, per‑VPC (mostly north‑south) | Cross‑VPC, cross‑account, cross‑cluster (east‑west) |
-| API model                 | `Ingress` (limited spec)              | Gateway API (richer, role‑oriented)             |
-| Mesh features             | Limited (no global service network)   | Service-network abstraction, auth policies, observability[web:112][web:128] |
-| Sidecars                  | Often needed with meshes              | Not needed; data plane is managed by VPC Lattice[web:112][web:127] |
-| Targets                   | Primarily K8s Services                 | K8s Services, EC2, Lambda, other Lattice targets[web:127][web:128] |
+| Dimension     | ALB Ingress / NLB + Ingress               | VPC Lattice + Gateway API Controller                      |
+| ------------- | ----------------------------------------- | --------------------------------------------------------- |
+| Scope         | Per‑cluster, per‑VPC (mostly north‑south) | Cross‑VPC, cross‑account, cross‑cluster (east‑west)       |
+| API model     | `Ingress` (limited spec)                  | Gateway API (richer, role‑oriented)                       |
+| Mesh features | Limited (no global service network)       | Service-network abstraction, auth policies, observability |
+| Sidecars      | Often needed with meshes                  | Not needed; data plane is managed by VPC Lattice          |
+| Targets       | Primarily K8s Services                    | K8s Services, EC2, Lambda, other Lattice targets          |
 
 ## Security & Best Practice Check
 

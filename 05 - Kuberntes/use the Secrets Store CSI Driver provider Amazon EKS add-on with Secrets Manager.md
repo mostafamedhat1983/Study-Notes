@@ -8,7 +8,7 @@ tags:
 ### Phase 1: Infrastructure & Identity
 1.  **Create Cluster**: Provision an EKS cluster using `eksctl` and a variable for the cluster name.
     ```
-    CLUSTER_NAME="my-test-cluster”
+    CLUSTER_NAME="my-test-cluster"
     eksctl create cluster $CLUSTER_NAME
     ```
 2.  **Install Add-ons**: Install the required EKS add-ons.
@@ -100,8 +100,7 @@ tags:
 
 ## Source of Truth (Official Doc Links)
 
-- **Official Blog Post**: [attached_file:1]
-- **AWS Secrets Store CSI Driver Provider Docs**: [GitHub - aws/secrets-store-csi-driver-provider-aws](https://github.com/aws/secrets-store-csi-driver-provider-aws) [web:16]
+- **AWS Secrets Store CSI Driver Provider Docs**: [GitHub - aws/secrets-store-csi-driver-provider-aws](https://github.com/aws/secrets-store-csi-driver-provider-aws)
 
 ---
 
@@ -109,12 +108,12 @@ tags:
 
 **Why use this over Bitnami Sealed Secrets?**
 Unlike Sealed Secrets, which stores encrypted static blobs in Git, this approach fetches secrets **dynamically** at runtime.
-1.  **Centralization**: Secrets remain in AWS Secrets Manager, allowing for centralized rotation, auditing (CloudTrail), and revocation. [web:10][web:11]
-2.  **No Secrets in Git**: Even encrypted secrets are removed from the repo, satisfying stricter compliance requirements (e.g., PCI-DSS, FedRAMP) that forbid any credential artifacts in source control. [web:11]
-3.  **Identity Federation**: By using EKS Pod Identity, the pod trades a short-lived K8s token for AWS credentials without hardcoding Access Keys. [web:11][web:16]
+1.  **Centralization**: Secrets remain in AWS Secrets Manager, allowing for centralized rotation, auditing (CloudTrail), and revocation.
+2.  **No Secrets in Git**: Even encrypted secrets are removed from the repo, satisfying stricter compliance requirements (e.g., PCI-DSS, FedRAMP) that forbid any credential artifacts in source control.
+3.  **Identity Federation**: By using EKS Pod Identity, the pod trades a short-lived K8s token for AWS credentials without hardcoding Access Keys.
 
 **The Cost of Complexity:**
-You are trading the simplicity of `kubeseal` (a binary and a CRD) for a chain of dependencies: *CSI Driver DaemonSet + AWS Provider DaemonSet + IAM Role + Pod Identity Agent + SecretProviderClass + Volume Mounts*. If any link in this chain breaks (e.g., Pod Identity agent fails), your pods will fail to start with `ContainerCreating` errors. [web:17]
+You are trading the simplicity of `kubeseal` (a binary and a CRD) for a chain of dependencies: *CSI Driver DaemonSet + AWS Provider DaemonSet + IAM Role + Pod Identity Agent + SecretProviderClass + Volume Mounts*. If any link in this chain breaks (e.g., Pod Identity agent fails), your pods will fail to start with `ContainerCreating` errors.
 
 ---
 
@@ -123,14 +122,14 @@ You are trading the simplicity of `kubeseal` (a binary and a CRD) for a chain of
 I need to challenge the "File Mount" pattern recommended in this tutorial.
 
 **1. File System vs. Memory (Tmpfs)**
-The blog explicitly notes: *"Security best practice recommends caching secrets in memory where possible."* [attached_file:1]
+Security best practice recommends caching secrets in memory where possible.
 By default, the CSI driver mounts secrets as **files** on the container's filesystem. While these are usually tmpfs (RAM-backed) volumes, they are technically visible to any process with root access to the file system namespace.
 *   **Challenge**: If you have high-security requirements, consider using the **AWS Secrets and Configuration Provider (ASCP)** or native SDKs to fetch secrets directly into application memory, bypassing the filesystem entirely.
 
 **2. Synchronization with Kubernetes Secrets**
-The steps above mounts the secret as a file. If your application expects an environment variable (`envFrom: secretRef`), this CSI driver setup requires an extra configuration (`syncSecret`) to sync the CSI volume into a native Kubernetes Secret object. This creates a duplicate copy of the secret in etcd, potentially negating the security benefit of keeping it external. [web:15]
+The steps above mounts the secret as a file. If your application expects an environment variable (`envFrom: secretRef`), this CSI driver setup requires an extra configuration (`syncSecret`) to sync the CSI volume into a native Kubernetes Secret object. This creates a duplicate copy of the secret in etcd, potentially negating the security benefit of keeping it external.
 *   **Verification**: Ensure your etcd is encrypted at rest if you enable the sync feature.
 
 **3. Least Privilege**
 The tutorial uses the managed policy `AWSSecretsManagerClientReadOnlyAccess`.
-*   **Critique**: This grants the pod permission to read **ALL** secrets in the account. In a production environment, you **must** write a custom inline IAM policy that allows `secretsmanager:GetSecretValue` on *only* the specific ARNs that the application needs. Never use the wildcard managed policy for production workloads. [web:10][attached_file:1]
+*   **Critique**: This grants the pod permission to read **ALL** secrets in the account. In a production environment, you **must** write a custom inline IAM policy that allows `secretsmanager:GetSecretValue` on *only* the specific ARNs that the application needs. Never use the wildcard managed policy for production workloads.

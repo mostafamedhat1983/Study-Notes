@@ -367,7 +367,7 @@ variable "create_bucket" {
 
 ### `list`
 
-Stores an ordered list of values.
+Stores an ordered list of values. All elements must be the same type.
 
 Example:
 
@@ -382,13 +382,14 @@ Access example:
 
 ```hcl
 var.availability_zones
+var.availability_zones[0]   # "us-east-1a"
 ```
 
 ---
 
 ### `map`
 
-Stores key-value pairs.
+Stores key-value pairs. All values must be the same type.
 
 Example:
 
@@ -407,6 +408,129 @@ Access example:
 ```hcl
 var.instance_types["dev"]
 ```
+
+---
+
+## Additional variable types
+
+### `set`
+
+Stores unique values with no duplicates and no guaranteed order.
+
+Similar to `list`, but duplicates are automatically removed.
+
+Example:
+
+```hcl
+variable "environments" {
+  type    = set(string)
+  default = ["dev", "staging", "prod"]
+}
+```
+
+Commonly used with `for_each`:
+
+```hcl
+resource "aws_s3_bucket" "app" {
+  for_each = var.environments
+  bucket   = "myapp-${each.key}"
+}
+```
+
+Simple rule:
+- use `list` when order matters
+- use `set` when you want unique values and order does not matter
+
+---
+
+### `object`
+
+Stores a structured group of named attributes, each with its own type.
+
+Example:
+
+```hcl
+variable "server" {
+  type = object({
+    instance_type = string
+    count         = number
+    enable_backup = bool
+  })
+  default = {
+    instance_type = "t2.micro"
+    count         = 2
+    enable_backup = true
+  }
+}
+```
+
+Access example:
+
+```hcl
+var.server.instance_type
+var.server.count
+```
+
+Commonly used for complex module inputs where multiple related values are grouped together.
+
+---
+
+### `tuple`
+
+Stores an ordered, fixed-length sequence where each element can have a different type.
+
+Example:
+
+```hcl
+variable "server_config" {
+  type    = tuple([string, number, bool])
+  default = ["t2.micro", 2, true]
+}
+```
+
+Access by index:
+
+```hcl
+var.server_config[0]   # "t2.micro"
+var.server_config[1]   # 2
+var.server_config[2]   # true
+```
+
+Simple rule:
+- use `list` when all elements are the same type
+- use `tuple` when elements have different types and the length is fixed
+
+---
+
+### `any`
+
+Disables type enforcement. Terraform accepts any value without validation.
+
+Example:
+
+```hcl
+variable "flexible_input" {
+  type = any
+}
+```
+
+This works but provides no validation or safety.
+
+Simple rule:
+- avoid `any` in production
+- use specific types whenever possible for clarity and safety
+
+---
+
+## Collection types at a glance
+
+| Type | Order | Duplicates allowed | Mixed types | Best used for |
+|------|-------|--------------------|-------------|---------------|
+| `list` | ✅ Yes | ✅ Yes | ❌ No | Ordered items of same type |
+| `set` | ❌ No | ❌ No | ❌ No | Unique items, used with for_each |
+| `map` | ❌ No | keys unique | ❌ No | Key-value pairs of same type |
+| `object` | N/A | N/A | ✅ Yes | Structured named attributes |
+| `tuple` | ✅ Yes | ✅ Yes | ✅ Yes | Fixed-length mixed-type sequence |
 
 ---
 

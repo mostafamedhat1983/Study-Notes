@@ -89,6 +89,7 @@ aws_instance.web.id
 - you want multiple very similar resources
 - the number of resources is based on a variable
 - index-based access is acceptable
+- Note: `count.index` always starts from 0. If you want 1-based naming, use `count.index + 1`:
 
 Example:
 

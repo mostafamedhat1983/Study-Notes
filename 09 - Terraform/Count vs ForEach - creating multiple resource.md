@@ -36,6 +36,7 @@ This creates three instances tracked as:
 - `aws_instance.web[0]`
 - `aws_instance.web[1]`
 - `aws_instance.web[2]`
+- Note: `count.index` always starts from 0. If you want 1-based naming, use `count.index + 1`:
 
 Inside the block, you can reference the current index using `count.index`:
 

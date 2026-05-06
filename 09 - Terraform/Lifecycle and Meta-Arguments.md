@@ -121,6 +121,8 @@ This creates one bucket for each value.
 - resources have meaningful names
 - you want stable references
 - you want to manage items by key instead of index
+- `for_each` accepts a **map** or a **set of strings** only
+- `for_each` does **not** accept a plain list directly — use `toset()` to convert
 
 ---
 

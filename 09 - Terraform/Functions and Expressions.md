@@ -593,6 +593,112 @@ max([10, 20, 30]...)    # ✅ correct - same as max(10, 20, 30)
 
 ---
 
+## Splat operator (`[*]`)
+
+The splat operator is used to extract one attribute from **every element** in a list at once.
+
+Instead of looping manually, you use `[*]` to collect a single attribute across all elements into a new list.
+
+### The problem it solves
+
+Imagine you have 3 EC2 instances created with `count` and you want all their IDs.
+
+Without splat you would have to access each one individually:
+
+```hcl
+aws_instance.web[0].id
+aws_instance.web[1].id
+aws_instance.web[2].id
+```
+
+With splat you get all of them in one line:
+
+```hcl
+aws_instance.web[*].id   # → ["id-1", "id-2", "id-3"]
+```
+
+---
+
+### Example with `count`
+
+```hcl
+resource "aws_instance" "web" {
+  count         = 3
+  ami           = "ami-12345678"
+  instance_type = "t2.micro"
+}
+
+# Get all instance IDs at once
+output "all_instance_ids" {
+  value = aws_instance.web[*].id
+}
+
+# Get all private IPs at once
+output "all_private_ips" {
+  value = aws_instance.web[*].private_ip
+}
+```
+
+Result of `all_instance_ids`:
+
+```hcl
+["i-0abc123", "i-0def456", "i-0ghi789"]
+```
+
+---
+
+### Example with a variable list of objects
+
+```hcl
+variable "users" {
+  type = list(object({
+    name  = string
+    email = string
+  }))
+  default = [
+    { name = "Ali",     email = "ali@example.com" },
+    { name = "Sara",    email = "sara@example.com" },
+    { name = "Mostafa", email = "mostafa@example.com" }
+  ]
+}
+
+var.users[*].name    # → ["Ali", "Sara", "Mostafa"]
+var.users[*].email   # → ["ali@example.com", "sara@example.com", "mostafa@example.com"]
+```
+
+---
+
+### Without vs with `[*]`
+
+```hcl
+# Without splat → access one element at a time
+aws_instance.web[0].id   # only the first instance
+aws_instance.web[1].id   # only the second instance
+
+# With splat → get all at once as a list
+aws_instance.web[*].id   # ✅ all instance IDs in one list
+```
+
+---
+
+### Simple rule
+
+- `[*]` means "for every element, give me this attribute"
+- the result is always a list
+- most commonly used in outputs to collect attributes from count-based resources
+- only works on lists, not maps or sets
+
+---
+
+### Ellipsis vs Splat — do not confuse them
+
+| Operator | Syntax | What it does |
+|----------|--------|--------------|
+| Ellipsis | `var.list...` | Expands a list into individual function arguments |
+| Splat | `resource[*].attr` | Extracts one attribute from every element in a list |
+
+---
+
 ## Expressions in locals
 
 Functions and expressions are often used inside locals.
@@ -654,6 +760,7 @@ This returns a transformed value instead of a raw one.
 - confusing `each.key`, `count.index`, `var.`, and `local.`
 - writing logic that is difficult to read or debug
 - forgetting `...` when passing a list to a function that expects individual arguments
+- confusing `[*]` splat with `...` ellipsis — they do different things
 
 ---
 
@@ -677,6 +784,7 @@ This returns a transformed value instead of a raw one.
 - Locals are often the best place to store complex expressions.
 - Readability matters more than writing everything in one line.
 - The `...` operator expands a list into individual arguments for functions that expect separate values.
+- The `[*]` splat operator extracts one attribute from every element in a list.
 
 ---
 
@@ -687,6 +795,7 @@ This returns a transformed value instead of a raw one.
 - use locals to keep complicated logic readable
 - keep Terraform logic simple and maintainable
 - use `...` when a function needs individual values but you have a list
+- use `[*]` when you want one attribute from every element in a list
 
 ---
 
@@ -724,6 +833,8 @@ file("user-data.sh")
 jsonencode({ env = "dev" })
 max(var.numbers...)
 min(var.ports...)
+aws_instance.web[*].id
+var.users[*].name
 ```
 
 ---
@@ -737,3 +848,4 @@ min(var.ports...)
 - Complex expressions are often best stored in locals.
 - Good Terraform code should stay readable even when it is dynamic.
 - The `...` operator expands a list into individual arguments for functions that expect separate values.
+- The `[*]` splat operator extracts one attribute from every element in a list and returns a new list.

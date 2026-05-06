@@ -519,6 +519,80 @@ This is very useful when a provider expects JSON input.
 
 ---
 
+## Ellipsis operator (`...`)
+
+The `...` operator is used for **argument expansion**.
+
+It takes a list and expands it into individual separate arguments for a function that expects multiple arguments instead of a single list.
+
+### The problem it solves
+
+Some Terraform functions like `max()` and `min()` expect individual values, not a list.
+
+Without `...` you would have to write each value manually:
+
+```hcl
+max(10, 20, 30)
+```
+
+With `...` you can pass a list variable and expand it automatically:
+
+```hcl
+variable "numbers" {
+  type    = list(number)
+  default = [10, 20, 30]
+}
+
+max(var.numbers...)   # same as max(10, 20, 30)
+```
+
+Result:
+
+```hcl
+30
+```
+
+---
+
+### Another example with `min`
+
+```hcl
+variable "ports" {
+  type    = list(number)
+  default = [8080, 443, 80]
+}
+
+min(var.ports...)   # same as min(8080, 443, 80)
+```
+
+Result:
+
+```hcl
+80
+```
+
+---
+
+### Without vs with `...`
+
+```hcl
+# Without ... → passes the list as a single argument → ERROR for max/min
+max([10, 20, 30])       # ❌ wrong - max does not accept a list
+
+# With ... → expands the list into individual arguments → CORRECT
+max([10, 20, 30]...)    # ✅ correct - same as max(10, 20, 30)
+```
+
+---
+
+### Simple rule
+
+- `...` expands a list into individual arguments
+- only use it when a function expects multiple separate values, not a list
+- most common with `max()`, `min()`, and `concat()`
+
+---
+
 ## Expressions in locals
 
 Functions and expressions are often used inside locals.
@@ -579,6 +653,7 @@ This returns a transformed value instead of a raw one.
 - using hardcoded values when expressions would be cleaner
 - confusing `each.key`, `count.index`, `var.`, and `local.`
 - writing logic that is difficult to read or debug
+- forgetting `...` when passing a list to a function that expects individual arguments
 
 ---
 
@@ -601,6 +676,7 @@ This returns a transformed value instead of a raw one.
 - Functions are commonly used with strings, lists, maps, and files.
 - Locals are often the best place to store complex expressions.
 - Readability matters more than writing everything in one line.
+- The `...` operator expands a list into individual arguments for functions that expect separate values.
 
 ---
 
@@ -610,6 +686,7 @@ This returns a transformed value instead of a raw one.
 - use functions to transform those values
 - use locals to keep complicated logic readable
 - keep Terraform logic simple and maintainable
+- use `...` when a function needs individual values but you have a list
 
 ---
 
@@ -645,6 +722,8 @@ lookup(var.instance_types, "dev", "t2.micro")
 toset(["dev", "stage", "prod"])
 file("user-data.sh")
 jsonencode({ env = "dev" })
+max(var.numbers...)
+min(var.ports...)
 ```
 
 ---
@@ -657,3 +736,4 @@ jsonencode({ env = "dev" })
 - Conditional expressions help change behavior based on input.
 - Complex expressions are often best stored in locals.
 - Good Terraform code should stay readable even when it is dynamic.
+- The `...` operator expands a list into individual arguments for functions that expect separate values.

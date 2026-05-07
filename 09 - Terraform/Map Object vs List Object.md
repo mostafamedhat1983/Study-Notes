@@ -332,3 +332,29 @@ aws_instance.server["web"].id
 - removing a key from a map only affects that one resource
 - `list(object)` outputs are lists; `map(object)` outputs are maps
 - map-based outputs are easier to read because each value is labeled by name
+
+
+---
+
+## Simple Mental Model
+
+With `list(object)` + `count`:
+- Items are retrieved by **index number** starting from `0`
+- Order matters — if the order of items changes, Terraform sees different indexes and may **destroy and recreate** resources even if the items themselves did not change
+- Inside the block use `count.index`, outside use `resource[0]`, `resource[1]`
+
+With `map(object)` + `for_each`:
+- Items are retrieved by **key** (like `"web"`, `"app"`, `"db"`)
+- Order does not matter — each item is tracked by its key, not its position
+- Inside the block use `each.key` for the name and `each.value.field` for the attributes, outside use `resource["web"]`, `resource["app"]`
+
+```hcl
+# list + count — access by index
+var.instances[count.index].instance_type
+aws_instance.server.id
+
+# map + for_each — access by key
+each.key                          # "web", "app", "db"
+each.value.instance_type          # the value for this item
+aws_instance.server["web"].id
+```

@@ -1,0 +1,329 @@
+---
+tags:
+  - Terraform
+---
+Terraform provides built-in functions for loading and parsing external files directly into your configuration.
+
+The most common pattern is combining `file()`, `path.module`, `yamldecode`, and `jsondecode` to load config files instead of hardcoding values.
+
+---
+
+## `file()` — read a file
+
+`file()` reads the content of a file and returns it as a string.
+
+Syntax:
+
+```hcl
+file("path/to/file")
+```
+
+Example:
+
+```hcl
+user_data = file("user-data.sh")
+```
+
+This reads the content of `user-data.sh` and passes it as the user data for an EC2 instance.
+
+Important: `file()` always returns a **plain string**. If the file contains YAML or JSON, you need to decode it with `yamldecode` or `jsondecode`.
+
+---
+
+## `path.module` — current module directory
+
+`path.module` is a built-in Terraform expression that returns the **path of the directory containing the current `.tf` file**.
+
+Example:
+
+```hcl
+path.module   # returns something like: /home/user/terraform/modules/ec2
+```
+
+This is important because Terraform does not always run from the same working directory. Using `path.module` makes file paths **relative to the module**, not to wherever `terraform apply` is run from.
+
+---
+
+## Why `file()` and `path.module` are almost always used together
+
+If you write:
+
+```hcl
+file("config.yaml")
+```
+
+Terraform looks for `config.yaml` relative to the **working directory**, which may not be where your module lives.
+
+If you write:
+
+```hcl
+file("${path.module}/config.yaml")
+```
+
+Terraform always finds the file **next to the current `.tf` file**, no matter where the command is run from.
+
+This is the safe and correct way to reference files in a module.
+
+---
+
+## `yamldecode` — parse a YAML file
+
+`yamldecode` takes a YAML string and converts it into a Terraform value (map, list, string, etc.).
+
+Syntax:
+
+```hcl
+yamldecode(string)
+```
+
+Full pattern with `file()` and `path.module`:
+
+```hcl
+locals {
+  config = yamldecode(file("${path.module}/config.yaml"))
+}
+```
+
+Example `config.yaml`:
+
+```yaml
+instance_type: t2.micro
+ami: ami-12345678
+environment: prod
+```
+
+Now you can access values like:
+
+```hcl
+local.config.instance_type   # "t2.micro"
+local.config.ami             # "ami-12345678"
+local.config.environment     # "prod"
+```
+
+---
+
+## `jsondecode` — parse a JSON file
+
+`jsondecode` takes a JSON string and converts it into a Terraform value.
+
+Syntax:
+
+```hcl
+jsondecode(string)
+```
+
+Full pattern with `file()` and `path.module`:
+
+```hcl
+locals {
+  config = jsondecode(file("${path.module}/config.json"))
+}
+```
+
+Example `config.json`:
+
+```json
+{
+  "instance_type": "t2.micro",
+  "ami": "ami-12345678",
+  "environment": "prod"
+}
+```
+
+Now you can access values the same way:
+
+```hcl
+local.config.instance_type   # "t2.micro"
+local.config.ami             # "ami-12345678"
+local.config.environment     # "prod"
+```
+
+---
+
+## `jsonencode` — convert Terraform value to JSON string
+
+`jsonencode` is the opposite of `jsondecode`. It takes a Terraform value and converts it into a JSON string.
+
+This is useful when a resource argument expects a JSON string, such as IAM policies.
+
+Example:
+
+```hcl
+policy = jsonencode({
+  Version = "2012-10-17"
+  Statement = [{
+    Effect   = "Allow"
+    Action   = ["s3:GetObject"]
+    Resource = "*"
+  }]
+})
+```
+
+---
+
+## EC2 example — loading config from a YAML file
+
+`config.yaml`:
+
+```yaml
+instance_type: t3.micro
+ami: ami-12345678
+name: web-server
+environment: prod
+```
+
+`main.tf`:
+
+```hcl
+locals {
+  config = yamldecode(file("${path.module}/config.yaml"))
+}
+
+resource "aws_instance" "web" {
+  ami           = local.config.ami
+  instance_type = local.config.instance_type
+
+  tags = {
+    Name        = local.config.name
+    Environment = local.config.environment
+  }
+}
+```
+
+This keeps all configuration values in a YAML file instead of hardcoding them in the resource block.
+
+---
+
+## EC2 example — loading config from a JSON file
+
+`config.json`:
+
+```json
+{
+  "instance_type": "t3.micro",
+  "ami": "ami-12345678",
+  "name": "web-server",
+  "environment": "prod"
+}
+```
+
+`main.tf`:
+
+```hcl
+locals {
+  config = jsondecode(file("${path.module}/config.json"))
+}
+
+resource "aws_instance" "web" {
+  ami           = local.config.ami
+  instance_type = local.config.instance_type
+
+  tags = {
+    Name        = local.config.name
+    Environment = local.config.environment
+  }
+}
+```
+
+---
+
+## YAML vs JSON — when to use each
+
+| | YAML | JSON |
+|---|---|---|
+| Readability | Easier to read and write by hand | Harder to read, more verbose |
+| Comments | Supports comments (`#`) | Does not support comments |
+| Common use | Human-written config files | Machine-generated output, API responses |
+| Terraform function | `yamldecode` | `jsondecode` / `jsonencode` |
+
+Rule of thumb:
+- Use **YAML** for config files written and maintained by humans
+- Use **JSON** for files generated by tools, APIs, or other programs
+
+---
+
+## Path expressions in Terraform
+
+| Expression | Returns |
+|---|---|
+| `path.module` | Directory of the current module's `.tf` file |
+| `path.root` | Directory of the root module (where `terraform apply` is run) |
+| `path.cwd` | Current working directory at the time of the run |
+
+In most cases, `path.module` is what you want because it keeps file references tied to the module itself.
+
+---
+
+## Common mistakes
+
+- using `file("config.yaml")` without `path.module` — the file may not be found when running from a different directory
+- forgetting that `file()` returns a plain string — you must decode it with `yamldecode` or `jsondecode` if it contains structured data
+- using `jsondecode` on a YAML file or `yamldecode` on a JSON file
+- not storing the decoded result in a `local` — this leads to calling `file()` and `yamldecode` repeatedly in different places
+- confusing `jsonencode` (Terraform → JSON string) with `jsondecode` (JSON string → Terraform)
+
+---
+
+## Rule of thumb
+
+- **`file()` + `path.module`** — always use together to safely load files from the module directory
+- **`yamldecode`** — use for human-written YAML config files
+- **`jsondecode`** — use for JSON files from tools or APIs
+- **`jsonencode`** — use when a resource expects a JSON string as input
+- **Store decoded values in `locals`** — keeps the code clean and avoids repeating the decode call
+
+---
+
+## Must memorize
+
+```hcl
+# load and decode a YAML file
+locals {
+  config = yamldecode(file("${path.module}/config.yaml"))
+}
+
+# access values
+local.config.instance_type
+local.config.ami
+```
+
+```hcl
+# load and decode a JSON file
+locals {
+  config = jsondecode(file("${path.module}/config.json"))
+}
+
+# access values
+local.config.instance_type
+local.config.ami
+```
+
+```hcl
+# encode a Terraform value as JSON string
+policy = jsonencode({
+  Version = "2012-10-17"
+  Statement = [{
+    Effect   = "Allow"
+    Action   = ["s3:GetObject"]
+    Resource = "*"
+  }]
+})
+```
+
+```hcl
+# read a plain text file (no decoding needed)
+user_data = file("${path.module}/user-data.sh")
+```
+
+---
+
+## Key ideas
+
+- `file()` reads a file and returns its content as a plain string
+- `path.module` returns the directory of the current module's `.tf` file
+- always combine `file()` with `path.module` to make file paths safe and portable
+- `yamldecode` converts a YAML string into a Terraform value
+- `jsondecode` converts a JSON string into a Terraform value
+- `jsonencode` converts a Terraform value into a JSON string
+- store decoded config in `locals` to keep code clean
+- use YAML for human-written files, JSON for machine-generated files

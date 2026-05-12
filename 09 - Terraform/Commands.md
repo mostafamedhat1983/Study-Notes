@@ -60,6 +60,19 @@ Use this when:
 - you want newer allowed provider versions
 - you want newer allowed module versions
 - you intentionally want to refresh dependencies
+# Important:
+- `-upgrade` only affects **remote** providers and modules (registry, Git)
+- it is **not needed for local modules** — Terraform picks up local module
+  changes automatically with a regular `terraform init` or even just `terraform plan`
+- common scenarios where you need it:
+  - you changed a provider version constraint in `required_providers` and want
+    Terraform to download the newer version
+  - you updated the `version` of a remote registry module and want Terraform
+    to fetch the newer version
+  - you want to refresh all dependencies to the latest allowed versions
+
+Plain `terraform init` installs missing dependencies but does not upgrade
+already-installed ones. `-upgrade` forces it to check for newer allowed versions.
 
 ---
 

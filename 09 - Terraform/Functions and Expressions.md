@@ -370,7 +370,26 @@ Result:
 ```
 
 ---
+### `slice`
+Returns a subset of a list between two indexes.
 
+```hcl
+slice(["a", "b", "c", "d"], 1, 3)
+# result: ["b", "c"]
+```
+
+- start index is **included**
+- end index is **not included**
+
+Common use case:
+
+```hcl
+locals {
+  all_azs   = ["us-east-1a", "us-east-1b", "us-east-1c", "us-east-1d"]
+  first_two = slice(local.all_azs, 0, 2)
+  # result: ["us-east-1a", "us-east-1b"]
+}
+```
 ## Common map functions
 
 ### `lookup`

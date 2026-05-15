@@ -303,6 +303,11 @@ Used when you need to move resource addresses in state.
 
 This is more advanced and should be used carefully.
 
+```bash
+terraform state mv -dry-run SOURCE DESTINATION
+```
+ Terraform prints the planned move instead of performing it
+
 ---
 
 ### Remove a resource from state

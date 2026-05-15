@@ -309,7 +309,55 @@ terraform state mv -dry-run SOURCE DESTINATION
  Terraform prints the planned move instead of performing it
 
 ---
+### Moving resources safely with `moved` blocks
 
+When you rename or refactor a resource in Terraform (for example changing its resource name, module path, or index key), Terraform will normally think the old resource was destroyed and a new one must be created. This can lead to unnecessary deletion and recreation of real infrastructure. To avoid this, Terraform lets you declare a `moved` block to tell it that the “old” and “new” addresses are actually the same real resource.
+
+A `moved` block is written in the same module where the change happens and maps the previous address to the new address:
+
+```hcl
+moved {
+  from = aws_instance.web
+  to   = aws_instance.app
+}
+```
+
+On the next `terraform plan` and `terraform apply`, Terraform updates the state so that the resource that used to be tracked as `aws_instance.web` is now tracked as `aws_instance.app` without destroying and recreating it. After the state has been updated, the `moved` block no longer affects future plans and can be safely removed once all workspaces/environments have applied the change.
+
+You can also use `moved` blocks when changing module paths or changing indices/keys for resources that use `count` or `for_each`:
+
+```hcl
+moved {
+  from = module.network.aws_subnet.public
+  to   = module.vpc.aws_subnet.public
+}
+```
+
+Important points about `moved` blocks:
+
+- Use them whenever a refactor (rename, module reorganisation, index/key change) would otherwise cause Terraform to destroy and recreate existing resources.
+- `moved` blocks change only how Terraform maps configuration to state; they do not directly modify real infrastructure.
+- They are a safer, declarative alternative to running `terraform state mv` manually, and they live in version-controlled configuration, so teammates and CI apply the same state move consistently.
+
+### `moved` blocks vs `terraform state mv`
+
+Both `moved` blocks and the `terraform state mv` command are used to tell Terraform that “this old address is now that new address” in the state, so Terraform does not destroy and recreate a real resource. The main difference is **where** and **how** you describe that move.
+
+**`moved` block (in configuration)**  
+- Written inside `.tf` files, in the module where the change happens.  
+- Declarative and version-controlled: everyone who runs `terraform apply` gets the same state move automatically.  
+- Survives over time: it documents the refactor in code until you remove the block.  
+- Best for planned refactors like renaming resources, moving resources between modules, or changing keys in `for_each` / `count` in a way that should be applied consistently across all environments.
+
+**`terraform state mv` (CLI command)**  
+- Run manually from the command line; it directly edits the state file.  
+- Imperative and not stored in configuration: teammates or CI do not automatically repeat the same move unless they manually run the same command.  
+- Easy to forget or to run differently between environments (dev, staging, prod).  
+- Best for ad-hoc fixes or one-off state surgery when configuration does not change, or when you need to repair state for a single environment only.
+
+**Rule of thumb**  
+- Use **`moved` blocks** for intentional, repeatable refactors that should be shared and tracked in Git.  
+- Use **`terraform state mv`** for one-time, manual state repair when configuration is not changing or when you must fix only a specific workspace/environment.
 ### Remove a resource from state
 
 ```bash

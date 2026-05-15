@@ -189,7 +189,7 @@ Without locking, state can become inconsistent or corrupted.
 
 A common AWS pattern is:
 - store state in S3
-- use DynamoDB for locking
+- use DynamoDB for locking (this is outdated as now S3 support terraform native state locking)
 
 This allows one Terraform operation to hold the lock while others wait.
 

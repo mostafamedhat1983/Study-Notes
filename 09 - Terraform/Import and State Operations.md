@@ -219,6 +219,57 @@ This can be useful when:
 
 Use it carefully.
 
+### Cleaning up with `removed` blocks
+
+A `removed` block is a declarative way to tell Terraform that a resource or module has been intentionally removed and should no longer be managed, without relying on ad-hoc `state rm` commands. It lives in configuration, so the intent is clear and shared across all environments.
+
+```hcl
+removed {
+  from = aws_instance.web
+
+  lifecycle {
+    destroy = false
+  }
+}
+```
+
+When Terraform sees this block, it understands that the object that used to be tracked at `aws_instance.web` has been deliberately removed from management. Terraform will update the state so that this address is no longer tracked. Because `destroy = false`, the real infrastructure object is left untouched; only the state mapping is removed. After all workspaces/environments have applied the change, you can remove the `removed` block from configuration.
+
+You can also use `removed` blocks for modules or nested addresses:
+
+```hcl
+removed {
+  from = module.legacy
+
+  lifecycle {
+    destroy = false
+  }
+}
+```
+
+This is useful when you decommission a module and want that unmanagement to be applied consistently everywhere.
+
+### `removed` blocks vs `terraform state rm`
+
+Both `removed` blocks and `terraform state rm` result in Terraform no longer tracking an address in state, but they are used in different ways:
+
+**`removed` block (in configuration)**  
+- Declarative and stored in `.tf` files.  
+- Applied consistently by anyone running `terraform apply` (including CI).  
+- Documents in code that a resource/module was intentionally removed.  
+- Requires a `lifecycle` block, usually `destroy = false` when you only want to forget the object from state.  
+- Best for planned decommissioning that should be repeated safely across all environments.
+
+**`terraform state rm` (CLI command)**  
+- Imperative, one-off command that edits the state directly.  
+- Not recorded in configuration; teammates and CI will not repeat it automatically.  
+- Easy to run differently per environment (or forget entirely).  
+- Best for manual repair or emergency clean-up in a single workspace.
+
+**Rule of thumb**  
+- Use **`removed` blocks** when you want a documented, repeatable removal as part of configuration history.  
+- Use **`terraform state rm`** only for ad-hoc fixes or special cases where you intentionally do not want the change to be part of normal configuration.
+
 ---
 
 ## `terraform state pull`

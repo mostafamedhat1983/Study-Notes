@@ -341,6 +341,34 @@ Removes the tainted status from a resource.
 
 This is useful if you marked a resource for recreation by mistake.
 
+#### Modern alternative: `-replace` instead of `taint`
+
+`terraform taint` and `terraform untaint` are older commands that are now considered deprecated in favor of the `-replace` option on `terraform apply`. The idea is the same: force Terraform to destroy and recreate a specific resource, but using `-replace` keeps everything in one explicit plan/apply step instead of marking state first.
+
+Example:
+
+```bash
+terraform apply -replace=aws_instance.web
+```
+
+What happens:
+
+- Terraform plans changes as usual.
+- For the address `aws_instance.web`, Terraform behaves as if it were tainted:
+  - It shows that the current instance will be destroyed.
+  - It shows that a new instance will be created to replace it.
+- You see the full plan (including this forced replacement) and then approve it in one step.
+
+This is often safer and clearer than `terraform taint` because:
+
+- You do not have a hidden taint flag stored in state that you might forget about.
+- The forced replacement is visible right in the plan you are about to apply.
+- You can combine `-replace` with other changes in the same plan.
+
+Rule of thumb:
+
+- For **new workflows**, prefer `terraform apply -replace=aws_instance.web` over `terraform taint aws_instance.web`.
+- Keep `terraform taint` / `untaint` in mind mainly for understanding older codebases and legacy workflows.
 ---
 
 ## `terraform import`

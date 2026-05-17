@@ -60,6 +60,38 @@ That means after import:
 
 This is one of the most important things to understand about import.
 
+### Using `terraform import` with `-generate-config-out`
+
+Sometimes writing the full resource block for an existing, complex resource is tedious. Terraform provides a helper flag `-generate-config-out` on `terraform import` to generate a starting configuration file for the imported resource.
+
+```bash
+terraform import \
+  -generate-config-out=generated.tf \
+  aws_s3_bucket.logs my-logs-bucket
+```
+
+What this does:
+
+- Imports the existing resource (`my-logs-bucket`) into Terraform state under `aws_s3_bucket.logs`.
+- Writes a suggested Terraform configuration for that resource into `generated.tf`.
+- The generated file contains a resource block with arguments based on what Terraform can detect from the real resource.
+
+Typical workflow with `-generate-config-out`:
+
+1. Run `terraform import` with `-generate-config-out=generated.tf`.
+2. Open `generated.tf` and review/clean up the generated resource:
+   - remove read-only or computed attributes
+   - rename the resource if needed
+   - adjust tags and any values you want to manage explicitly
+   - move the cleaned block into your main module files
+3. Run `terraform plan` to confirm that your configuration matches the existing resource and Terraform is not planning unexpected changes.
+
+Important points:
+
+- `-generate-config-out` does **not** remove the need to understand the resource; it only gives you a starting HCL template.
+- The imported resource is still added to state; the generated file is separate and must be integrated into your configuration.
+- You should treat the generated configuration as a draft, not as final production code.
+
 ---
 
 ## Typical import workflow

@@ -417,7 +417,40 @@ This reduces risk because:
 This separation can be done in different ways depending on your project design.
 
 ---
+## TF_WORKSPACE environment variable
 
+Sometimes Terraform shows a message like:
+
+> To select a new workspace, either update this environment variable or unset it and then run this command again.
+
+This happens when the `TF_WORKSPACE` environment variable is set.
+
+- `TF_WORKSPACE` forces Terraform to use a specific workspace.
+- When `TF_WORKSPACE` is set, commands like `terraform workspace select` cannot change the workspace unless you update or unset this variable first.
+
+Typical usage:
+
+```bash
+# Linux/macOS
+export TF_WORKSPACE=dev
+
+# Windows PowerShell
+$env:TF_WORKSPACE = "dev"
+```
+
+To allow `terraform workspace select` to work normally again, unset it:
+
+```bash
+# Linux/macOS
+unset TF_WORKSPACE
+
+# Windows PowerShell
+Remove-Item Env:TF_WORKSPACE
+```
+
+Use `TF_WORKSPACE` mainly in automation (CI/CD) to control which workspace Terraform runs in, instead of interactively selecting a workspace.
+
+---
 ## Common mistakes
 
 - storing only local state in team projects

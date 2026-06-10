@@ -108,3 +108,42 @@ Now:
     
 - others can **only execute** (`1`)
     
+
+## Special permissions in Linux
+
+Linux has three special permissions that add behavior beyond the normal `rwx` bits:
+
+- `setuid` (`u+s`)  
+- `setgid` (`g+s`)  
+- `sticky bit` (`+t`)
+
+### 1) setuid
+- Applies mainly to executable files.
+- When set, the program runs with the **owner’s** permissions, not the user who launched it.
+- Numeric form: first digit `4`.
+- Example: `chmod 4755 file`
+
+### 2) setgid
+- On executable files, the program runs with the **group’s** permissions.
+- On directories, new files inherit the **directory’s group**.
+- Numeric form: first digit `2`.
+- Example: `chmod 2755 dir`
+
+### 3) sticky bit
+- Applies mainly to directories.
+- In a shared directory, users can only delete their **own** files, even if they have write access to the directory.
+- Common example: `/tmp`
+- Numeric form: first digit `1`.
+- Example: `chmod 1777 dir`
+
+### Summary
+- `4` = setuid
+- `2` = setgid
+- `1` = sticky bit
+
+### Combined examples
+- `chmod 4755 file` → setuid + normal permissions
+- `chmod 2755 dir` → setgid + normal permissions
+- `chmod 1777 /tmp` → sticky bit + full access for everyone
+- `chmod 6755 file` → setuid + setgid together
+- `chmod 7755 dir` → setuid + setgid + sticky bit together

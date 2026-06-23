@@ -149,12 +149,12 @@ resource "aws_instance" "web" {
 
 These look similar but serve different purposes.
 
-| | `validation` | `precondition` |
-|---|---|---|
-| Lives in | `variable` block | `lifecycle` block inside a resource |
-| Checks | Input values only | Any value — inputs, data sources, other resources |
-| Runs | Before plan | Before resource create/update |
-| Has access to | Only `var.<name>` | `var`, `data`, other resources |
+|               | `validation`                                    | `precondition`                                    |
+| ------------- | ----------------------------------------------- | ------------------------------------------------- |
+| Lives in      | `variable` block                                | `lifecycle` block inside a resource               |
+| Checks        | Input values only                               | Any value — inputs, data sources, other resources |
+| Runs          | Before plan                                     | Before resource create/update                     |
+| Has access to | Only `var.<name>` and `locals` (Terraform 1.9+) | `var`, `data`, other resources                    |
 
 Simple rule:
 - use `validation` to check that a variable value is acceptable

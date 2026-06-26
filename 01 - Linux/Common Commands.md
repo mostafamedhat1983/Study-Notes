@@ -460,3 +460,37 @@ du -ch dir1 dir2
 - `-s` = summarize, one total only.
 - `-h` = human-readable.
 - `du` is for directory/file usage, while `df` is for filesystem free/used space.
+
+---
+# getent
+
+`getent` stands for **“get entries”**. It is used to query system databases such as users, groups, hosts, services, and networks.
+
+## What it does
+`getent` asks the system’s configured name service for information. That means it can read from local files like `/etc/passwd` and `/etc/group`, and also from sources like LDAP or NIS if they are configured.
+
+## Common uses
+- `getent passwd` — list user accounts.
+- `getent group` — list groups.
+- `getent hosts` — show hostname to IP mappings.
+- `getent services` — show service names and ports.
+
+## Why it is useful
+It gives the **official system view** of entries, not just what is stored in local text files. This makes it very useful for troubleshooting users, groups, and name resolution.
+
+## Examples
+```bash
+getent passwd
+getent group
+getent group docker
+getent hosts google.com
+getent services ssh
+```
+
+## When to use it
+Use `getent` when you want to check whether a user, group, host, or service is known to the system. It is especially useful when debugging permissions, DNS, or directory service lookups.
+
+## Quick idea
+If `cat /etc/passwd` shows only local users, `getent passwd` can show the full result the system actually uses.
+
+---

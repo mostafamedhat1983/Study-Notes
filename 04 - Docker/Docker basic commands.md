@@ -353,7 +353,7 @@ Displays system-wide Docker details.
 docker system df
 ```
 
-Shows how much disk space Docker is using.
+Shows how much disk space Docker is using across images, containers, volumes, and build cache.
 
 ### Show detailed disk usage
 ```bash
@@ -382,6 +382,20 @@ docker image prune -a
 ```
 
 Removes all images not currently used by containers.
+
+### Remove build cache
+```bash
+docker builder prune
+```
+
+Removes unused build cache. Build cache can grow large over time and shows as a separate line in `docker system df`.
+
+### Remove all build cache
+```bash
+docker builder prune -a
+```
+
+Removes all build cache, including cache that is still referenced.
 
 ### Remove unused Docker data
 ```bash
@@ -521,6 +535,7 @@ docker stats
 docker system df
 docker container prune
 docker image prune
+docker builder prune
 docker system prune
 docker cp
 docker version
@@ -569,3 +584,4 @@ docker rmi nginx
 - Use cleanup commands carefully, especially `prune`.
 - `docker commit` is not recommended for production — use a Dockerfile instead.
 - A Docker image reference supports only one colon for the tag: `registry/repo:tag`.
+- Build cache can consume significant disk space; use `docker builder prune` to clean it up.

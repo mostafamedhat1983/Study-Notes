@@ -308,6 +308,8 @@ docker compose up -d
 - use `docker compose restart` for restarting running services
 - use `docker compose up --build` when the image needs rebuilding
 - use `docker compose down` then `up` when you want a cleaner recreation
+- use `docker compose --no-build` to start containers without building images.
+- use `docker compose --force-recreate`: recreate containers even if nothing changed.
 ## Docker Compose installation note
 
 Docker Compose used to be a separate tool, but modern Docker uses **Docker Compose v2** as a Docker CLI plugin. On Linux, Docker documents installation of the Compose plugin separately from Docker Engine, and the modern command format is `docker compose` with a space rather than the old standalone `docker-compose` form.

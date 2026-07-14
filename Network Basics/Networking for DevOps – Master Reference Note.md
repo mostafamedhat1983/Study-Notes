@@ -5,7 +5,7 @@ tags:
   - Kubernetes
   - Linux
 ---
-## 1. Big picture of networking for DevOps
+t## 1. Big picture of networking for DevOps
 
 - Networking is **how services talk to each other** across machines, containers, VPCs, and the internet.  
 - As a DevOps engineer, you must understand IP, DNS, ports, routing, NAT, firewalls, VPCs, and Kubernetes networking so you can:

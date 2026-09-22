@@ -80,3 +80,23 @@ These principles help in optimizing the development process and improving softwa
 ## Software Lean in practice
 
 Use small batches, automate quality checks, reduce unnecessary approvals and handoffs, and improve the full value stream instead of one isolated team.
+
+## Visual management
+
+Visual management makes the flow of work, priorities, blockers, and problems easy for the team to see. A physical or digital Kanban board can show work stages such as to do, in progress, review, and done.
+
+The goal is to make problems visible so the team can improve the workflow, not to use the board to control individuals.
+
+## Work in process limits
+
+A WIP limit sets the maximum number of items allowed in a workflow stage. It creates a pull system where teams finish existing work before starting more work.
+
+WIP limits expose bottlenecks, reduce context switching, and improve flow when used with visible boards and feedback loops.
+
+## Five thieves of time
+
+- Too much work in process.
+- Conflicting priorities.
+- Unknown dependencies.
+- Unplanned work.
+- Neglected work.

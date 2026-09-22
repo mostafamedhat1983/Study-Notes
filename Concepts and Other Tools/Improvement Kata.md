@@ -23,6 +23,12 @@ tags:
 
 Leaders set the direction and target condition. Teams understand the current condition, run experiments, and improve step by step.
 
+## Improving workflow
+
+Use workflow data to understand the current condition, such as unplanned-work percentage, WIP, blocked items, incident counts, or delivery time.
+
+Set a small target condition and run experiments. For example, reserve capacity for operational work, reduce a WIP limit, automate a test, or improve a feedback loop.
+
 ## DevOps example
 
 - Vision: On-demand deployments with low production risk.

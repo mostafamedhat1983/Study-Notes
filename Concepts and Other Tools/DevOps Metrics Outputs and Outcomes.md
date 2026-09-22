@@ -23,6 +23,22 @@ DevOps focuses on outcomes, not only how much work a team delivers.
 - **Unplanned work**: Work caused by incidents, support requests, defects, or unexpected changes that interrupt planned work.
 - **Employee Net Promoter Score (eNPS)**: Measures how likely employees are to recommend their team or organization as a place to work.
 
+## Tracking unplanned work
+
+Track unplanned work separately from planned features, technical debt, and operational work. This makes capacity loss visible and helps teams improve estimates, reserve capacity, and reduce recurring sources of disruption.
+
+## eNPS calculation
+
+Employees score how likely they are to recommend their team or organization from 0 to 10.
+
+- **Promoters**: Scores of 9 or 10.
+- **Passives**: Scores of 7 or 8.
+- **Detractors**: Scores from 0 to 6.
+
+**eNPS = Percentage of promoters - Percentage of detractors**
+
+Use the score as a starting point for learning about team health, workload, ownership, and improvement opportunities.
+
 ## Key idea
 
 Measure delivery speed and reliability together. Faster delivery is useful only when changes remain stable and services can recover quickly.

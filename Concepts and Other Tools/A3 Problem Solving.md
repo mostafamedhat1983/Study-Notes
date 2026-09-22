@@ -22,6 +22,12 @@ tags:
 - Step 6: **Check**
 - Step 7: **Adjust**
 
+## DevOps uses
+
+Use A3 thinking to investigate problems such as excessive unplanned work, workload imbalance, repeated incidents, slow delivery, or missing feedback loops.
+
+For example, measure how much work is interrupted by incidents, identify the causes, test countermeasures, and standardize what works.
+
 ## Key idea
 
 Spend most of the effort understanding the problem before implementing a solution.

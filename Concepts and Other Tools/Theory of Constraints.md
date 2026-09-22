@@ -2,7 +2,7 @@
 tags:
   - concepts
 ---
-The Theory of Constraints, or TOC, is a management method that says every system has at least one limiting factor, called a **constraint**, that controls how much the whole system can achieve. The idea is to find that bottleneck and improve it first, because improving non-bottleneck parts will not increase total throughput very much.
+The Theory of Constraints, or TOC, is a management method that says every system has at least one limiting factor, called a **constraint**, that controls how much the whole system can achieve. The idea is to find that bottleneck and improve it first, because improving a non-constraint generally does not increase total system throughput unless it changes or relieves the actual constraint.
 
 ## Core idea
 
@@ -10,18 +10,13 @@ TOC treats a process like a chain, where the weakest link limits the strength of
 
 ## Five steps
 
-TOC is commonly explained through five focusing steps.
+TOC is commonly explained through five focusing steps:
 
-- Identify the constraint.[](https://shoplogix.com/es/the-theory-of-constraints/)​
-    
-- Exploit the constraint, meaning get the most out of it with current resources.
-    
-- Subordinate everything else to the constraint, so the rest of the system supports it instead of overloading it.
-    
-- Elevate the constraint, meaning increase its capacity if needed.
-    
-- Repeat the cycle, because once one constraint is removed, another usually becomes the new limit.[](https://shoplogix.com/es/the-theory-of-constraints/)​
-    
+1. Identify the constraint.
+2. Exploit the constraint, meaning get the most out of it with current resources.
+3. Subordinate everything else to the constraint, so the rest of the system supports it instead of overloading it.
+4. Elevate the constraint, meaning increase its capacity if needed.
+5. Repeat the cycle, because once one constraint is removed, another usually becomes the new limit.
 
 ## Simple example
 

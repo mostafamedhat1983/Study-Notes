@@ -66,3 +66,17 @@ Lean software development principles:
 
   
 These principles help in optimizing the development process and improving software quality.  
+
+## Seven wastes in software development
+
+- **Partially done work**: Work that is incomplete, untested, undocumented, or not released.
+- **Extra features**: Functionality that customers do not need or use.
+- **Relearning**: Repeatedly rediscovering knowledge because it was not documented or shared.
+- **Handoffs**: Moving work between teams, which creates waiting time and lost context.
+- **Delays**: Waiting for approvals, environments, builds, dependencies, or decisions.
+- **Task switching**: Interruptions that reduce focus and slow completion.
+- **Defects**: Bugs and rework that consume capacity without adding new value.
+
+## Software Lean in practice
+
+Use small batches, automate quality checks, reduce unnecessary approvals and handoffs, and improve the full value stream instead of one isolated team.

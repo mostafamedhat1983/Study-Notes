@@ -48,4 +48,14 @@ Lean and Agile are important foundations of DevOps. Agile contributes iterative 
 
 ## Small distinction
 
-They are related but not identical. Agile, Lean, and DevOps overlap heavily, but each has a different emphasis: Agile centers on development practices, Lean on end-to-end value and efficiency, and DevOps on unifying development and operations for fast, reliable delivery
+They are related but not identical. Agile, Lean, and DevOps overlap heavily, but each has a different emphasis: Agile centers on development practices, Lean on end-to-end value and efficiency, and DevOps on unifying development and operations for fast, reliable delivery.
+
+## DevOps in different environments
+
+DevOps principles work with Agile, Scrum, Waterfall, and other delivery methods. They also apply to greenfield products, legacy systems, custom software, and packaged or vendor software.
+
+The goal is to improve the parts of the value stream the team can control. Common improvements include reducing handoffs, using smaller batches, automating tests and deployments, and improving collaboration with business, operations, security, and vendors.
+
+## Product ownership
+
+A DevOps team should build, own, operate, and improve its product throughout its lifecycle. This shared ownership improves feedback, reliability, and delivery speed.

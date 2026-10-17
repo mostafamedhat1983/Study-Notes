@@ -32,6 +32,19 @@ Good delivery performance is not a trade-off between speed and stability. Teams 
 
 These capabilities help reduce lead time, lower change risk, and improve recovery when failures occur.
 
+## Product-health metrics
+
+Service availability alone does not always show whether customers can successfully use a product. Pair technical measures with customer-centered outcomes.
+
+Examples include:
+
+- **Transactions per hour**: Whether customers can complete purchases or other core actions.
+- **Successful customer journeys**: Whether important flows, such as sign-in, checkout, or order placement, work end to end.
+- **App ratings and user feedback**: Signals of user satisfaction and product quality.
+- **Mean time to detect**: How quickly the team discovers an issue, ideally before customers report it.
+
+Choose measures that represent the product's purpose. For a checkout system, successful purchases may matter more than server uptime alone.
+
 ## Other useful metrics
 
 - **Deployment pain**: The effort, stress, time, and number of people needed for a deployment.

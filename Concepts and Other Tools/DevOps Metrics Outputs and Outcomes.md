@@ -17,6 +17,21 @@ DevOps focuses on outcomes, not only how much work a team delivers.
 - **Change failure rate**: Percentage of deployments that cause a production failure or require remediation.
 - **Time to restore service**: Average time to recover service after a production incident.
 
+## Reading DORA metrics together
+
+Use the four metrics together rather than treating one number as success. High deployment frequency is valuable only when change failure rate stays controlled and service restoration is fast.
+
+Good delivery performance is not a trade-off between speed and stability. Teams improve both by building quality into the delivery process instead of relying on long manual test cycles or release gates.
+
+## Capabilities behind the metrics
+
+- **Version control**: Keep application code, infrastructure, and configuration versioned so changes are traceable and repeatable.
+- **Automated testing**: Detect defects early and make frequent changes safer.
+- **Continuous delivery**: Keep software in a deployable state and make releases routine.
+- **Monitoring and observability**: Detect service problems quickly and support faster restoration.
+
+These capabilities help reduce lead time, lower change risk, and improve recovery when failures occur.
+
 ## Other useful metrics
 
 - **Deployment pain**: The effort, stress, time, and number of people needed for a deployment.

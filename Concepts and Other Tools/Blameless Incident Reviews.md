@@ -25,9 +25,15 @@ Complex systems rarely have one root cause. Incidents usually result from severa
 
 ## Human error
 
-Human error is a starting point for investigation, not a root cause. Ask what conditions made the action possible, likely, or difficult to recover from.
+Human error is not a useful root cause because it stops the investigation too early. Treat an action by a person as a starting point for learning about the system conditions that made that action possible, likely, or difficult to recover from.
 
 For example, a wrong production configuration may expose missing review controls, manual changes, confusing access, poor automation, or an unsustainable workload.
+
+## Learn fast
+
+The aim is to learn quickly and safely, not to assign blame or merely “fail fast.” Teams should use incidents to test improvement hypotheses, make changes, measure the result, and keep improving the system.
+
+Psychological safety matters because people need to be able to report bad news, uncertainty, and near misses before they become larger failures.
 
 ## Good review practices
 

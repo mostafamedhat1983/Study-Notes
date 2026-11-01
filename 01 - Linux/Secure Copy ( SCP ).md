@@ -4,7 +4,7 @@ tags:
   - SSH
 ---
 # scp copy file from one pc to another pc
-to avoid asking for password every time use password-less authentication  [[SSH]]
+to avoid asking for password every time use password-less authentication  [SSH](SSH.md)
 
 ## to secure copy from one pc to another
 scp /path/to/your/local/file.txt user@remote_host:/path/to/remote/directory/

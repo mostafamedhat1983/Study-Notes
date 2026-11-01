@@ -133,7 +133,7 @@ platform-ai-chatbot/
   - Falco: 7 pods (4 daemonset + 3 supporting)
   - Application: 6 pods (3 backend + 3 frontend)
 - **With HPA Max Scaling**: ~41-42 pods (60-62% utilization)
-  - Application scales to 13 pods (7 backend + 3 frontend)
+  - Application scales to 13 pods (7 backend + 6 frontend)
 
 ### Jenkins Pipeline Pods (Temporary)
 - Application Pipeline: 1 pod (docker-dind + kubectl containers)

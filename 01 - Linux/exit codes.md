@@ -25,7 +25,7 @@ Linux exit codes (also called exit status) are 8-bit integers (0-255) returned b
 
 ## Bash Scripting Usage
 
-Check codes in scripts: `if [ $? -ne 0 ]; then echo "Failed"; fi`. Use `exit 1` to propagate errors in functions. For DevOps (your bash/K8s workflows), trap them in CI/CD: `trap 'exit 1' ERR`.
+Check codes in scripts: `if [ $? -ne 0 ]; then echo "Failed"; fi`. Use `exit 1` to propagate errors in functions. In CI/CD scripts you can trap failures: `trap 'exit 1' ERR`.
 
 ## Quick Reference Table
 

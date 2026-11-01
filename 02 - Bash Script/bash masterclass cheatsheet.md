@@ -3,4 +3,4 @@ tags:
   - Linux
   - Bash_Script
 ---
-![[bash_masterclass_cheatsheet.pdf]]
+*(The PDF cheatsheet is not included in this repository.)*

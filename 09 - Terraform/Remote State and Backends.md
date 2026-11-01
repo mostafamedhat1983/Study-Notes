@@ -86,7 +86,7 @@ The backend block tells Terraform where to store or read the state file. Backend
 
 A very common AWS pattern is:
 - S3 bucket for state storage
-- DynamoDB table for state locking
+- S3 native state locking (`use_lockfile = true`, Terraform 1.10 or newer)
 - encryption enabled
 
 Example:
@@ -97,13 +97,13 @@ terraform {
     bucket         = "my-company-terraform-state-prod"
     key            = "environments/production/terraform.tfstate"
     region         = "us-east-1"
-    dynamodb_table = "terraform-state-locks"
+    use_lockfile   = true
     encrypt        = true
   }
 }
 ```
 
-This setup is widely used because S3 provides centralized storage, while DynamoDB locking helps prevent concurrent Terraform runs from corrupting state. 
+This setup is widely used because S3 provides centralized storage, while native S3 locking (`use_lockfile`) helps prevent concurrent Terraform runs from corrupting state. The older approach used a DynamoDB table (`dynamodb_table`), which is now deprecated. 
 
 ---
 
@@ -207,7 +207,7 @@ Example:
 resource "aws_instance" "web" {
   ami                    = "ami-0c55b159cbfafe1f0"
   instance_type          = "t3.micro"
-  subnet_id              = data.terraform_remote_state.network.outputs.public_subnet_ids
+  subnet_id              = data.terraform_remote_state.network.outputs.public_subnet_ids[0]
   vpc_security_group_ids = [data.terraform_remote_state.network.outputs.web_security_group_id]
 }
 ```
@@ -233,7 +233,7 @@ Those controls help reduce risk and improve recoverability.
 
 State locking helps prevent two Terraform operations from modifying the same state at the same time. This reduces the risk of corruption and conflicting updates. 
 
-For AWS-based setups, DynamoDB is commonly used with S3 backends for locking. In general, choosing a backend with locking support is a strong operational practice. 
+For AWS-based setups, Terraform 1.10 and newer support native S3 locking with `use_lockfile = true`. Older setups used a DynamoDB table for locking; that approach is now deprecated. In general, choosing a backend with locking support is a strong operational practice. 
 
 ## Force unlock
 
@@ -307,7 +307,7 @@ These practices are repeatedly recommended in Terraform backend and state-manage
 - A backend controls where state is stored and accessed.
 - Local backend is the default when no backend is configured.
 - Remote backends are better for collaboration and automation.
-- S3 with DynamoDB locking is a common AWS pattern.
+- S3 with native locking (`use_lockfile`) is the current AWS pattern; DynamoDB locking is the older, deprecated approach.
 - `terraform init` is used to initialize or reinitialize backend settings.
 - `terraform_remote_state` can read outputs from another state file.
 
@@ -330,7 +330,7 @@ terraform {
     bucket         = "my-company-terraform-state-prod"
     key            = "environments/production/terraform.tfstate"
     region         = "us-east-1"
-    dynamodb_table = "terraform-state-locks"
+    use_lockfile   = true
     encrypt        = true
   }
 }

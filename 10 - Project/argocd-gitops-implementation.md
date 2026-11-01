@@ -73,7 +73,7 @@ metadata:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
-    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-2:586794447516:certificate/1696ca3e-e5ac-477d-b872-e579133f660c
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-2:123456789012:certificate/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
     alb.ingress.kubernetes.io/backend-protocol: HTTPS
     alb.ingress.kubernetes.io/healthcheck-path: /healthz
     alb.ingress.kubernetes.io/group.name: platform-shared-alb
@@ -302,7 +302,7 @@ spec:
     
     environment {
         AWS_REGION = 'us-east-2'
-        ECR_REGISTRY = '586794447516.dkr.ecr.us-east-2.amazonaws.com'
+        ECR_REGISTRY = '123456789012.dkr.ecr.us-east-2.amazonaws.com'
         ECR_REPOSITORY = 'platform-app'
         BACKEND_IMAGE_TAG = "${env.BUILD_NUMBER}-backend"
         FRONTEND_IMAGE_TAG = "${env.BUILD_NUMBER}-frontend"
@@ -384,12 +384,12 @@ Ensure `k8s/values-dev.yaml` has placeholder images that sed can replace:
 
 ```yaml
 backend:
-  image: 586794447516.dkr.ecr.us-east-2.amazonaws.com/platform-app:latest-backend
-  # Jenkins will replace with: 586794447516.dkr.ecr.us-east-2.amazonaws.com/platform-app:42-backend
+  image: 123456789012.dkr.ecr.us-east-2.amazonaws.com/platform-app:latest-backend
+  # Jenkins will replace with: 123456789012.dkr.ecr.us-east-2.amazonaws.com/platform-app:42-backend
 
 frontend:
-  image: 586794447516.dkr.ecr.us-east-2.amazonaws.com/platform-app:latest-frontend
-  # Jenkins will replace with: 586794447516.dkr.ecr.us-east-2.amazonaws.com/platform-app:42-frontend
+  image: 123456789012.dkr.ecr.us-east-2.amazonaws.com/platform-app:latest-frontend
+  # Jenkins will replace with: 123456789012.dkr.ecr.us-east-2.amazonaws.com/platform-app:42-frontend
 ```
 
 ---
@@ -440,7 +440,7 @@ argocd app sync chatbot-dev  # Manual sync if needed
 # Check pods updated
 kubectl get pods -l app=chatbot-backend -o jsonpath='{.items[0].spec.containers[0].image}'
 
-# Should show: 586794447516.dkr.ecr.us-east-2.amazonaws.com/platform-app:42-backend
+# Should show: 123456789012.dkr.ecr.us-east-2.amazonaws.com/platform-app:42-backend
 
 # Check application
 curl https://chatbot.mostafa-medhat.online

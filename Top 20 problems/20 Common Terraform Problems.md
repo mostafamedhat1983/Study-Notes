@@ -51,8 +51,8 @@ For each problem below:
 
 - **Why it happens:** Multiple modules or configurations require incompatible provider versions.
 - **Quick sign:** Init fails while resolving provider versions.
-- **Solution:** Align required_provider constraints and module expectations, then reinitialize.
-- **Useful commands:** `terraform init -upgrade`, `terraform providers`
+- **Solution:** Align required_providers constraints and module expectations, then reinitialize.
+- **Useful commands:** `terraform init`, `terraform providers`
 
 ---
 
@@ -94,10 +94,10 @@ For each problem below:
 
 ## 9. Resource not found during refresh
 
-- **Why it happens:** The resource was deleted outside Terraform or the provider cannot access it.
+- **Why it happens:** The resource was deleted outside Terraform, the provider cannot access it, or the wrong account/region is selected.
 - **Quick sign:** Plan reports the resource no longer exists.
-- **Solution:** Confirm whether deletion was intentional; remove it from state or recreate it according to the desired configuration.
-- **Useful commands:** `terraform plan`, `terraform state list`, `terraform state rm`
+- **Solution:** Confirm account/region and whether deletion was intentional; remove it from state only after confirmation, or recreate it according to the desired configuration.
+- **Useful commands:** `terraform plan`, `terraform state list`, `terraform state rm <address>`
 
 ---
 
@@ -123,8 +123,8 @@ For each problem below:
 
 - **Why it happens:** A required attribute changed, a resource was renamed, or configuration/state diverged.
 - **Quick sign:** Plan includes `- destroy` for resources that should remain.
-- **Solution:** Read the diff carefully and use targeted planning; prevent accidental replacement with lifecycle rules only when the semantics are understood.
-- **Useful commands:** `terraform plan -out=tfplan`, `terraform show -no-color tfplan`, `terraform plan -target=<resource>`
+- **Solution:** Stop before applying. Review the complete plan, replacement reason, resource addresses, and recent configuration changes. Use targeted planning only for a specific, understood recovery scenario.
+- **Useful commands:** `terraform plan -out=tfplan`, `terraform show -no-color tfplan`
 
 ---
 
@@ -177,8 +177,8 @@ For each problem below:
 
 - **Why it happens:** A secret-bearing value was marked or exposed incorrectly.
 - **Quick sign:** A secret appears in plan, state, logs, or output.
-- **Solution:** Rotate the exposed secret, mark sensitive values appropriately, and restrict output and state access.
-- **Useful commands:** `terraform output`, `terraform state pull`
+- **Solution:** Rotate the exposed secret, mark sensitive values appropriately, and restrict output and state access. Sensitive masking does not remove the value from state.
+- **Useful commands:** `terraform output <name>`
 
 ---
 
@@ -225,7 +225,7 @@ For each problem below:
 
 ```bash
 terraform version
-terraform init -upgrade
+terraform init
 terraform fmt -check
 terraform validate
 terraform plan -out=tfplan

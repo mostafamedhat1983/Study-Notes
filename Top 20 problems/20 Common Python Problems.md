@@ -106,7 +106,7 @@ For each problem below:
 - **Why it happens:** An operation receives an incompatible type, such as adding a string and integer.
 - **Quick sign:** Runtime reports unsupported operand or argument type.
 - **Solution:** Inspect value types at the failure point and convert or validate inputs explicitly.
-- **Useful commands:** `python3 -c 'print(type(value))'`, `python3 -m pdb script.py`
+- **Useful commands:** `python3 -m pdb script.py`, add `print(type(value))` temporarily at the failure point
 
 ---
 
@@ -115,7 +115,7 @@ For each problem below:
 - **Why it happens:** Code assumes a dictionary key exists.
 - **Quick sign:** Runtime reports the missing key.
 - **Solution:** Validate input data or use a safe access pattern with an appropriate default.
-- **Useful commands:** `python3 -m pdb script.py`, `python3 -c 'print(data.keys())'`
+- **Useful commands:** `python3 -m pdb script.py`, add `print(data.keys())` temporarily at the failure point
 
 ---
 
@@ -124,7 +124,7 @@ For each problem below:
 - **Why it happens:** Code accesses a list position beyond its length.
 - **Quick sign:** Runtime reports list index out of range.
 - **Solution:** Check collection length and boundary conditions, especially empty inputs.
-- **Useful commands:** `python3 -m pdb script.py`, `python3 -c 'print(len(items))'`
+- **Useful commands:** `python3 -m pdb script.py`, add `print(len(items))` temporarily at the failure point
 
 ---
 
@@ -133,7 +133,7 @@ For each problem below:
 - **Why it happens:** An object does not have the accessed method or attribute, often because it is None or another type.
 - **Quick sign:** Runtime reports object has no attribute.
 - **Solution:** Inspect the object's actual type and handle None or unexpected shapes before access.
-- **Useful commands:** `python3 -m pdb script.py`, `python3 -c 'print(type(obj), dir(obj))'`
+- **Useful commands:** `python3 -m pdb script.py`, add `print(type(obj), dir(obj))` temporarily at the failure point
 
 ---
 
@@ -151,7 +151,7 @@ For each problem below:
 - **Why it happens:** The working directory differs from the script directory.
 - **Quick sign:** File exists but open() reports FileNotFound.
 - **Solution:** Build paths relative to the script file and log the resolved path.
-- **Useful commands:** `pwd`, `python3 -c 'from pathlib import Path; print(Path(__file__).resolve())'`
+- **Useful commands:** `pwd`, add this inside the script: `from pathlib import Path; print(Path(__file__).resolve().parent)`
 
 ---
 
@@ -160,7 +160,7 @@ For each problem below:
 - **Why it happens:** Files use an unexpected encoding or text is decoded incorrectly.
 - **Quick sign:** UnicodeDecodeError or unexpected characters appear.
 - **Solution:** Specify encoding explicitly when reading/writing files and inspect the source encoding.
-- **Useful commands:** `file data.txt`, `python3 -c "open('data.txt', encoding='utf-8')"`
+- **Useful commands:** `file data.txt`, `python3 -c "print(open('data.txt', encoding='utf-8').read())"`
 
 ---
 
@@ -196,7 +196,7 @@ For each problem below:
 - **Why it happens:** Credentials are hardcoded, printed, or included in error messages.
 - **Quick sign:** A token or password appears in output, logs, or Git history.
 - **Solution:** Rotate the secret immediately, load it from a secure source, and redact sensitive values in logs.
-- **Useful commands:** `git log --all -- path/to/file`, `grep -RIn --exclude-dir=.git 'password\|token' .`
+- **Useful commands:** `git log --all -- path/to/file`, `grep -RIn --exclude-dir=.git 'password\\|token' .`
 
 ---
 
@@ -239,5 +239,5 @@ python3 -m pytest -v
 
 - Confirm which interpreter is actually running.
 - Virtual environments isolate dependencies and prevent conflicts.
-- Read the first traceback line and failure location before changing code.
+- Identify the exception type/message and inspect the relevant stack frame.
 - Environment differences explain many local-versus-CI failures.

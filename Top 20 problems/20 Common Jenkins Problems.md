@@ -12,6 +12,8 @@ Knowing these problems helps you diagnose Jenkins builds, agents, plugins, and p
 
 Most Jenkins problems involve controller health, plugins, agents, credentials, pipeline syntax, artifacts, or resource pressure.
 
+Commands below assume a systemd Linux installation with the default service names. Jenkins containers, custom `JENKINS_HOME` locations, and externally managed agents can use different service names and paths.
+
 For each problem below:
 - **Why it happens** = root cause
 - **Quick sign** = how to recognize it fast
@@ -123,8 +125,8 @@ For each problem below:
 
 - **Why it happens:** The variable is defined in the wrong scope, set after use, or masked by a tool-specific environment.
 - **Quick sign:** A command receives an empty value or uses an unexpected default.
-- **Solution:** Print non-secret values at the point of use and verify pipeline/environment scoping.
-- **Useful commands:** `sh 'printf "%s\n" "$MY_VAR"'`, `printenv`
+- **Solution:** Print only known non-secret variables at the point of use and verify pipeline/environment scoping.
+- **Useful commands:** `sh 'printf "%s\\n" "$MY_NON_SECRET_VAR"'`, `sh 'command -v <tool>'`
 
 ---
 
@@ -142,7 +144,7 @@ For each problem below:
 - **Why it happens:** PATH, working directory, user, tool versions, or shell behavior differ on the agent.
 - **Quick sign:** A command succeeds interactively but fails during the build.
 - **Solution:** Run the command with the same user and working directory, then use explicit tool paths or a tool installation where appropriate.
-- **Useful commands:** `pwd`, `whoami`, `printf '%s\n' "$PATH"`, `command -v <tool>`
+- **Useful commands:** `pwd`, `whoami`, `printf '%s\\n' "$PATH"`, `command -v <tool>`
 
 ---
 

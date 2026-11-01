@@ -12,6 +12,8 @@ Knowing these problems helps you isolate connectivity failures layer by layer.
 
 Most networking problems involve interface/link state, IP configuration, routing, DNS, firewall policy, NAT, or application listeners.
 
+Commands below are primarily Linux examples. Some tools require installation or elevated permissions, and commands such as `dhclient` can change network configuration.
+
 For each problem below:
 - **Why it happens** = root cause
 - **Quick sign** = how to recognize it fast
@@ -34,7 +36,7 @@ For each problem below:
 - **Why it happens:** DHCP failed, static configuration is incomplete, or the route was removed.
 - **Quick sign:** Local subnet works but external destinations do not.
 - **Solution:** Verify DHCP/static settings and restore the correct default route.
-- **Useful commands:** `ip route`, `ip route show default`, `dhclient -v`
+- **Useful commands:** `ip route`, `ip route show default`
 
 ---
 
@@ -52,7 +54,7 @@ For each problem below:
 - **Why it happens:** Two devices use the same IP address.
 - **Quick sign:** Connectivity is intermittent or ARP entries change unexpectedly.
 - **Solution:** Identify duplicate addresses, release/renew or reassign one device, and reserve critical addresses.
-- **Useful commands:** `arping -D <ip>`, `ip neigh`, `dhclient -v`
+- **Useful commands:** `arping -D <ip>`, `ip neigh`
 
 ---
 
@@ -151,7 +153,7 @@ For each problem below:
 - **Why it happens:** No DHCP server is reachable, the VLAN is wrong, or address pool/relay configuration is broken.
 - **Quick sign:** Interface has no IPv4 address or uses an APIPA address.
 - **Solution:** Verify link, VLAN, DHCP server reachability, and relay configuration.
-- **Useful commands:** `ip addr`, `dhclient -v`, `tcpdump -ni <interface> port 67 or port 68`
+- **Useful commands:** `ip addr`, `tcpdump -ni <interface> port 67 or port 68`
 
 ---
 
@@ -186,7 +188,7 @@ For each problem below:
 
 - **Why it happens:** Certificate validation, SNI, proxy interception, clock skew, or protocol mismatch causes failure.
 - **Quick sign:** TCP connects but HTTPS handshake fails.
-- **Solution:** Verify time, certificate chain, hostname/SNI, and proxy behavior; do not disable verification as a permanent fix.
+- **Solution:** Verify time, certificate chain, hostname/SNI, and proxy behavior; do not disable certificate verification as a permanent fix.
 - **Useful commands:** `openssl s_client -connect host:443 -servername host`, `curl -v https://host`, `timedatectl`
 
 ---
@@ -203,7 +205,7 @@ For each problem below:
 ## Common mistakes
 
 - changing multiple network settings at once
-- disabling firewall verification permanently
+- disabling a firewall or certificate verification without understanding the impact
 - assuming DNS failure means total network failure
 - ignoring interface errors and packet counters
 - using broad security rules instead of specific sources and ports

@@ -12,6 +12,8 @@ Knowing these problems helps you isolate AWS identity, networking, compute, stor
 
 Most AWS problems involve credentials, IAM permissions, VPC routing/security, service limits, or region/resource references.
 
+Replace placeholders before running commands. Some commands require additional arguments or permissions.
+
 For each problem below:
 - **Why it happens** = root cause
 - **Quick sign** = how to recognize it fast
@@ -34,7 +36,7 @@ For each problem below:
 - **Why it happens:** The identity lacks an allowed IAM action, resource policy denies access, or a permission boundary restricts it.
 - **Quick sign:** API calls return AccessDenied.
 - **Solution:** Identify the exact action and resource, inspect identity and resource policies, then grant only the required permission.
-- **Useful commands:** `aws sts get-caller-identity`, `aws iam simulate-principal-policy`, CloudTrail event history
+- **Useful commands:** `aws sts get-caller-identity`, `aws iam simulate-principal-policy --policy-source-arn <principal-arn> --action-names <action> --resource-arns <resource-arn>`, CloudTrail event history
 
 ---
 
@@ -61,7 +63,7 @@ For each problem below:
 - **Why it happens:** The subnet lacks an internet gateway route, the instance has no public IP, or security/NACL rules block traffic.
 - **Quick sign:** Package downloads and external API calls fail while internal VPC access may work.
 - **Solution:** Trace route tables, internet/NAT gateway configuration, security groups, and NACLs in order.
-- **Useful commands:** `aws ec2 describe-route-tables`, `aws ec2 describe-instances`, `aws ec2 describe-security-groups`
+- **Useful commands:** `aws ec2 describe-route-tables --filters Name=association.subnet-id,Values=<subnet-id>`, `aws ec2 describe-instances --instance-ids <instance-id>`, `aws ec2 describe-security-groups --group-ids <sg-id>`
 
 ---
 
@@ -70,16 +72,16 @@ For each problem below:
 - **Why it happens:** Inbound rules do not allow the application port or expected source.
 - **Quick sign:** Connections time out despite the service running.
 - **Solution:** Verify listener, source IP, protocol, and security-group rules; use the narrowest practical source range.
-- **Useful commands:** `aws ec2 describe-security-groups`, `ss -lntp`, `curl -v <endpoint>`
+- **Useful commands:** `aws ec2 describe-security-groups --group-ids <sg-id>`, `ss -lntp`, `curl -v <endpoint>`
 
 ---
 
 ## 7. Security group or NACL misconfiguration
 
-- **Why it happens:** Stateless security groups and stateful NACL evaluation differ, causing asymmetric or unexpected blocks.
-- **Quick sign:** One direction works while return traffic fails.
+- **Why it happens:** Security groups are stateful, while NACLs are stateless and require explicit return-traffic rules.
+- **Quick sign:** One direction works while return traffic fails, especially with NACLs.
 - **Solution:** Check both inbound and outbound rules and distinguish security-group stateful behavior from NACL rules.
-- **Useful commands:** `aws ec2 describe-security-groups`, `aws ec2 describe-network-acls`
+- **Useful commands:** `aws ec2 describe-security-groups --group-ids <sg-id>`, `aws ec2 describe-network-acls --network-acl-ids <nacl-id>`
 
 ---
 
@@ -97,7 +99,7 @@ For each problem below:
 - **Why it happens:** VPC DNS support, private hosted zones, resolver endpoints, or DHCP options are misconfigured.
 - **Quick sign:** Private names fail while IP-based access works.
 - **Solution:** Verify VPC DNS attributes, hosted zones, resolver endpoints, and security-group access for DNS traffic.
-- **Useful commands:** `aws ec2 describe-vpc-attribute`, `aws route53 list-hosted-zones`, `dig <name>`
+- **Useful commands:** `aws ec2 describe-vpc-attribute --vpc-id <vpc-id> --attribute enableDnsSupport`, `aws route53 list-hosted-zones`, `dig <name>`
 
 ---
 
@@ -106,7 +108,7 @@ For each problem below:
 - **Why it happens:** IAM policy, bucket policy, KMS key policy, or Block Public Access settings conflict.
 - **Quick sign:** GetObject or PutObject returns AccessDenied.
 - **Solution:** Identify the exact operation and principal, then review identity policy, bucket policy, and encryption settings.
-- **Useful commands:** `aws s3api get-object`, `aws s3api get-bucket-policy`, `aws s3api get-bucket-encryption`
+- **Useful commands:** `aws s3api get-object --bucket <bucket> --key <key> <output-file>`, `aws s3api get-bucket-policy --bucket <bucket>`, `aws s3api get-bucket-encryption --bucket <bucket>`
 
 ---
 
@@ -115,7 +117,7 @@ For each problem below:
 - **Why it happens:** Object size, multipart configuration, network throughput, permissions, or encryption requirements cause failure.
 - **Quick sign:** Large uploads fail or remain incomplete.
 - **Solution:** Verify object size and permissions, use multipart upload where appropriate, and inspect incomplete multipart uploads.
-- **Useful commands:** `aws s3 cp <file> s3://<bucket>/`, `aws s3api list-multipart-uploads --bucket <bucket>`
+- **Useful commands:** `aws s3 cp <file> s3://<bucket>/<key>`, `aws s3api list-multipart-uploads --bucket <bucket>`
 
 ---
 
@@ -124,7 +126,7 @@ For each problem below:
 - **Why it happens:** AZ mismatch, attachment limits, instance state, or an existing attachment prevents mounting.
 - **Quick sign:** Attach-volume fails or the device does not appear inside the OS.
 - **Solution:** Confirm AZ, instance state, attachment status, and device naming; never assume a device name without checking the OS.
-- **Useful commands:** `aws ec2 describe-volumes`, `aws ec2 describe-instances`, `lsblk`
+- **Useful commands:** `aws ec2 describe-volumes --volume-ids <volume-id>`, `aws ec2 describe-instances --instance-ids <instance-id>`, `lsblk`
 
 ---
 
@@ -133,7 +135,7 @@ For each problem below:
 - **Why it happens:** Security groups, VPC/subnet groups, endpoint/DNS, credentials, or database engine settings are wrong.
 - **Quick sign:** The application cannot connect even though the instance is available.
 - **Solution:** Test from the intended network location, verify security-group ingress, endpoint resolution, and database authentication.
-- **Useful commands:** `aws rds describe-db-instances`, `nslookup <rds-endpoint>`, `ss -lntp`
+- **Useful commands:** `aws rds describe-db-instances --db-instance-identifier <identifier>`, `nslookup <rds-endpoint>`, database client connection test
 
 ---
 
@@ -142,7 +144,7 @@ For each problem below:
 - **Why it happens:** The function exceeds its configured timeout, waits on a downstream service, or has insufficient memory/CPU allocation.
 - **Quick sign:** Logs show Task timed out after the configured duration.
 - **Solution:** Inspect duration and memory metrics, identify the slow dependency, and adjust timeout or resources based on measured behavior.
-- **Useful commands:** `aws lambda get-function-configuration`, CloudWatch Logs, `aws lambda invoke`
+- **Useful commands:** `aws lambda get-function-configuration --function-name <name>`, CloudWatch Logs, `aws lambda invoke --function-name <name> <output-file>`
 
 ---
 
@@ -150,8 +152,8 @@ For each problem below:
 
 - **Why it happens:** The function is attached to private subnets without a NAT route, or security-group rules block the destination.
 - **Quick sign:** Internet or VPC-resource calls time out.
-- **Solution:** Verify subnet routing, NAT/internet gateway design, security groups, and DNS configuration.
-- **Useful commands:** `aws lambda get-function-configuration`, `aws ec2 describe-route-tables`, `aws ec2 describe-security-groups`
+- **Solution:** Verify subnet routing, NAT/internet gateway design, security groups, and DNS configuration. Separate private-destination failures from internet-destination failures.
+- **Useful commands:** `aws lambda get-function-configuration --function-name <name>`, `aws ec2 describe-route-tables`, `aws ec2 describe-security-groups --group-ids <sg-id>`
 
 ---
 
@@ -160,7 +162,7 @@ For each problem below:
 - **Why it happens:** Invalid template syntax, IAM permissions, dependency ordering, resource limits, or an existing resource conflict.
 - **Quick sign:** Stack events show CREATE_FAILED or UPDATE_FAILED.
 - **Solution:** Read the first failing event, correct the specific resource or permission, then update or roll back deliberately.
-- **Useful commands:** `aws cloudformation describe-stack-events --stack-name <stack>`, `aws cloudformation validate-template`
+- **Useful commands:** `aws cloudformation describe-stack-events --stack-name <stack>`, `aws cloudformation validate-template --template-body file://template.yaml`
 
 ---
 
@@ -169,7 +171,7 @@ For each problem below:
 - **Why it happens:** The instance uses a private subnet, the Elastic IP was released, or the network interface configuration changed.
 - **Quick sign:** External systems cannot reach the instance.
 - **Solution:** Verify subnet routing, public-IP settings, and Elastic IP association before changing network configuration.
-- **Useful commands:** `aws ec2 describe-instances`, `aws ec2 describe-addresses`, `aws ec2 describe-subnets`
+- **Useful commands:** `aws ec2 describe-instances --instance-ids <instance-id>`, `aws ec2 describe-addresses`, `aws ec2 describe-subnets --subnet-ids <subnet-id>`
 
 ---
 
@@ -178,7 +180,7 @@ For each problem below:
 - **Why it happens:** Account or regional quotas restrict instances, IPs, volumes, Lambdas, or API rates.
 - **Quick sign:** API errors mention limit exceeded, throttling, or quota.
 - **Solution:** Identify the specific quota, reduce waste, and request an increase only where justified.
-- **Useful commands:** `aws service-quotas list-service-quotas`, `aws ec2 describe-account-attributes`
+- **Useful commands:** `aws service-quotas list-service-quotas --service-code <service-code>`, `aws ec2 describe-account-attributes`
 
 ---
 
@@ -226,7 +228,7 @@ For each problem below:
 aws sts get-caller-identity
 aws configure list
 aws ec2 describe-instances --region <region>
-aws ec2 describe-security-groups
+aws ec2 describe-security-groups --group-ids <sg-id>
 aws ec2 describe-route-tables
 aws s3 ls
 aws cloudformation describe-stack-events --stack-name <stack>

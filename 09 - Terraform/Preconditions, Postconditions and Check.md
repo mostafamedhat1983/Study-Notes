@@ -193,13 +193,13 @@ check "ami_is_available" {
 
     filter {
       name   = "name"
-      values = ["amzn2-ami-hvm-*"]
+      values = ["al2023-ami-2023.*-x86_64"]
     }
   }
 
   assert {
     condition     = data.aws_ami.latest.id != ""
-    error_message = "Could not find a valid Amazon Linux 2 AMI."
+    error_message = "Could not find a valid Amazon Linux 2023 AMI."
   }
 }
 ```

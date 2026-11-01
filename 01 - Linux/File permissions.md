@@ -60,7 +60,7 @@ So:
     
 - `chmod 600 ~/.ssh/id_rsa` – secure private SSH key.
     
-- `chmod +x script.sh` – add execute permission (your umask is applied when no user class is given; use `+x` as `a+x` to be explicit for everyone).
+- `chmod +x script.sh` – add execute permission without a user class like u, g or a, your umask decides which classes get it use ax to add it for everyone explicitly.
     
 - `chmod u+x script.sh` – add execute only for the owner.
     

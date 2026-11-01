@@ -7,7 +7,7 @@ tags:
 Kubernetes Services provide a stable network endpoint (IP address and DNS name) to access applications running on a set of ephemeral Pods.  
 This abstraction is crucial for both internal and external communication.
 
-There are five Service types covered here: ClusterIP, NodePort, LoadBalancer, ExternalName, and Headless.
+There are four Service types: ClusterIP, NodePort, LoadBalancer, and ExternalName. This note also covers Headless Services, which are a variant of ClusterIP (`clusterIP: None`).
 
 ---
 

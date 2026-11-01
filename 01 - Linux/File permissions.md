@@ -2,39 +2,39 @@
 tags:
   - Linux
 ---
-File permissions in Linux are controlled mainly by a few key commands, and each permission type has a numeric value: **`r=4`, `w=2`, `x=1`**.
+File permissions in Linux are controlled mainly by a few key commands, and each permission type has a numeric value: **`r=4`, `w=2`, `x=1`**.
 
 ---
 
 ## Basic numeric values (421 model)
 
-Permissions are built by **adding** the numbers for each type:
+Permissions are built by **adding** the numbers for each type:
 
-- `r` (read) = **4**
+- `r` (read) = **4**
     
-- `w` (write) = **2**
+- `w` (write) = **2**
     
-- `x` (execute) = **1**
+- `x` (execute) = **1**
     
 
 Each of the three positions is then:
 
-- First digit: **owner** (user)
+- First digit: **owner** (user)
     
-- Second digit: **group**
+- Second digit: **group**
     
-- Third digit: **others**
+- Third digit: **others**
     
 
 So:
 
-- `7` = `4+2+1` → `rwx`
+- `7` = `4+2+1` → `rwx`
     
-- `6` = `4+2+0` → `rw-`
+- `6` = `4+2+0` → `rw-`
     
-- `5` = `4+0+1` → `r-x`
+- `5` = `4+0+1` → `r-x`
     
-- `4` = `4+0+0` → `r--`
+- `4` = `4+0+0` → `r--`
     
 
 ---
@@ -52,33 +52,33 @@ So:
 
 ## Common permission commands
 
-## `chmod` – change permissions
+## `chmod` – change permissions
 
-- `chmod 644 file.txt` – standard readable‑by‑all, writable‑only‑by‑owner.
+- `chmod 644 file.txt` – standard readable‑by‑all, writable‑only‑by‑owner.
     
-- `chmod 755 script.sh` – make script executable by owner and readable/executable by others.
+- `chmod 755 script.sh` – make script executable by owner and readable/executable by others.
     
-- `chmod 600 ~/.ssh/id_rsa` – secure private SSH key.
+- `chmod 600 ~/.ssh/id_rsa` – secure private SSH key.
     
-- `chmod +x script.sh` – add execute permission for owner, group, and others.
+- `chmod +x script.sh` – add execute permission (your umask is applied when no user class is given; use `+x` as `a+x` to be explicit for everyone).
     
-- `chmod u+x script.sh` – add execute only for the owner.
+- `chmod u+x script.sh` – add execute only for the owner.
     
-- `chmod -R 755 dir/` – set permissions recursively on a directory tree.
-    
-
-## `ls` – view permissions
-
-- `ls -l` – show file details including permissions (`rwx` or numbers when requested).
-    
-- `ls -ld dir/` – show permissions of the directory itself, not its contents.
+- `chmod -R 755 dir/` – set permissions recursively on a directory tree.
     
 
-## `chown` / `chgrp` – change ownership
+## `ls` – view permissions
 
-- `chown user:group file` – change owner and group of a file.
+- `ls -l` – show file details including permissions (`rwx` or numbers when requested).
     
-- `chgrp developers dir/` – change group ownership of a directory.
+- `ls -ld dir/` – show permissions of the directory itself, not its contents.
+    
+
+## `chown` / `chgrp` – change ownership
+
+- `chown user:group file` – change owner and group of a file.
+    
+- `chgrp developers dir/` – change group ownership of a directory.
     
 
 ---
@@ -87,14 +87,14 @@ So:
 
 If you want:
 
-- owner: `r--` → `4`
+- owner: `r--` → `4`
     
-- group: `rw-` → `4+2 = 6`
+- group: `rw-` → `4+2 = 6`
     
-- others: `--x` → `1`
+- others: `--x` → `1`
     
 
-you get **`461`**:
+you get **`461`**:
 
 bash
 
@@ -102,11 +102,11 @@ bash
 
 Now:
 
-- owner can **read** (`4`)
+- owner can **read** (`4`)
     
-- group can **read and write** (`4+2 = 6`)
+- group can **read and write** (`4+2 = 6`)
     
-- others can **only execute** (`1`)
+- others can **only execute** (`1`)
     
 
 ## Special permissions in Linux
@@ -146,4 +146,4 @@ Linux has three special permissions that add behavior beyond the normal `rwx` bi
 - `chmod 2755 dir` → setgid + normal permissions
 - `chmod 1777 /tmp` → sticky bit + full access for everyone
 - `chmod 6755 file` → setuid + setgid together
-- `chmod 7755 dir` → setuid + setgid + sticky bit together
+- `chmod 7755 dir` → setuid + setgid + sticky bit together (note: Linux ignores setuid on directories)

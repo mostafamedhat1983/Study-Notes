@@ -11,11 +11,16 @@ These notes are written for learning, revision, and quick reference. The goal is
 This repository contains my study notes as I learn and review topics related to:
 
 - Linux
+- Bash scripting
+- Git
 - Docker
-- Terraform
 - Kubernetes
+- Ansible
+- Jenkins
 - AWS
-- DevOps tools and practices
+- Terraform
+- Python and networking basics
+- DevOps concepts, tools, and practices
 
 The notes are organized by topic and written in Markdown for easy reading and navigation on GitHub.
 
@@ -41,14 +46,21 @@ Example structure:
 ```text
 Study-Notes/
 ├── 01 - Linux/
-├── 02 - Networking/
+├── 02 - Bash Script/
 ├── 03 - Git/
 ├── 04 - Docker/
-├── 05 - Kubernetes/
-├── 06 - AWS/
+├── 05 - Kuberntes/
+├── 06 - Ansible/
 ├── 07 - Jenkins/
-├── 08 - Ansible/
+├── 08 - AWS/
 ├── 09 - Terraform/
+├── 10 - Project/
+├── Concepts and Other Tools/
+├── Network Basics/
+├── New Tech/
+├── Python/
+├── Top 20 problems/
+├── Unrelated Notes/
 └── README.md
 ```
 
@@ -58,12 +70,17 @@ Folder names may change over time as the repository grows.
 
 ## Topics Covered
 
-This repository may include notes on:
+This repository includes notes on:
 
 - Linux fundamentals and commands
+- Bash scripting
+- Git
 - Docker concepts, commands, and troubleshooting
 - Terraform basics, state, modules, lifecycle, and meta-arguments
 - Kubernetes architecture and resources
+- Ansible and Jenkins
+- Python and networking basics
+- A hands-on EKS project (`10 - Project`)
 - AWS core services
 - CI/CD and automation tools
 - DevOps best practices

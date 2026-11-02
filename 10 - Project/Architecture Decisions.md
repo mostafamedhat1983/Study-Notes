@@ -2305,7 +2305,7 @@ resource "aws_instance" "mysql" {
 **Security design note (not the verified deployed implementation):** RDS for MySQL supports TLS, but the reviewed project backend code uses `aiomysql.create_pool()` without TLS parameters. Do not claim backend-to-RDS TLS is deployed until the application is configured to verify the RDS CA and server-side enforcement is enabled and tested.
 
 **Requirements:**
-- RDS instance with SSL enabled (default)
+- RDS for MySQL supports TLS, but the client must negotiate TLS; support does not mean every client connection is automatically encrypted
 - The client explicitly negotiates TLS
 - The client verifies the RDS server certificate using the current AWS RDS CA bundle (recommended for server identity verification)
 - Configure `require_secure_transport=ON` when the database must reject non-TLS connections; confirm the parameter is supported by the selected engine/version.
@@ -2316,7 +2316,7 @@ resource "aws_db_instance" "this" {
   identifier = "platform-dev"
   engine     = "mysql"
   
-  # SSL is enabled by default, but can enforce
+  # RDS supports TLS; require_secure_transport enforces TLS for client connections
   parameter_group_name = aws_db_parameter_group.this.name
 }
 

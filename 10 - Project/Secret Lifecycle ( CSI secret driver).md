@@ -2,7 +2,11 @@
 tags:
   - My_CV_Project
 ---
- Complete Secret Lifecycle - From Creation to Pod
+# Historical CSI Secret Lifecycle Design (Not the Current Deployment)
+
+> **Status:** This note describes an earlier CSI-based design explored for the project. The project later moved to an init-container approach. Treat this as historical architecture, not as proof that the CSI design was deployed or is the current implementation. For the current implementation, use `10 - Project/secret-lifecycle-init-container.md`.
+
+## Complete Secret Lifecycle - From Creation to Pod
 
    Let me trace the entire journey of your database credentials:
 
@@ -47,7 +51,7 @@ tags:
        }
      }
 
-   Result: EKS cluster configured to encrypt all Kubernetes Secrets with KMS key
+   Result: the Terraform configuration requests EKS envelope encryption for Kubernetes Secrets with this KMS key. Verify the actual cluster configuration and KMS key policy; do not infer that all cluster secrets were encrypted merely from this design snippet.
 
    2c. Secrets Store CSI Driver IAM Policy
 
@@ -73,7 +77,7 @@ tags:
        role_arn = module.secrets_store_csi_role.role_arn
      }
 
-   Result: CSI driver pods can assume IAM role to access Secrets Manager
+   Correction: the workload Pod's ServiceAccount must be associated with the IAM role used by ASCP to retrieve the external secret. Do not assign the role to the CSI provider's ServiceAccount based on this example.
 
    ──────────────────────────────────────────
 
@@ -92,6 +96,7 @@ tags:
      spec:
        provider: aws
        parameters:
+         usePodIdentity: "true"
          objects: |
            - objectName: "platform-db-dev-credentials"
              jmesPath:
@@ -110,7 +115,7 @@ tags:
        name: chatbot-backend-service-account
        namespace: default
 
-   Result: Service account exists (but doesn't need IAM access for secret reading - CSI driver handles that)
+   Result: the workload ServiceAccount exists. With EKS Pod Identity or IRSA, this workload ServiceAccount is the identity associated with the IAM role that authorizes ASCP to retrieve the secret. The CSI driver/provider does not remove the need to authorize the workload identity.
 
    3c. Deployment References SecretProviderClass
 
@@ -147,13 +152,13 @@ tags:
    •  Sees jmesPath mappings: username → db_user, etc.
 
    **4c. CSI Driver Authenticates to AWS**
-   •  CSI Driver pod is running in kube-system namespace
-   •  Has service account: secrets-store-csi-driver-provider-aws
-   •  Pod Identity gives it IAM role with secretsmanager:GetSecretValue permission
+   •  The application Pod uses its configured Kubernetes ServiceAccount.
+   •  That ServiceAccount is associated with an IAM role through EKS Pod Identity (or configured through IRSA).
+   •  ASCP uses the workload identity to call Secrets Manager, subject to the IAM policy.
 
    **4d. CSI Driver Fetches Secret from AWS**
 
-     CSI Driver → AWS Secrets Manager API
+     ASCP provider → AWS Secrets Manager API
      Request: GetSecretValue for "platform-db-dev-credentials"
      Response: {"username":"admin","password":"YourPassword","dbname":"platformdb"}
 
@@ -174,9 +179,9 @@ tags:
    **4g. (Optional) CSI Driver Creates Kubernetes Secret**
 
    Because secretObjects is defined in SecretProviderClass:
-   •  CSI Driver creates Kubernetes Secret: chatbot-backend-db-credentials
+   •  The sync feature can create Kubernetes Secret: chatbot-backend-db-credentials
    •  Secret data: {username: admin, password: YourPassword, dbname: platformdb}
-   •  Stored in etcd, encrypted with KMS key automatically
+   •  Stored as a Kubernetes Secret; encryption at rest depends on the EKS/Kubernetes encryption configuration actually enabled for the cluster
    •  Can now be referenced as environment variables
 
    **4h. Volume Mounted to Pod**
@@ -212,7 +217,7 @@ tags:
 
    When pod is deleted:
    1. tmpfs volume is unmounted and destroyed (secrets removed from memory)
-   2. Kubernetes Secret remains in etcd (still encrypted with KMS)
+   2. A synchronized Kubernetes Secret is not guaranteed to remain indefinitely; the CSI driver's sync lifecycle deletes it when no Pods mount the corresponding SecretProviderClass. Verify the actual behavior and cluster encryption configuration.
    3. AWS Secrets Manager secret remains unchanged
 
    ──────────────────────────────────────────
@@ -233,13 +238,13 @@ tags:
 
      1. AWS Secrets Manager (encrypted at rest)
         ↓
-     2. CSI Driver authenticates via Pod Identity
+     2. ASCP authenticates using the workload Pod's ServiceAccount identity (Pod Identity or IRSA)
         ↓
      3. CSI Driver fetches secret via AWS API (TLS)
         ↓
      4. CSI Driver creates tmpfs volume with files
         ↓
-     5. CSI Driver creates K8s Secret (encrypted with KMS in etcd)
+     5. Optional sync creates a Kubernetes Secret (encryption at rest depends on cluster configuration)
         ↓
      6. Pod mounts tmpfs volume at /mnt/secrets
         ↓
@@ -250,9 +255,9 @@ tags:
    Key Security Features:
    •  ✅ Secrets never stored in plaintext on disk
    •  ✅ tmpfs is memory-only
-   •  ✅ KMS encryption for K8s Secrets
+   •  ✅ Kubernetes Secret encryption at rest only when the cluster's encryption-at-rest configuration is enabled and verified
    •  ✅ IAM-based access control
    •  ✅ TLS for all network communication
    •  ✅ Automatic rotation possible (CSI driver can refresh)
 
-   This is enterprise-grade secrets management! 🔒
+   This was a proposed/experimental project design, not a statement that every component was deployed successfully. The actual project implementation and security properties must be verified against the committed Terraform and Kubernetes manifests.

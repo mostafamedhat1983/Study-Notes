@@ -139,7 +139,9 @@ For each problem below:
 - **Why it happens:** Repository metadata may be stale, mirrors unavailable, package databases locked, or dependency trees broken.
 - **Quick sign:** apt/dnf/yum reports locks, broken dependencies, or unreachable repositories.
 - **Solution:** Refresh metadata, verify repositories, clear caches if needed, inspect lock holders, and repair dependency issues before forcing installs.
-- **Useful commands:** `apt update or dnf makecache, rpm, dpkg, repo checks`
+- **Useful commands (Debian/Ubuntu):** `sudo apt update`  
+- **Useful commands (Fedora/RHEL):** `sudo dnf makecache`  
+- **Useful package database checks:** `dpkg --audit` (Debian/Ubuntu), `rpm -Va` (RPM-based distributions; review output before taking action)
 
 ---
 
@@ -157,7 +159,8 @@ For each problem below:
 - **Why it happens:** Cron syntax errors, wrong user environment, missing PATH, non-executable scripts, or a stopped cron daemon can prevent execution.
 - **Quick sign:** Scheduled jobs simply do not execute at the expected time.
 - **Solution:** Check crontab syntax, service status, cron logs, script permissions, and always use full paths inside jobs.
-- **Useful commands:** `crontab -l, systemctl status cron/crond, journalctl -u cron`
+- **Useful commands (Debian/Ubuntu):** `crontab -l`, `systemctl status cron`, `journalctl -u cron`  
+- **Useful commands (RHEL/CentOS/Fedora):** `crontab -l`, `systemctl status crond`, `journalctl -u crond`
 
 ---
 

@@ -3,124 +3,68 @@ tags:
   - Linux
   - Docker
 ---
-## Overview
-Docker uses a **storage driver** to manage container image layers and writable data, and a **cgroup driver** to manage CPU, memory, and other resource controls.
+# Docker Storage and Cgroup Drivers
 
-On modern Linux hosts, the usual choices are:
-- `overlay2` for storage.
-- `systemd` for cgroups.
+Docker storage drivers manage image layers and container writable layers. Cgroup drivers determine how the container runtime manages Linux control groups for resource accounting and limits.
 
 ## Storage drivers
-Storage drivers control how Docker stores image layers and the writable container layer on disk. They use layered filesystems and copy-on-write so containers can share base layers efficiently.
 
-### Common storage drivers
-- `overlay2`: Recommended for most modern Linux systems. Best balance of performance and compatibility.
-- `overlay`: Older OverlayFS-based driver. Mostly legacy.
-- `aufs`: Older union filesystem driver. Mostly found on older Ubuntu/Docker setups.
-- `devicemapper`: Block-device based driver. Common in older enterprise environments, but mostly legacy now.
-- `btrfs`: Uses Btrfs filesystem features such as snapshots and subvolumes.
-- `zfs`: Uses ZFS features such as snapshots, compression, and integrity checks.
-- `fuse-overlayfs`: Useful for rootless Docker or systems with limited kernel overlay support.
-- `vfs`: Very simple fallback driver. Slow, mostly for testing or debugging.
+The available storage driver depends on the Docker Engine version, Linux kernel, backing filesystem, and installation mode. On many current Linux installations, Docker uses the OverlayFS-based `overlay2` driver; newer Docker Engine releases may expose the `overlayfs` driver name. Do not assume every listed legacy driver is supported by a current installation.
 
-### Differences
-- `overlay2` is usually the best default choice.
-- `overlay` is older and less preferred than `overlay2`.
-- `btrfs` and `zfs` depend on those specific filesystems being in place.
-- `devicemapper` and `aufs` are mostly legacy.
-- `fuse-overlayfs` is mainly for rootless or constrained environments.
-- `vfs` is simplest but slowest.
+Common names you may encounter:
 
-### When to use each
-- Use `overlay2` for almost all modern Linux hosts.
-- Use `fuse-overlayfs` for rootless Docker or limited environments.
-- Use `btrfs` if your host is already built around Btrfs and you want snapshot features.
-- Use `zfs` if your environment already uses ZFS and you want its storage features.
-- Use `devicemapper` only if an older environment requires it.
-- Use `vfs` only for troubleshooting or unsupported setups.
+- **overlay2 / overlayfs:** OverlayFS-based layered storage.
+- **btrfs / zfs:** filesystem-specific storage backends.
+- **fuse-overlayfs:** userspace OverlayFS implementation used in some rootless configurations.
+- **vfs:** simple copy-based driver, useful for testing but generally inefficient.
+- **aufs / devicemapper:** legacy drivers; availability depends on older distributions and Docker versions.
 
-### Important note
-On many systems, Docker reports `overlay2` as the storage driver name, while OverlayFS is the underlying technology. In practice, `overlay2` is the name you usually see in `docker info`.
+Check the actual configuration:
 
-### How to check
 ```bash
-docker info | grep "Storage Driver"
+docker info
 ```
 
-### How to change
-Edit `/etc/docker/daemon.json`:
-```json
-{
-  "storage-driver": "overlay2"
-}
-```
-
-Then restart Docker:
-```bash
-sudo systemctl restart docker
-```
-
-### Warning
-Changing the storage driver is a disruptive change. It can affect existing images and containers, so treat it carefully on production systems.
+Do not change the storage driver casually on a host with existing images or containers. Follow the Docker documentation for the Engine version and plan for the impact on local image/container data.
 
 ## Cgroup drivers
-Cgroup drivers control how Docker manages Linux cgroups for CPU, memory, and process isolation.
 
-### Common cgroup drivers
-- `systemd`: Docker asks systemd to manage cgroups. This is the preferred choice on most modern Linux distributions.
-- `cgroupfs`: Docker manages cgroups directly through the Linux cgroup filesystem.
+The cgroup driver controls how a container runtime organizes and manages cgroups.
 
-### Differences
-- `systemd` integrates with the host init system and gives more consistent resource management.
-- `cgroupfs` is more direct, but on systemd-based hosts it can create two different cgroup managers.
-- That mismatch can cause instability or Kubernetes startup problems.
+Common options:
 
-### When to use each
-- Use `systemd` on modern Linux systems.
-- Use `systemd` for Kubernetes nodes in most cases.
-- Use `cgroupfs` only if your platform explicitly requires it.
-- If your host uses cgroup v2, `systemd` is generally the right choice.
+- **systemd:** uses systemd to manage cgroups.
+- **cgroupfs:** manages cgroups directly through the cgroup filesystem.
 
-### How to check
+On systemd-based Linux distributions, using the systemd cgroup driver is generally recommended, especially with cgroup v2.
+
+Check Docker's setting:
+
 ```bash
-docker info | grep "Cgroup Driver"
+docker info | grep -i 'Cgroup Driver'
 ```
 
-### How to change
-Edit `/etc/docker/daemon.json`:
+If Docker Engine is used as a standalone runtime, its daemon configuration may include:
+
 ```json
 {
   "exec-opts": ["native.cgroupdriver=systemd"]
 }
 ```
 
-Then restart Docker:
-```bash
-sudo systemctl restart docker
-```
+Restarting Docker after a daemon configuration change affects running workloads; plan the change.
 
-### Kubernetes note
-If Kubernetes is involved, Docker and kubelet must use the same cgroup driver. A mismatch between kubelet and Docker is a common source of startup errors.
+## Kubernetes and the runtime cgroup driver
 
-## Why DevOps cares
-These settings matter because DevOps is about making sure the operating system, Docker, and Kubernetes all agree on how containers are stored and controlled.
+Do not memorize “Docker and kubelet must use the same cgroup driver” as a universal modern Kubernetes rule.
 
-If the storage driver is wrong, you may see performance issues, filesystem incompatibility, or storage-related errors.
-If the cgroup driver is wrong, Kubernetes nodes may fail to start cleanly or become unstable under load.
+- Kubelet communicates with a container runtime through the Container Runtime Interface (CRI).
+- Docker Engine is not directly supported by kubelet through the removed in-tree dockershim; using Docker Engine requires an external CRI adapter such as `cri-dockerd`.
+- The kubelet cgroup driver should match the cgroup driver used by the CRI runtime.
+- On systemd hosts, Kubernetes recommends the `systemd` cgroup driver to avoid having two different cgroup managers.
 
-### Practical rule
-- Keep `overlay2` unless you have a specific reason to change it.
-- Use `systemd` for cgroups on modern Linux and Kubernetes hosts.
-- Change these settings only when you understand the platform requirement or the failure you are solving.
+For a Kubernetes node, inspect the actual runtime and kubelet configuration rather than assuming Docker is the runtime.
 
-## Troubleshooting signs
-- Storage driver issues may show up as Docker startup failures, filesystem compatibility errors, or broken container/image behavior.
-- Cgroup driver issues may show up as kubelet misconfiguration errors or node bootstrap failures.
-- When troubleshooting, compare `docker info` with kubelet or runtime configuration.
+## Interview takeaway
 
-## Quick interview answer
-- Storage driver = how Docker stores image and container layers on disk.
-- Cgroup driver = how Docker manages CPU and memory controls.
-- `overlay2` is the common modern storage driver.
-- `systemd` is the common modern cgroup driver.
-- Change them only for compatibility, performance, or orchestration requirements.
+Storage driver = how container image and writable layers are stored. Cgroup driver = how container resource-control groups are organized. In Kubernetes, align kubelet with the **CRI runtime**, not automatically with Docker Engine.

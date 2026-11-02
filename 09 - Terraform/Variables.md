@@ -130,7 +130,7 @@ variable "instance_count" {
 
 Using types helps Terraform validate input values.
 
-If `type` is not specified, Terraform defaults the variable to `any`. This means Terraform will accept any value without type validation. This works, but it is better to always specify a type for clarity and safety.
+If `type` is omitted, Terraform uses the special `any` type constraint. `any` is a placeholder that allows Terraform to infer the caller's value type; it does not mean Terraform skips all validation or conversion. Prefer a specific type constraint when the module requires a particular data shape.
 
 ---
 
@@ -514,7 +514,7 @@ variable "flexible_input" {
 }
 ```
 
-This works but provides no validation or safety.
+`any` allows different input types, but it does not disable Terraform's general expression evaluation or type-conversion rules. Use it only when the module genuinely supports arbitrary types.
 
 Simple rule:
 - avoid `any` in production

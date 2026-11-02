@@ -2,12 +2,11 @@
 tags:
   - Linux
 ---
-Linux capabilities are a kernel feature that split the all-powerful “root” privileges into many fine‑grained flags (capabilities) that can be independently granted to processes or executables, so you can give a program only the specific powers it needs instead of full root.
+Linux capabilities divide many traditionally root-associated privileged operations into fine-grained permission bits that can be independently granted to processes or executables. Capabilities reduce privilege when used carefully, but they do not mean every operation available to UID 0 is represented by a single simple capability list.
 
 ## What Linux capabilities are
 
-Linux used to treat UID 0 (root) as “may bypass almost all permission checks,” but capabilities decompose that into distinct privilege bits such as “bind low TCP ports,” “mount filesystems,” or “override DAC file permissions.”
-Each thread in a process holds sets of these capabilities, and the kernel checks those sets when deciding if an operation is allowed instead of blindly trusting root.
+UID 0 retains special privilege semantics, but the kernel also checks capability sets, namespaces, and other security mechanisms. Capabilities include permissions such as binding low TCP ports, mounting filesystems, and overriding discretionary access controls. Capability sets are maintained per thread.
 
 ## Why capabilities exist
 
@@ -46,17 +45,17 @@ Example pattern (conceptual, not a command dump):
 
 - Remove setuid root from a binary such as `ping`.
 - Grant only `cap_net_raw+ep` to that binary via `setcap`.
-This lets non‑root users run `ping` using only the minimal network‑socket privilege instead of inheriting full root.
+On systems where `ping` uses raw sockets and the installed binary is configured accordingly, `CAP_NET_RAW` can allow it to run without full root privileges. Some implementations use other mechanisms, so inspect the actual binary and system configuration.
 
 ## Capabilities vs traditional root – trade‑off table
 
 | Aspect                    | Using plain root (UID 0)                                       | Using Linux capabilities                                           |
 |---------------------------|-----------------------------------------------------------------|--------------------------------------------------------------------|
-| Privilege granularity     | All‑or‑nothing superuser                                       | Fine‑grained per operation (e.g., network, mount, audit)          |
-| Attack surface            | Compromise of process ⇒ full system compromise                 | Compromise ⇒ limited to granted capabilities                      |
+| Privilege granularity     | UID 0 has broad traditional privilege, subject to kernel controls | Capabilities can grant selected privileged operations          |
+| Attack surface            | A privileged process can have broad impact, but other controls still apply | A process is limited by its effective capabilities and other controls |
 | Implementation complexity | Operationally simple, but hard to audit safely                 | More complex to reason about sets, but easier to audit precisely   |
 | Legacy compatibility      | Fully compatible with old tools                                | Some older software assumes full root and may not behave as expected |
-| Principle of least priv.  | Mostly violated                                                | Explicitly supported as a design goal                              |
+| Principle of least priv.  | Requires additional privilege restriction and careful configuration | Supports least privilege when capability sets are scoped correctly |
 
 ## Architectural reasoning and DevOps angle
 

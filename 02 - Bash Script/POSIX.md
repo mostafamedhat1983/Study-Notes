@@ -48,7 +48,7 @@ You can make bash behave more strictly according to POSIX standards in several w
 
 ## Version Differences
 
-Earlier versions of bash weren't fully POSIX-compliant, but **Bash 4.0 and later versions are fully POSIX-compliant**. If you write scripts using only POSIX-compliant syntax in bash, they can run on most Unix and Linux-based operating systems.[](https://www.baeldung.com/linux/test-posix-compliance-shell-scripts)​
+Do not use a Bash version number as a guarantee of script portability. Use POSIX shell syntax and utilities supported by your target environments, and test with the target shell.[](https://www.baeldung.com/linux/test-posix-compliance-shell-scripts)​
 
 ## Testing for POSIX Compliance
 

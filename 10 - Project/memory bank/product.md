@@ -9,10 +9,10 @@ last_updated: 2025-12-13
 Multi-repository AWS cloud platform demonstrating enterprise-grade DevOps practices through infrastructure-as-code and cloud-native application deployment. Built from scratch over 5 months to showcase modern AWS services (2023-2024 features), Kubernetes orchestration, and production-ready security patterns with hands-on implementation and debugging.
 
 ## Value Proposition
-- **Production-Ready Infrastructure**: 85+ AWS resources across 2 environments with comprehensive security, encryption, and high availability
+- **Production-Ready Infrastructure**: 85+ AWS resources across 2 environments with security controls, service-level encryption, and availability-oriented architecture
 - **Modern Cloud Architecture**: EKS 1.34, RDS MySQL 8.0, AWS Bedrock DeepSeek V3.1 integration with EKS Pod Identity and init-container secret retrieval. Pod Identity provides temporary credentials to SDKs in the Pod; do not describe this as zero credential exposure.
 - **DevOps Excellence**: Immutable infrastructure with Packer/Ansible, Terraform modules, Helm multi-environment deployments, Jenkins CI/CD automation with Docker-in-Docker builds
-- **Security Focus**: Defense-in-depth with encryption at rest/transit/in-use, network policies, RBAC, Falco runtime monitoring, Trivy vulnerability scanning, SSM Session Manager access
+- **Security Focus**: Defense-in-depth with encryption at rest for configured services, TLS where explicitly configured, network-policy manifests (enforcement subject to CNI configuration), and RBAC, Falco runtime monitoring, Trivy vulnerability scanning, SSM Session Manager access
 - **Learning Platform**: Educational project demonstrating real-world cloud engineering skills, architecture decisions, and production deployment patterns
 
 ## Key Features
@@ -27,7 +27,7 @@ Multi-repository AWS cloud platform demonstrating enterprise-grade DevOps practi
   - Prod: 4x t3.medium nodes (68 pod capacity, 47-49% steady state utilization with ~32-33 pods)
 - **RDS MySQL 8.0**: Dev single-AZ (db.t3.micro, 20GB), Prod Multi-AZ (db.t3.small, 50GB, 7-day backups), both encrypted
 - **Immutable AMIs**: Packer + Ansible builds (not user data scripts) with Trivy vulnerability scanning (fails on CRITICAL)
-- **Security Hardening**: KMS encryption everywhere, IAM least privilege, SSM Session Manager access (no bastion, no SSH keys)
+- **Security Hardening**: KMS encryption for resources configured to use the selected KMS keys, IAM least privilege, SSM Session Manager access (no bastion, no SSH keys)
 - **Modular Terraform**: Reusable modules (network, ec2, rds, role, eks) with flexible IAM role module reused for EC2, EKS, Pod Identity
 - **Jenkins Infrastructure**: Controller on EC2 t3.medium, ephemeral agents as EKS pods (cost-effective, scalable)
 
@@ -47,7 +47,7 @@ Multi-repository AWS cloud platform demonstrating enterprise-grade DevOps practi
 - **High Availability**: 
   - Pod disruption budgets (minAvailable: 1 for backend/frontend)
   - PodAntiAffinity spreads replicas across nodes
-  - Rolling updates (MaxUnavailable=1, MaxSurge=1) for zero-downtime deployments
+  - Rolling updates (MaxUnavailable=1, MaxSurge=1) designed to maintain availability; this does not guarantee zero downtime by itself
   - Horizontal Pod Autoscaler (dev: 2-5 backend replicas, prod: 3-7 backend replicas, 75% CPU target)
   - Health probes: liveness (restart unhealthy pods after 30s), readiness (traffic routing control after 5s)
 - **Monitoring Stack**: Prometheus metrics collection, Grafana visualization dashboards, Metrics Server for HPA, Falco security events
@@ -72,7 +72,7 @@ Multi-repository AWS cloud platform demonstrating enterprise-grade DevOps practi
 - **Students/Learners**: Educational resource for AWS, Terraform, Kubernetes best practices with real-world complexity
 
 ## Use Cases
-- **Portfolio Demonstration**: Showcasing production-ready cloud engineering skills with 85+ AWS resources and modern features
+- **Portfolio Demonstration**: Showcasing hands-on cloud engineering skills with 85+ AWS resources and modern features
 - **Learning Reference**: Educational resource with architecture decisions documented, tradeoffs explained, debugging examples
 - **Architecture Template**: Foundation for similar cloud-native platforms with reusable Terraform modules and Helm charts
 - **Interview Preparation**: Technical discussion points covering AWS, Kubernetes, security, CI/CD, monitoring, cost optimization

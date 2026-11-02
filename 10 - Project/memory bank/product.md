@@ -10,7 +10,7 @@ Multi-repository AWS cloud platform demonstrating enterprise-grade DevOps practi
 
 ## Value Proposition
 - **Production-Ready Infrastructure**: 85+ AWS resources across 2 environments with comprehensive security, encryption, and high availability
-- **Modern Cloud Architecture**: EKS 1.34, RDS MySQL 8.0, AWS Bedrock DeepSeek V3.1 AI integration with Pod Identity, init container secrets management, and zero-credential exposure
+- **Modern Cloud Architecture**: EKS 1.34, RDS MySQL 8.0, AWS Bedrock DeepSeek V3.1 integration with EKS Pod Identity and init-container secret retrieval. Pod Identity provides temporary credentials to SDKs in the Pod; do not describe this as zero credential exposure.
 - **DevOps Excellence**: Immutable infrastructure with Packer/Ansible, Terraform modules, Helm multi-environment deployments, Jenkins CI/CD automation with Docker-in-Docker builds
 - **Security Focus**: Defense-in-depth with encryption at rest/transit/in-use, network policies, RBAC, Falco runtime monitoring, Trivy vulnerability scanning, SSM Session Manager access
 - **Learning Platform**: Educational project demonstrating real-world cloud engineering skills, architecture decisions, and production deployment patterns
@@ -32,14 +32,14 @@ Multi-repository AWS cloud platform demonstrating enterprise-grade DevOps practi
 - **Jenkins Infrastructure**: Controller on EC2 t3.medium, ephemeral agents as EKS pods (cost-effective, scalable)
 
 ### Application (platform-ai-chatbot)
-- **AI Integration**: AWS Bedrock DeepSeek V3.1 serverless model ($0.27/1M tokens, 64K context window, pay-per-use, no GPU management)
+- **AI Integration**: AWS Bedrock DeepSeek V3.1 serverless model (`deepseek.v3-v1:0`). AWS currently lists a 128K context window and model lifecycle/EOL information; pricing varies by region and service tier, so do not retain a universal $0.27/1M-token figure.
 - **Full-Stack Architecture**: FastAPI async backend + Streamlit frontend with session management
-- **Database Persistence**: RDS MySQL with aiomysql connection pooling, conversation history, SSL/TLS connections
+- **Database Persistence**: RDS MySQL with aiomysql connection pooling and conversation history. The reviewed application connection code did not configure database TLS; do not claim the backend-to-RDS connection is encrypted until verified and enforced.
 - **Cloud-Native Deployment**: Kubernetes with Helm charts, multi-environment values files (values-dev.yaml, values-prod.yaml)
 - **Enterprise Security**: 
-  - Pod Identity for AWS authentication (no static credentials, OIDC tokens, or service account files)
+  - Pod Identity for AWS authentication without long-lived static access keys. Supported SDKs obtain temporary role credentials through the container credential provider; these credentials are available to processes in the Pod.
   - Init container secrets from AWS Secrets Manager (better debugging visibility than CSI driver)
-  - Network policies (zero-trust: default deny all, frontend → backend only, backend accepts frontend traffic only)
+  - NetworkPolicy manifests designed for default-deny and explicit traffic paths. Enforcement requires the VPC CNI network-policy feature to be enabled/configured (or another enforcing CNI); verify cluster add-on settings and live policy behavior before claiming active enforcement.
   - RBAC with service accounts and minimal permissions
   - Falco runtime monitoring with Falcosidekick UI
   - Security context: non-root containers (UID 1000), all capabilities dropped, seccomp profile

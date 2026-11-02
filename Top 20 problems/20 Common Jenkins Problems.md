@@ -186,10 +186,10 @@ For each problem below:
 
 ## 19. Webhook does not trigger a build
 
-- **Why it happens:** The webhook URL, token, repository settings, network path, or plugin configuration is wrong.
+- **Why it happens:** The configured webhook URL or secret, repository event settings, network path, reverse-proxy routing, or Jenkins job/plugin configuration is incorrect.
 - **Quick sign:** Pushes occur but no build starts.
-- **Solution:** Check webhook delivery logs, verify the endpoint and authentication, and test the trigger with a controlled commit.
-- **Useful commands:** `curl -I http://<controller>/github-webhook/`, Jenkins UI: job build history
+- **Solution:** Inspect the provider's webhook delivery result, verify the exact endpoint configured by the SCM integration and the required job trigger, and check authentication. For GitHub webhooks, use HTTPS with SSL verification enabled and configure a webhook secret. If Jenkins is behind a reverse proxy, verify that the webhook path and required forwarded headers are passed through correctly.
+- **Useful checks:** `curl -v https://<configured-webhook-host>/<configured-webhook-path>` (checks DNS/TLS/HTTP reachability only; it does not reproduce a signed webhook delivery), the SCM provider's webhook delivery log/test, and Jenkins job/build logs.
 
 ---
 

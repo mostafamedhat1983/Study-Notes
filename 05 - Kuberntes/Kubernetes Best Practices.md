@@ -2,7 +2,7 @@
 
 ## Resource Management
 
-- **Always set `requests` and `limits`** on every container — without requests, the scheduler cannot make good decisions and HPA/CA won't work properly
+- Set realistic resource requests for workloads where scheduling and capacity planning matter. Limits are workload-dependent; do not assume every container needs both CPU and memory limits. HPA utilization targets require relevant resource requests.
 - Use `LimitRange` objects to enforce defaults at namespace level
 - Use `ResourceQuota` to cap total CPU/memory per namespace
 - Set memory `requests == limits` to avoid OOMKill surprises on memory-constrained nodes
@@ -28,7 +28,7 @@ spec:
 
 ## Health Probes
 
-- Define **all three probes** on every production container: `livenessProbe`, `readinessProbe`, `startupProbe`
+- Configure the probes that match the application's behavior. Readiness is useful for traffic gating; liveness is useful for detecting unrecoverable process states; startup probes help slow-starting applications. Not every container needs all three.
 - Use `readinessProbe` to gate traffic — a Pod not ready won't receive Service traffic
 - Use `startupProbe` for slow-starting apps to avoid liveness killing them before they're ready
 - Prefer HTTP probes over exec probes for performance
@@ -37,7 +37,7 @@ spec:
 
 ## High Availability
 
-- Run **minimum 2 replicas** for any production Deployment
+- Choose replica count based on availability, workload, cost, and failure-domain requirements; two replicas alone do not guarantee high availability.
 - Use **PodDisruptionBudgets** to maintain availability during node drain/upgrades
 - Use **Pod Anti-Affinity** to spread replicas across nodes and AZs
 - Use **topology spread constraints** for fine-grained distribution control
@@ -57,10 +57,10 @@ spec:
 
 ## Security
 
-- **Never run containers as root** — set `runAsNonRoot: true` and a specific `runAsUser`
+- Prefer non-root containers and set `runAsNonRoot: true` when the image supports it. Some workloads require specific privileges; document and constrain exceptions.
 - Use `readOnlyRootFilesystem: true` wherever possible
 - Drop all Linux capabilities and add back only what's needed
-- Use **NetworkPolicies** with default-deny and explicit allow rules
+- Use NetworkPolicies where the CNI/network implementation enforces them; validate DNS, control-plane, monitoring, and application flows before applying default-deny.
 - Use **RBAC** with least privilege — avoid ClusterAdmin for workloads
 - Store secrets in external systems (AWS Secrets Manager, Vault) rather than Kubernetes Secrets alone
 - Scan images for vulnerabilities before deploying
@@ -119,7 +119,7 @@ strategy:
 
 - Use **PersistentVolumeClaims** — never hardcode hostPath volumes in production
 - Use **StorageClasses** with appropriate reclaim policies (`Retain` for production data)
-- Use `ReadWriteOnce` for single-node workloads, `ReadWriteMany` (NFS/EFS) for shared data
+- Choose access modes based on the storage driver's documented capabilities. `ReadWriteOnce` is node-scoped, not necessarily single-Pod; `ReadWriteMany` requires backend support.
 - Back up persistent volumes regularly with tools like Velero
 
 ---
@@ -142,8 +142,8 @@ labels:
 ## General Checklist
 
 - [ ] Resource requests and limits set
-- [ ] All three probes configured
-- [ ] Non-root security context
+- [ ] Appropriate health probes configured
+- [ ] Non-root security context where supported
 - [ ] NetworkPolicy applied
 - [ ] PodDisruptionBudget set
 - [ ] Image tag pinned (no `latest`)

@@ -196,7 +196,7 @@ For each problem below:
 - **Why it happens:** Credentials are hardcoded, printed, or included in error messages.
 - **Quick sign:** A token or password appears in output, logs, or Git history.
 - **Solution:** Rotate the secret immediately, load it from a secure source, and redact sensitive values in logs.
-- **Useful commands:** `git log --all -- path/to/file`, `grep -RIn --exclude-dir=.git 'password\\|token' .`
+- **Useful commands:** `git log --all -- path/to/file`, `grep -RInE --exclude-dir=.git 'password|token' .`
 
 ---
 

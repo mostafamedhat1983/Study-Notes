@@ -7,36 +7,35 @@ tags:
 ---
 # AWS Backup for EKS Implementation Guide
 
-Complete guide to implement AWS Backup for Amazon EKS with full cluster backup and restore capabilities using the new December 2024 features.
+Guide to using AWS Backup for Amazon EKS cluster-state and supported persistent-storage protection. Check current AWS Backup feature availability and restore limitations before relying on it for disaster recovery.
 
 ---
 
 ## Overview
 
-**What:** Automated backup of entire EKS cluster (Kubernetes resources + persistent volumes)  
-**Why:** Disaster recovery, compliance, point-in-time restore  
-**New Feature:** AWS Backup for EKS (December 2024) - backs up all Kubernetes resources, not just EBS volumes
+**What:** Composite recovery point for EKS cluster state plus supported persistent storage (EBS, EFS, and supported S3-backed CSI volumes)  
+**Why:** Disaster recovery, compliance, and recovery of supported Kubernetes state and storage  
+**Important:** This is not a byte-for-byte backup of the running cluster or every AWS resource associated with it.
 
 **Difficulty:** Easy (30 minutes)  
-**Cost:** ~$5-30/month depending on retention and cluster size
+**Cost:** Depends on protected resource size, backup storage, retention, copy/restore activity, and Region. Calculate with current AWS Backup and underlying storage pricing; do not rely on a fixed monthly estimate.
 
 ---
 
 ## What Gets Backed Up
 
 ### Included in Backup
-✅ **All Kubernetes resources** - Deployments, Services, ConfigMaps, Secrets, Ingress  
-✅ **Persistent volumes** - EBS snapshots with application-consistent backups  
-✅ **RBAC** - Roles, RoleBindings, ClusterRoles, ServiceAccounts  
-✅ **Custom resources** - CRDs and their instances  
-✅ **Namespace metadata** - Labels, annotations, resource quotas  
-✅ **Network policies** - If implemented  
-✅ **Pod Identity associations** - IAM role mappings
+- **EKS cluster state:** supported Kubernetes manifests and configuration objects such as Deployments, Services, ConfigMaps, Secrets, RBAC objects, CRDs, and other supported resources.
+- **Supported persistent storage:** child recovery points for supported EBS, EFS, and S3-backed persistent volumes attached through supported CSI drivers.
+- **EKS configuration:** AWS documents cluster configuration details including access entries, managed node groups, add-ons, and Pod Identity associations in the cluster-state backup.
 
-### Not Included
-❌ **Running pod state** - In-memory data (restart required after restore)  
-❌ **External resources** - RDS, S3, external services (backup separately)  
-❌ **Cluster configuration** - Node groups, addons (recreated from Terraform)
+### Not Included or Not Automatically Recreated
+- **Ephemeral runtime state:** running process memory, in-flight requests, and transient Pod state are not captured as a live-memory checkpoint.
+- **Underlying network infrastructure:** VPCs, subnets, route tables, and other external infrastructure are not part of the EKS cluster-state backup; manage these separately (for example, with Terraform).
+- **External application dependencies:** RDS databases and unrelated S3 buckets/services need their own backup plans. Supported S3-backed persistent volumes are a specific exception.
+- **Container images:** images in ECR or external registries are not copied by the EKS backup; ensure the destination cluster can pull the referenced images.
+
+A successful composite recovery point can still have partial/failed child recovery points or skipped Kubernetes objects. Inspect the parent and each child job status rather than treating `COMPLETED` on one component as proof that every dependency is recoverable.
 
 ---
 
@@ -50,8 +49,8 @@ Add to `terraform/modules/eks/main.tf`:
 # ========================================
 # AWS Backup for EKS
 # ========================================
-# Automated backup of EKS cluster including all Kubernetes resources and persistent volumes
-# Uses AWS Backup service (December 2024 feature) for complete cluster backup
+# Creates AWS Backup resources for supported EKS cluster-state and persistent-storage recovery points.
+# This does not replace backups for external dependencies such as RDS or VPC infrastructure.
 
 # IAM role for AWS Backup service
 resource "aws_iam_role" "eks_backup" {
@@ -343,7 +342,7 @@ aws backup start-backup-job \
 aws backup describe-backup-job --backup-job-id <job-id> --region us-east-2
 
 # Expected states: CREATED → RUNNING → COMPLETED
-# Backup typically takes 15-30 minutes depending on cluster size
+# Backup duration varies with cluster state, persistent-volume size, throughput, and service load; use job status rather than assuming a fixed 15-30 minute duration.
 
 # List all backup jobs
 aws backup list-backup-jobs \

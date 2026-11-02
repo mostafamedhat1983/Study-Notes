@@ -13,7 +13,7 @@ Complete guide to add Kubernetes Network Policies for pod-to-pod traffic control
 **What:** Kubernetes firewall rules controlling pod-to-pod communication  
 **Why:** Defense-in-depth security, limit blast radius, compliance requirements  
 **Difficulty:** Easy (15-30 minutes)  
-**Prerequisites:** None - EKS VPC CNI supports network policies by default
+**Prerequisites:** EKS must run a supported version and the Amazon VPC CNI network-policy feature must be explicitly enabled and configured (including the policy agent and `enableNetworkPolicy` add-on setting). Merely using VPC CNI does not activate enforcement. Verify the live add-on configuration before deploying restrictive policies.
 
 ---
 
@@ -28,7 +28,7 @@ Complete guide to add Kubernetes Network Policies for pod-to-pod traffic control
 - Frontend → Backend only (port 8000)
 - Backend → RDS only (port 3306)
 - Backend → AWS APIs only (port 443 for Bedrock/Secrets Manager)
-- All pods → DNS only (port 53)
+- Permit DNS egress only for workloads that need name resolution, to the actual cluster DNS endpoints and required protocols
 - Block all other traffic
 
 ---
@@ -417,7 +417,7 @@ aws elbv2 describe-target-health --target-group-arn <arn> --region us-east-2
 
 ## Cost Impact
 
-**Zero additional cost** - Network policies are native Kubernetes resources with no AWS charges.
+Kubernetes NetworkPolicy objects do not have a per-policy AWS charge. The VPC CNI network-policy agent may have node resource overhead, and related network traffic or infrastructure can still incur normal service costs.
 
 ---
 

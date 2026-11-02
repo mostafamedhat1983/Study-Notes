@@ -61,7 +61,7 @@ tags:
 |**dig**|**Detailed** technical output|**Scripting, troubleshooting**|`dig google.com`|
 |**nslookup**|**Simple** human-readable|**Quick lookups**|`nslookup google.com`|
 
-**dig** is better for scripting because of its consistent, machine-parseable output and non-interactive design. its output is always identical
+**dig** is better for scripting because of its consistent, machine-parseable output and non-interactive design. its output is not always identical: answers, ordering, TTLs, resolver metadata, and formatting can vary with DNS data and options
 
 **dig +trace google.com**        # Shows full DNS resolution path
 **dig google.com MX**             # Mail server records

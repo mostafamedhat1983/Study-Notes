@@ -373,7 +373,7 @@ resource "aws_eks_access_policy_association" "dev_readonly" {
 }
 ```
 
-**Can't do this easily with aws-auth ConfigMap.**
+**This is also possible with aws-auth:** map the IAM principal to a Kubernetes group and bind that group with namespace-scoped RBAC. EKS access policies provide a separate AWS-managed authorization option.
 
 ---
 
@@ -550,8 +550,22 @@ output "cluster_security_group_id" {
 ```hcl
 # New IAM roles/users: use Access Entry API
 resource "aws_eks_access_entry" "new_developer" {
+  cluster_name      = aws_eks_cluster.main.name
+  principal_arn     = aws_iam_role.new_developer.arn
+  kubernetes_groups = ["developers"]
+}
+
+# A matching RoleBinding/ClusterRoleBinding for the `developers` group
+# must exist in Kubernetes, or associate an EKS access policy instead.
+resource "aws_eks_access_policy_association" "new_developer_view" {
   cluster_name  = aws_eks_cluster.main.name
   principal_arn = aws_iam_role.new_developer.arn
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy"
+
+  access_scope {
+    type       = "namespace"
+    namespaces = ["development"]
+  }
 }
 ```
 
@@ -570,13 +584,9 @@ aws eks create-access-entry \
 # Remove from aws-auth ConfigMap
 ```
 
-**Step 3: Eventually Remove aws-auth ConfigMap**
+**Step 3: Remove the legacy ConfigMap only after the authentication migration is complete**
 
-Once all access is migrated, delete the ConfigMap:
-
-```bash
-kubectl delete configmap aws-auth -n kube-system
-```
+Before deleting `aws-auth`, verify all human, automation, node, and Fargate role mappings have an equivalent supported access entry or are otherwise no longer required. Confirm the cluster authentication mode and node-group behavior. If the cluster still uses ConfigMap authentication, deleting `aws-auth` can break node or user access. Prefer changing the cluster to API authentication mode only after validating all required principals and access paths. Do not delete the ConfigMap as a routine cleanup step.
 
 **Note:** Managed node-group access behavior depends on the cluster authentication mode and how the node group was created. In clusters using the EKS API authentication mode (or API_AND_CONFIG_MAP), EKS can create the required node access entry for managed node groups. In ConfigMap-only mode, node role mappings use `aws-auth`. Do not infer access-entry creation from the Kubernetes version alone.
 
@@ -604,7 +614,7 @@ kubectl delete configmap aws-auth -n kube-system
    - Required Kubernetes provider AND AWS provider
 
 5. **Namespace-Scoped Access Was Hard**
-   - aws-auth only supported cluster-wide groups
+   - aws-auth maps principals to Kubernetes groups; those groups can be authorized with namespace-scoped Kubernetes RBAC
    - Needed manual Kubernetes RBAC for namespace limits
 
 ### AWS's Solution: Access Entry API

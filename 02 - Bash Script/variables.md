@@ -31,7 +31,7 @@ export JAVA_HOME
 ```
 ## Important Notes
 
-Variables with multiple values should be separated by colons, and values containing spaces must be enclosed in quotes:
+For example, `PATH` is a colon-separated list of directories. Other variables can contain any string value; quote values with spaces when assigning them:
 ```bash
 PATH=/usr/bin:/usr/local/bin
 DESCRIPTION="Value with spaces"
@@ -150,7 +150,7 @@ bash
 
 ## Relationship to declare
 
-`typeset` was provided primarily for compatibility with the Korn shell (ksh). However, **`typeset` has been deprecated since Bash version 4.0**, and the `declare` command should be used instead for better forward compatibility. Modern Bash versions may display deprecation warnings when using `typeset`.​
+`typeset` was provided primarily for compatibility with the Korn shell (ksh). In Bash, `typeset` is retained as a synonym for `declare`; it is not deprecated in Bash 4.0 or later. `declare` is often clearer in Bash-specific scripts.​
 
 ## Common Options
 
@@ -195,7 +195,7 @@ bash
 
 `typeset -u name="hello"  # Automatically converts to HELLO`
 
-Since `typeset` is deprecated, use `declare` instead for all new Bash scripts to ensure compatibility with current and future Bash versions.[](https://www.baeldung.com/linux/declare-vs-typeset)
+`typeset` remains available as a Bash synonym for `declare`. Use the spelling your team finds clearest; neither command makes a script portable to POSIX `sh`.[](https://www.baeldung.com/linux/declare-vs-typeset)
 
 ---
 
@@ -208,7 +208,7 @@ Here's a comparison of variable scope behavior when using `typeset`, `declare`, 
 |`typeset VAR=value`|Global [](https://stackoverflow.com/questions/4419704/differences-between-declare-typeset-and-local-variable-in-bash)​|Local [](https://stackoverflow.com/questions/4419704/differences-between-declare-typeset-and-local-variable-in-bash)​|No|Deprecated; identical to `declare` [](https://stackoverflow.com/questions/4419704/differences-between-declare-typeset-and-local-variable-in-bash)​|
 |`declare VAR=value`|Global [](https://stackoverflow.com/questions/4419704/differences-between-declare-typeset-and-local-variable-in-bash)​|Local [](https://stackoverflow.com/questions/4419704/differences-between-declare-typeset-and-local-variable-in-bash)​|No|Preferred modern approach [](https://www.baeldung.com/linux/declare-vs-typeset)​|
 |`declare -x VAR=value`|Global [](https://www.baeldung.com/linux/declare-vs-typeset)​|Local [](https://delightlylinux.wordpress.com/2024/03/23/bash-typed-variables-with-declare/)​|Yes ​|Same as `export`|
-|`export VAR=value`|Global [](https://delightlylinux.wordpress.com/2024/03/23/bash-typed-variables-with-declare/)​|Global [](https://delightlylinux.wordpress.com/2024/03/23/bash-typed-variables-with-declare/)​|Yes [](https://delightlylinux.wordpress.com/2024/03/23/bash-typed-variables-with-declare/)​|Always creates global variables|
+|`export VAR=value`|Current shell variable scope|Current shell variable scope|Yes|Marks the variable for export; it does not change an existing local variable's scope|
 |`VAR=value` (simple assignment)|Global|Global [](https://stackoverflow.com/questions/4419704/differences-between-declare-typeset-and-local-variable-in-bash)​|No|No export unless preceded by `export`|
 
 ## Key Differences
@@ -223,7 +223,7 @@ All three commands create global variables accessible throughout the script. How
     
 - **`declare -g`**: Explicitly creates global variables from within functions​
     
-- **`export`**: Always creates global variables regardless of where used[](https://delightlylinux.wordpress.com/2024/03/23/bash-typed-variables-with-declare/)​
+- **`export`**: Marks a variable for export to child processes; if used on a local variable inside a function, that variable remains local to the function[](https://delightlylinux.wordpress.com/2024/03/23/bash-typed-variables-with-declare/)​
     
 
 ## Child Process Visibility
@@ -419,7 +419,7 @@ bash
 |**All UPPERCASE** |ALL_UPPERCASE|ALL_UPPERCASE|Easy to spot variables|Conflicts with env vars|
 |**camelCase**|camelCase|UPPERCASE|Common in other languages|Non-standard for shell|
 
-**Recommendation:** Follow Google Shell Style Guide —it's the de facto industry standard and prevents environment variable conflicts.
+**Recommendation:** Pick a consistent team style. The Google Shell Style Guide is one published convention, not a universal industry standard.
 
 ---
 

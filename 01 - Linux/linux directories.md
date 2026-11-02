@@ -10,7 +10,7 @@ All files and directories stem from `/`, treating devices, binaries, and configs
 
 ## Key Directories
 
-- `/bin`: Essential user binaries like `ls`, `cp` for basic operations, available in single-user mode.
+- `/bin`: Traditionally contains essential user commands. On many modern distributions it is a symlink into `/usr/bin` as part of the merged-usr layout.
     
 - `/boot`: Bootloader files, kernels, and initramfs for system startup.
     
@@ -20,7 +20,7 @@ All files and directories stem from `/`, treating devices, binaries, and configs
     
 - `/home`: User home dirs (e.g., `/home/mostafa` for personal files).
     
-- `/lib` and `/lib64`: Shared libraries for `/bin` and `/sbin` binaries.
+- `/lib` and `/lib64`: Traditionally contain essential shared libraries and loader files; on merged-usr systems these may be symlinks into `/usr/lib`.
     
 - `/opt`: Optional third-party software installs.
     
@@ -28,11 +28,11 @@ All files and directories stem from `/`, treating devices, binaries, and configs
     
 - `/root`: Root user's home directory.
     
-- `/sbin`: System admin binaries like `fdisk`, `reboot`.
+- `/sbin`: Traditionally contains system administration commands; on merged-usr systems it may be a symlink into `/usr/sbin`.
     
-- `/tmp`: Temporary files, cleared on reboot.
+- `/tmp`: Temporary files. Its contents may be removed at reboot or by periodic cleanup, depending on the distribution and configuration; do not assume files persist.
     
-- `/usr`: User programs and data (/usr/bin for apps, /usr/lib for libs, read-only).
+- `/usr`: Most user-space programs, libraries, documentation, and shared data (such as `/usr/bin` and `/usr/lib`). It is treated as static software data by the FHS, but it is not necessarily mounted read-only on every system.
     
 - `/var`: Variable data like logs (/var/log), mail, spool files.
     

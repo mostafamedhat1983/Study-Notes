@@ -18,7 +18,7 @@ Basic syntax: `grep [options] "pattern" [file]`. Without a file, it reads from 
     
 - `-l`: List matching files only
     
-- `-c`: Count matches
+- `-c`: Count matching lines per file, not total occurrences
     
 - `-E`: Extended regex (no escaping needed for `|`, `+`, etc.) [](https://phoenixnap.com/kb/grep-command-linux-unix-examples)  
 ## Grep Context Options

@@ -67,7 +67,7 @@ spec:
 
 ## Headless Service (required for StatefulSets)
 
-StatefulSets require a Headless Service to give each Pod a stable DNS name.
+A Headless Service is the common way to provide stable per-Pod DNS records for a StatefulSet. The StatefulSet's `serviceName` should reference the governing Service; DNS publication also depends on endpoint readiness and Service settings.
 
 ```yaml
 apiVersion: v1
@@ -95,8 +95,8 @@ postgres-2.postgres.default.svc.cluster.local
 
 - each Pod gets its own PVC automatically
 - PVCs are named `<volume-name>-<pod-name>`
-- PVCs are NOT deleted when the StatefulSet is deleted (data protection)
-- you must manually delete PVCs to free storage
+- By default, deleting or scaling down a StatefulSet retains its PVCs. The `.spec.persistentVolumeClaimRetentionPolicy` can be configured with `whenDeleted` and `whenScaled` set to `Delete`; check the cluster version and policy before relying on retention.
+- Deleting a PVC may in turn delete the PV/storage asset depending on the PV reclaim policy.
 
 ---
 
@@ -124,7 +124,7 @@ kubectl delete pod postgres-1        # Pod restarts with same identity
 ## Common mistakes
 
 - using a Deployment for a database (Pods have no stable identity or dedicated storage)
-- forgetting the Headless Service (StatefulSet Pods will not get stable DNS names)
+- forgetting the governing Service when stable per-Pod DNS discovery is required
 - deleting a StatefulSet and expecting PVCs to be cleaned up (they are not)
 - not using init containers to handle first-run database initialization
 - updating a StatefulSet without understanding rolling update behavior for stateful apps
@@ -163,5 +163,5 @@ kubectl get pvc
 - StatefulSets give Pods stable names, stable DNS, and stable storage.
 - Each Pod gets its own PVC via volumeClaimTemplates.
 - Pods start in order (0 → 1 → 2) and stop in reverse (2 → 1 → 0).
-- A Headless Service is required for stable per-Pod DNS.
+- A governing Service (commonly headless) provides stable per-Pod DNS discovery.
 - PVCs are not deleted when the StatefulSet is deleted — clean them up manually.

@@ -2,62 +2,78 @@
 tags:
   - Linux
 ---
-Linux processes show states like running, sleeping, stopped, zombie, and uninterruptible sleep (D) in tools like `top`. Systemd (PID 1) manages the process tree, spawning children and adopting orphans when parents die.
+Linux processes have states such as running/runnable, interruptible sleep, uninterruptible sleep, stopped, and zombie. The process tree records parent-child relationships. When a parent exits, orphaned children are reparented to an init process or a configured child subreaper.
 
-## Monitoring Commands
+## Monitoring commands
 
-**`top`** provides real-time views of CPU, RAM, load average (1/5/15-min queues), tasks (total, running, sleeping), and sorts processes by resource use—press `q` to quit. Load average rises with CPU saturation; values > CPU cores (check `nproc`) mean queuing.
+- `top`: interactive process and system monitor. It displays CPU and memory usage, task states, and load averages over 1, 5, and 15 minutes.
+- `uptime`: displays uptime and the same load averages.
+- `nproc`: reports the number of processing units available to the current process.
+- `ps aux`: lists processes with resource and state information.
+- `ps -ef`: lists processes with parent process IDs (PPIDs).
+- `ps -eo pid,ppid,stat,comm,wchan`: useful for inspecting process states and wait channels.
+- `htop`: an optional interactive process viewer.
 
-**`ps aux`** lists all processes statically: PID, user, %CPU/%MEM, status (S=sleeping, R=running, Z=zombie, T=stopped, **D=uninterruptible I/O wait**), sorted by PID.
+### Understanding load average
 
-**`ps -ef`** adds parent PID (PPID) to trace hierarchy; PID 1 (systemd) parents orphans from killed services like httpd.
+Linux load average is not simply CPU utilization or a CPU run queue. It reflects the average number of tasks that are runnable or in uninterruptible sleep over 1, 5, and 15 minutes. Compare it with the number of available CPUs as a rough signal, while also investigating I/O wait and workload characteristics. A load average above the CPU count does not by itself prove CPU saturation.
 
-**`htop`** improves on top: colors, tree view (F5), mouse support, search—install if missing (`sudo apt install htop`).
+## Common process states
 
-## Full Process States
+- **R — Running or runnable:** executing on a CPU or waiting for CPU time.
+- **S — Interruptible sleep:** waiting for an event and can generally be woken by signals.
+- **D — Uninterruptible sleep:** usually waiting in the kernel, often for I/O. A signal such as SIGKILL can be sent, but the task cannot act on it until it leaves the uninterruptible wait. Investigate the underlying I/O or kernel wait; do not assume the process can be killed immediately.
+- **T — Stopped:** stopped by a job-control or signal event, such as SIGSTOP.
+- **Z — Zombie:** the process has exited, but its parent has not yet collected its exit status with wait(). A zombie is not running and cannot be killed again. The parent must reap it; if the parent exits, the zombie is reparented and normally reaped by init or a subreaper.
 
-- **R**: Running/runnable (CPU-ready).
-    
-- **S**: Interruptible sleep (signal-wakeable).
-    
-- **D**: **Uninterruptible sleep** (I/O wait like disk; ignores `kill -9`, check `iotop` or `ps -eo stat,wchan`).
-    
-- **T**: Stopped/suspended (Ctrl+Z or SIGSTOP).
-    
-- **Z**: Zombie (dead entry; kill parent or reboot).
-    
+## Signals and process termination
 
-This flowchart shows transitions—D-state often needs I/O fixes, not kills.
+- `kill PID` sends SIGTERM by default. It requests termination; the application may handle it, clean up, or ignore it.
+- `kill -9 PID` sends SIGKILL. The process cannot catch or handle this signal, so it cannot perform application-level cleanup.
+- Sending a signal to one PID does **not** automatically terminate all of its children.
+- Process groups, sessions, service managers, or application-specific shutdown logic may be used when a whole workload must be stopped.
 
-## Killing Processes
+Examples:
 
-**`kill PID`** (SIGTERM): Polite; closes children first.  
-**`kill -9 PID`** (SIGKILL): Forceful; orphans kids to PID 1 (systemd cleans via Type=notify).
+```bash
+ps -ef | grep '[h]ttpd'
+kill 1420                 # request termination of PID 1420
+kill -TERM 1420           # explicit SIGTERM
+kill -KILL 1420           # force termination; use only when necessary
+pkill -TERM -f httpd      # signal matching processes; verify the match first
+```
 
-**Examples** (httpd):  
-`ps -ef | grep httpd | grep -v grep` finds PIDs.  
-`kill 1420` stops parent+children.  
-`ps -ef | grep httpd | awk '{print $2}' | xargs kill -9` mass-kills (use cautiously).
+For a systemd-managed service, prefer:
 
-**Better**: `systemctl stop httpd` (handles tree). Or `pkill -f httpd` (name-based).
+```bash
+sudo systemctl stop httpd
+sudo systemctl status httpd
+journalctl -u httpd -f
+```
 
-## systemd Best Practices
+Systemd's service cgroup and unit configuration determine how service processes are managed and stopped. Do not assume a generic `kill` command reproduces `systemctl stop` behavior.
 
-- **Logs**: `journalctl -u httpd -f` tails service logs.
-    
-- **Limits**: Add to `/etc/systemd/system/httpd.service.d/override.conf`:
-    
-    ```
-    [Service]
-    MemoryMax=500M
-    CPUQuota=50%
-    ```
-    
-    Then `systemctl daemon-reload && systemctl restart httpd`.
-    
-- **Review**: `systemctl list-unit-files --state=enabled` → disable unneeded: `systemctl disable foo`.
-    
+## systemd operations
 
-**Pro tip**: Orphans (PPID=1) waste resources; zombies clog tables (not RAM). D-state signals trouble—use `echo w > /proc/sysrq-trigger` for stack traces.
+- `systemctl stop foo`: stop the running unit.
+- `systemctl disable foo`: remove enablement links so the unit is not automatically started by the relevant boot target; it does **not** stop a unit that is already running.
+- `systemctl disable --now foo`: disable and stop the unit.
+- `systemctl daemon-reload`: reload unit files after changes.
+- `journalctl -u foo`: inspect a unit's logs.
 
-Like systemd as family patriarch: forks kids, reparents orphans, but D-state kids stonewall signals until I/O finishes.
+A service override can set resource controls, for example:
+
+```ini
+[Service]
+MemoryMax=500M
+CPUQuota=50%
+```
+
+After creating or changing a drop-in, run `systemctl daemon-reload` and restart the service if required.
+
+## Troubleshooting notes
+
+- Orphaned processes are not inherently resource leaks; they are reparented. Investigate what they do before taking action.
+- Zombies consume a process-table entry but do not execute or consume normal process memory like a live process.
+- A D-state task often points to a kernel wait such as blocked I/O. Investigate storage, filesystem, device, or network-filesystem health.
+- SysRq stack dumps can help advanced kernel troubleshooting, but enabling or triggering SysRq should follow the distribution's operational and security guidance.

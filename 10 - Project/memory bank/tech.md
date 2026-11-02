@@ -14,15 +14,15 @@ tags:
 
 ### Core AWS Services
 - **Amazon EKS 1.34**: Managed Kubernetes with Pod Identity and modern access patterns
-- **Regional NAT Gateway**: December 2024 feature with built-in HA across all AZs
+- **Regional NAT Gateway**: Regional VPC NAT mode that automatically expands/contracts across workload AZs for supported public NAT use cases; it does not support private NAT.
 - **Amazon RDS MySQL 8.0**: Managed database with Multi-AZ, encryption, and automated backups
-- **AWS Bedrock DeepSeek V3.1**: Serverless AI model with 64K context window ($0.27/1M tokens)
-- **AWS Secrets Manager**: Encrypted credential storage with KMS and automatic rotation
+- **AWS Bedrock DeepSeek V3.1**: Model ID `deepseek.v3-v1:0`; AWS currently documents a 128K context window and model lifecycle/EOL information. Pricing varies by region and service tier.
+- **AWS Secrets Manager**: Encrypted secret storage; automatic rotation occurs only when a rotation schedule and supported rotation mechanism are configured.
 - **Amazon ECR**: Private container registry with IAM authentication
 
 ### Infrastructure as Code
 - **Terraform >= 1.0**: Resource provisioning with S3 native state locking
-- **AWS Provider 6.25+**: Required for Regional NAT Gateway support
+- **AWS Provider**: Pin a version that explicitly supports the Regional NAT Gateway availability-mode argument; verify the provider resource documentation and lockfile.
 - **Packer >= 1.8**: Immutable AMI builds with vulnerability scanning
 - **Ansible >= 2.9**: Configuration management and software provisioning
 - **Trivy v0.67.2**: Container and filesystem vulnerability scanning
@@ -119,7 +119,7 @@ curl http://localhost:8000/health  # Backend health check
 - **AWS KMS**: Encryption key management for data at rest
 - **AWS IAM**: Identity and access management with least privilege policies
 - **Trivy**: Vulnerability scanning for containers and filesystems
-- **SSL/TLS**: End-to-end encryption for all network communications
+- **SSL/TLS**: Use HTTPS for AWS API calls. Backend-to-RDS TLS must be separately configured and verified; the reviewed aiomysql connection did not demonstrate TLS.
 
 ## Monitoring & Observability
 - **Prometheus**: Metrics collection and alerting

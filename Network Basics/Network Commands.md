@@ -22,7 +22,7 @@ tags:
 **ip route**  or  **route -n**    Displays routing table for gateway issues
 **ip link show**    for link states (up/down)
 
-**ip neighbor**    view the ARP table, this lists IP-to-MAC mappings for local network neighbors. It show **Only**known** neighbors**—devices your machine has recently communicated with directly , not all network
+**ip neighbor**    view the neighbor cache (IPv4 ARP and IPv6 neighbor discovery). It shows entries currently known to the kernel, which may be reachable, stale, failed, or permanent; it is not a complete inventory of all devices on the network.
 
 **arp -a**      Displays the current ARP table (cache) showing IP-to-MAC address mappings.
 

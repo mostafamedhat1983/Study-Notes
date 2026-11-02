@@ -5,96 +5,88 @@ tags:
   - EKS
   - Kubernetes
 ---
-## Why EKS Didn't Auto-Scale:
+# Investigating EKS Pod-Density and Cluster Autoscaler
 
-**The Problem:**  
-You hit the **pod limit per node** (11 pods for t3.small), not CPU/memory limits. Cluster Autoscaler only scales based on **resource requests** (CPU/memory), not pod count.
+This note separates two different questions:
 
-**What's Actually Happening:**
+1. Why did a Pod fail to schedule on the existing EKS nodes?
+2. Why did the node autoscaler or managed node group not add capacity?
 
-```c
-Node has capacity for: 11 pods, 2 vCPU, 2GB RAM
-Current usage: 11 pods, 0.5 vCPU (25%), 1GB RAM (50%)
-                ↓
-Cluster Autoscaler sees: CPU/memory available ✅
-Pod scheduling fails: No pod slots available ❌
-                ↓
-Autoscaler does NOT scale (thinks resources are available)
-```
+Do not assume that reaching a node's Pod limit prevents Cluster Autoscaler from scaling. Cluster Autoscaler reacts to **unschedulable Pods** when adding a node from a configured node group would make the Pod schedulable. Its scheduling simulation includes node constraints, not only CPU and memory.
 
-Copy
+## Pod density on EKS nodes
 
-**The Root Cause:**  
-AWS limits pods per node based on **ENI (Elastic Network Interface) capacity**, not resources. Each pod needs an IP address, and t3.small supports only 3 ENIs × 4 IPs = 11 pods max (1 IP reserved for node).
+With the Amazon VPC CNI, Pods generally receive VPC IP addresses from ENI/IP capacity (or prefix delegation, if configured). The maximum Pod count depends on:
 
-## Why Autoscaler Didn't Trigger:
+- EC2 instance type network limits (maximum ENIs and addresses/slots per ENI)
+- VPC CNI configuration
+- Whether prefix delegation is enabled
+- The node's configured `maxPods`
+- Host-network Pods and other implementation details
 
-**Cluster Autoscaler scales when:**
+For some common instance types, EKS publishes a recommended maximum Pod count. Do not derive a node's actual Pod capacity from a simplified ENI calculation without checking the instance type, CNI mode, and node bootstrap configuration.
 
-- ✅ Pods are **Pending** due to insufficient CPU/memory
-    
-- ❌ NOT when pods are **Unschedulable** due to pod limit
-    
-
-**Your case:**
-
-```c
-Pod status: Unschedulable (Too many pods)
-Reason: 0/3 nodes available: 3 Too many pods
-Autoscaler: Sees CPU/memory available, does nothing
-```
-
-Copy
-
-## How to Enable Auto-Scaling for Pod Limits:
-
-**Option 1: Increase max_size (Already Done)**
-
-```hcl
-node_max_size = 6  # Allows manual scaling up to 6 nodes
-```
-
-Copyhcl
-
-But Cluster Autoscaler still won't trigger automatically for pod limits.
-
-**Option 2: Install Cluster Autoscaler (Recommended)**
-
-Even with Cluster Autoscaler, it won't help with pod limits unless you configure it properly:
+Useful checks:
 
 ```bash
-# Install Cluster Autoscaler
-helm repo add autoscaler https://kubernetes.github.io/autoscaler
-helm install cluster-autoscaler autoscaler/cluster-autoscaler \
-  --set autoDiscovery.clusterName=platform-dev \
-  --set awsRegion=us-east-2 \
-  --set extraArgs.balance-similar-node-groups=true \
-  --set extraArgs.skip-nodes-with-system-pods=false
+# Node allocatable capacity and current Pod count
+kubectl describe node <node-name>
+
+# Inspect the node's capacity/allocatable fields
+kubectl get node <node-name> -o jsonpath='{.status.capacity.pods}{" / "}{.status.allocatable.pods}{"\n"}'
+
+# Check scheduling failure reason
+kubectl describe pod <pending-pod> -n <namespace>
+
+# Inspect VPC CNI configuration
+kubectl get daemonset aws-node -n kube-system -o yaml
+kubectl get configmap amazon-vpc-cni -n kube-system -o yaml
 ```
 
-Copybash
+## Does Cluster Autoscaler scale for Pod-count limits?
 
-**But:** Cluster Autoscaler still primarily looks at resource requests, not pod count.
+Yes, it can. If the scheduler marks a Pod unschedulable because a node has reached its Pod capacity, Cluster Autoscaler can consider scaling a configured node group **if a new node of that group would make the Pod schedulable**.
 
-## The Lesson:
+A scale-up may still not happen when, for example:
 
-**Pod limits are hard limits** - Cluster Autoscaler doesn't automatically scale for them. You must:
+- Cluster Autoscaler is not installed, healthy, or configured to discover the node group.
+- The node group has already reached its configured maximum size.
+- No configured node-group template satisfies the Pod's resource requests, selectors, affinity, taints/tolerations, topology, or storage constraints.
+- The Pod is not considered eligible for scale-up by the installed autoscaler version/configuration.
+- The node group's AWS Auto Scaling configuration or permissions prevent the requested change.
 
-1. Monitor pod usage manually
-    
-2. Set 
-    
-    ```plaintext
-    node_max_size
-    ```
-    
-     high enough for growth
-    
-3. Use larger instance types (more pods per node)
-    
-4. Or manually scale when approaching limits
-    
+The statement “Cluster Autoscaler does not scale for Pod limits because it only checks CPU/memory” is incorrect.
 
-**Best practice:** Always leave 20-30% pod capacity headroom to avoid hitting limits unexpectedly.
+## Troubleshooting sequence
 
-**Your fix (4 nodes) is the right approach** - manual scaling when you know you need more capacity.
+1. Check the Pending Pod's Events:
+   ```bash
+   kubectl describe pod <pending-pod> -n <namespace>
+   ```
+2. Confirm the scheduler reason (for example, `Too many pods`, insufficient CPU/memory, taint, affinity, or volume topology).
+3. Check each node's Pod capacity and current Pod count:
+   ```bash
+   kubectl describe node <node-name>
+   ```
+4. Check Cluster Autoscaler logs and confirm that the node group is discovered and below its maximum size.
+5. Verify that adding a node of that node group would satisfy the Pod's scheduling constraints.
+6. Check the EKS VPC CNI mode and the instance type's network limits before changing `maxPods` or instance type.
+
+## Important distinction
+
+Increasing a managed node group's `max_size` only raises its allowed upper bound; it does not itself add nodes. A working autoscaler must be configured and must decide that an eligible unschedulable Pod can be scheduled on a new node.
+
+## Project-specific facts must be verified
+
+The old version of this note stated that the cluster hit an 11-Pod limit on `t3.small`, that Cluster Autoscaler would not scale for Pod limits, and that manual scaling to four nodes was the fix. Keep those statements only if supported by project evidence such as:
+
+- the actual EC2 instance type and node `maxPods` value;
+- Pod scheduling Events showing `Too many pods`;
+- Cluster Autoscaler logs/configuration at the time;
+- node-group minimum/maximum values and actual scaling history.
+
+Without those records, describe this as a troubleshooting hypothesis, not a confirmed root cause or verified fix.
+
+## Key takeaway
+
+A Pod-capacity limit can make a Pod unschedulable, and Cluster Autoscaler can scale for that condition when a configured node group can provide a node that makes the Pod schedulable. Diagnose the scheduler Events and autoscaler logs instead of assuming CPU/memory-only behavior.

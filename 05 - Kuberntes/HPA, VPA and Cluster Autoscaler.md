@@ -1,16 +1,18 @@
 # HPA, VPA and Cluster Autoscaler
 
-Kubernetes has three complementary autoscaling mechanisms operating at different levels.
-
----
+Kubernetes autoscaling operates at different layers: HPA adjusts workload replica counts, VPA recommends or applies container resource settings, and Cluster Autoscaler adjusts node-group capacity when unschedulable Pods can be placed on added nodes.
 
 ## HPA — Horizontal Pod Autoscaler
 
-Scales the **number of Pod replicas** up or down based on observed metrics.
+HPA adjusts the replica count of a scalable workload based on observed metrics.
 
-- Default metric: CPU utilization
-- Also supports memory, custom metrics (via Metrics Server or Prometheus Adapter)
-- Acts on Deployments, StatefulSets, ReplicaSets
+- Resource metrics include CPU and memory utilization or average values.
+- Custom and external metrics can also be used when the corresponding metrics APIs/adapters are installed.
+- For CPU or memory **utilization percentage**, the relevant container resource requests must be defined; utilization is calculated relative to requests.
+- Metrics Server commonly supplies resource metrics, but it is not the provider for every custom/external metric.
+- HPA targets a resource with a scale subresource, commonly a Deployment or StatefulSet.
+
+Example:
 
 ```yaml
 apiVersion: autoscaling/v2
@@ -33,41 +35,27 @@ spec:
           averageUtilization: 60
 ```
 
-```bash
-# Create HPA imperatively
-kubectl autoscale deployment web --cpu-percent=60 --min=2 --max=10
+Commands:
 
-# Check HPA status
+```bash
+kubectl autoscale deployment web --cpu-percent=60 --min=2 --max=10
 kubectl get hpa
 kubectl describe hpa web-hpa
 ```
 
-### Requirements
-- **Metrics Server** must be installed in the cluster
-- Pods must have **resource requests** defined (CPU/memory)
-
-### Behaviour
-- Scale-up: fast (default 15s evaluation)
-- Scale-down: conservative (default 5 min stabilization window) to avoid flapping
-
----
+HPA behavior and timing are controlled by controller-manager configuration and the HPA behavior fields. Do not treat a single evaluation interval or stabilization window as a universal fixed value for every cluster.
 
 ## VPA — Vertical Pod Autoscaler
 
-Automatically adjusts **CPU and memory requests/limits** for containers based on actual usage.
+VPA analyzes historical and current resource usage and can recommend or apply CPU and memory requests (and, depending on configuration/version, limits).
 
-- Does NOT change replica count
-- Requires Pod restart to apply new resource values (unless using in-place updates — alpha)
-- Useful for workloads with unpredictable or varying resource needs
+- VPA does not change the replica count.
+- Applying changed resource values may require Pod eviction/recreation, depending on the VPA update mode and Kubernetes/VPA version.
+- VPA is a separate project/add-on; it is not enabled by simply creating a Kubernetes Deployment.
 
-### VPA Modes
+VPA update modes and feature availability can change across VPA releases. Check the installed VPA version's official documentation before copying a mode value into a manifest. In particular, do not use `Auto` as a generic current mode without checking the version; older notes and examples may use mode names that have changed.
 
-| Mode | Behaviour |
-|---|---|
-| `Off` | Only recommends, no changes applied |
-| `Initial` | Sets resources at Pod creation only |
-| `Auto` | Applies recommendations, restarts Pods as needed |
-| `Recreate` | Same as Auto but always evicts Pods |
+Example structure:
 
 ```yaml
 apiVersion: autoscaling.k8s.io/v1
@@ -80,70 +68,48 @@ spec:
     kind: Deployment
     name: web
   updatePolicy:
-    updateMode: "Auto"
+    updateMode: "Off"
 ```
 
-> ⚠️ Do NOT use HPA (CPU/memory) and VPA (Auto) together on the same Deployment — they conflict. Use HPA for scaling replicas + VPA in `Off` mode for recommendations only.
+`Off` is useful when you want recommendations without VPA applying resource changes.
 
----
+### HPA and VPA together
+
+Using HPA on CPU/memory utilization while VPA changes the same CPU/memory requests can create feedback or competing adjustments because HPA utilization is calculated relative to requests. They can be combined with careful design (for example, different metrics or recommendation-only VPA), but do not assume every combination is safe.
 
 ## Cluster Autoscaler
 
-Scales the **number of nodes** in the cluster up or down based on pending Pods and underutilized nodes.
+Cluster Autoscaler changes the size of configured node groups.
 
-- Adds nodes when Pods are `Pending` due to insufficient resources
-- Removes nodes when they are underutilized for a sustained period (default 10 min)
-- Cloud-provider specific: AWS (EKS managed node groups), GKE, AKS all supported
+It attempts to scale up when Pods are unschedulable and adding a node from a configured node group would make those Pods schedulable. The scheduler's constraints are broader than CPU and memory: they include Pod count capacity, node selectors, affinity, taints/tolerations, topology, and storage constraints.
 
-### How it works
-1. Pod is `Pending` — no node has enough resources
-2. Cluster Autoscaler detects this and triggers node group scale-up
-3. New node joins, Pod gets scheduled
-4. When nodes are underutilized, CA evicts Pods and removes the node
+It can scale down nodes that remain unneeded when their workloads can be safely moved elsewhere, subject to PodDisruptionBudgets, eviction rules, and autoscaler configuration.
 
-### Key Annotations/Flags
+### Common reasons a scale-up does not happen
 
-```yaml
-# Prevent a Pod from being evicted during scale-down
-annotations:
-  cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
-```
+- Cluster Autoscaler is not installed, healthy, or configured to discover the node group.
+- The node group is already at its configured maximum.
+- A new node of that group would still not satisfy the Pod's scheduling constraints.
+- The Pod is not eligible for scale-up under the autoscaler's version/configuration.
+- Cloud-provider permissions or node-group configuration prevent scaling.
 
-```yaml
-# PodDisruptionBudget — protect minimum replicas during scale-down
-apiVersion: policy/v1
-kind: PodDisruptionBudget
-metadata:
-  name: web-pdb
-spec:
-  minAvailable: 2
-  selector:
-    matchLabels:
-      app: web
-```
+### EKS considerations
 
-### On EKS
-- Use **Managed Node Groups** or **Karpenter** (preferred modern alternative)
-- Karpenter is faster and more flexible than Cluster Autoscaler on AWS
-
----
+Cluster Autoscaler and Karpenter are separate node-provisioning approaches. EKS managed node groups can be used with Cluster Autoscaler when configured correctly; Karpenter is another option with different provisioning behavior. Do not label one universally “preferred” without considering the architecture, version, and operational requirements.
 
 ## Comparison
 
 | Feature | HPA | VPA | Cluster Autoscaler |
 |---|---|---|---|
-| Scales | Pod replicas | Pod resources | Nodes |
-| Trigger | Metrics (CPU/memory) | Resource usage | Pending Pods / idle nodes |
-| Requires restart | ❌ | ✅ (usually) | ❌ |
-| Use together | ✅ with CA | ⚠️ not with HPA | ✅ with HPA |
+| Changes | Pod replica count | Pod resource recommendations/requests | Node-group size |
+| Trigger | Metrics | Observed resource usage | Unschedulable Pods / unneeded nodes |
+| Requires Pod restart | No, for replica changes | May, depending on update mode | No, for node count itself |
+| Common pairing | HPA + Cluster Autoscaler | Carefully designed with HPA | Supports HPA by adding node capacity |
 
----
+## Good practices
 
-## Best Practices
-
-- Always define `requests` on all containers — HPA and CA depend on them
-- Use HPA + Cluster Autoscaler together for full horizontal scaling
-- Use VPA in `Off` mode to get right-sizing recommendations without restarts
-- Set `minReplicas >= 2` on HPA for production availability
-- Use PodDisruptionBudgets to protect apps during CA scale-down
-- On AWS EKS, evaluate **Karpenter** as a replacement for Cluster Autoscaler
+- Set realistic resource requests; they influence scheduling and HPA utilization calculations.
+- Use HPA with Cluster Autoscaler or another node provisioner when workloads need both Pod and node scaling.
+- Start with VPA recommendation mode before allowing it to evict/recreate Pods.
+- Configure PodDisruptionBudgets thoughtfully; they can affect safe node scale-down.
+- Inspect Pending Pod Events and autoscaler logs instead of assuming a scale-up trigger is based only on CPU/memory.

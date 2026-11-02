@@ -51,9 +51,9 @@ For each problem below:
 
 ## 4. IP address conflict
 
-- **Why it happens:** Two devices use the same IP address.
+- **Why it happens:** Two devices on the same Layer 2 network use the same IP address.
 - **Quick sign:** Connectivity is intermittent or ARP entries change unexpectedly.
-- **Solution:** Identify duplicate addresses, release/renew or reassign one device, and reserve critical addresses.
+- **Solution:** Use duplicate-address detection on the affected local link, then identify and reconfigure the conflicting device. `arping -D` sends ARP probes on the local Layer 2 segment; routers do not forward ARP broadcasts, so it cannot detect a duplicate on a different routed subnet. For conflicts across VLANs or routed networks, check DHCP/IPAM records and the relevant gateway or switch ARP tables on each segment.
 - **Useful commands:** `arping -D <ip>`, `ip neigh`
 
 ---

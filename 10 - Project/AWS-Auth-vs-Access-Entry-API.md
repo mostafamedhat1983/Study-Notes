@@ -178,7 +178,7 @@ Opens vim/nano with YAML. One wrong space = broken cluster access.
 
 #### ❌ **Problem 5: Deprecated by AWS**
 
-AWS officially deprecated aws-auth ConfigMap in 2023 in favor of Access Entry API.
+AWS documents `aws-auth` as deprecated and recommends access entries for supported clusters. Deprecation does not mean the ConfigMap has already been removed; clusters using ConfigMap authentication may continue to depend on it.
 
 ---
 
@@ -386,7 +386,9 @@ resource "aws_eks_access_policy_association" "dev_readonly" {
 | **Status** | Deprecated | Recommended |
 | **Resource Type** | Kubernetes ConfigMap | AWS API resource |
 | **Managed By** | Kubernetes API | AWS API |
-| **Granularity** | Monolithic (all in one) | Individual per IAM principal |
+| **Mapping management** | Multiple mappings stored in one ConfigMap | Individual access-entry resources per IAM principal |
+
+Both methods can map IAM principals to Kubernetes groups that are then authorized through Kubernetes RBAC. Do not claim that `aws-auth` only supports cluster-wide permissions; namespace-scoped RBAC is possible with either approach.
 | **Terraform Approach** | One ConfigMap for all | One resource per principal |
 | **Team Collaboration** | ❌ Conflicts, overwrites | ✅ Independent modules |
 | **Race Conditions** | ⚠️ Common (EKS auto-creates) | ✅ None |
@@ -578,7 +580,7 @@ Once all access is migrated, delete the ConfigMap:
 kubectl delete configmap aws-auth -n kube-system
 ```
 
-**Note:** EKS node groups don't need aws-auth anymore—they use Access Entry API automatically if cluster is v1.24+.
+**Note:** Managed node-group access behavior depends on the cluster authentication mode and how the node group was created. In clusters using the EKS API authentication mode (or API_AND_CONFIG_MAP), EKS can create the required node access entry for managed node groups. In ConfigMap-only mode, node role mappings use `aws-auth`. Do not infer access-entry creation from the Kubernetes version alone.
 
 ---
 

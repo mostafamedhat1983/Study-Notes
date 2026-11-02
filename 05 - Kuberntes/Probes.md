@@ -76,7 +76,7 @@ With `failureThreshold: 30` and `periodSeconds: 10`, the configured startup fail
 | `httpGet` | HTTP GET request — success if status 200-399 |
 | `tcpSocket` | TCP connection attempt — success if port opens |
 | `exec` | runs a command inside the container — success if exit code 0 |
-| `grpc` | gRPC health check (Kubernetes 1.24+) |
+| `grpc` | Native gRPC health check (introduced as beta in Kubernetes 1.24; stable in Kubernetes 1.27) |
 
 ### tcpSocket example
 
@@ -160,7 +160,7 @@ spec:
 
 - configure only the probes that match the application's health model; a startup probe is especially useful for slow initialization
 - liveness probe: check only that the app process itself is alive (no external dependencies)
-- readiness probe: check that the app can actually serve requests (DB connection, etc.)
+- readiness probe: check whether the app can currently serve its intended requests; include critical dependencies only when their failure truly makes the instance unable to serve traffic
 - use a startup probe when startup duration is variable or could exceed the liveness probe's failure budget
 - expose `/healthz` and `/ready` endpoints in your application
 - tune `failureThreshold` and `periodSeconds` based on real app behavior
@@ -193,4 +193,4 @@ livenessProbe:
 - Liveness restarts unhealthy containers; readiness removes them from traffic.
 - Startup probe prevents liveness from killing slow-starting apps.
 - Liveness should not check external dependencies to avoid cascading restarts.
-- Readiness should check all dependencies so unready pods get no traffic.
+- Readiness should reflect the application's ability to serve traffic; avoid marking every Pod unready for optional or non-critical dependency failures.

@@ -243,7 +243,7 @@ It is useful when:
 
 ## `prevent_destroy`
 
-This tells Terraform to refuse destruction of a resource.
+This tells Terraform to reject a plan that would destroy the resource while the resource block and this lifecycle rule remain in the configuration. Removing the resource block also removes this protection, so it is not a substitute for backups or access controls.
 
 Example:
 
@@ -253,7 +253,7 @@ lifecycle {
 }
 ```
 
-This is useful for very important resources such as:
+This can help guard important resources such as:
 - production databases
 - critical storage
 - important networking resources

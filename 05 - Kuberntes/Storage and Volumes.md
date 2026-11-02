@@ -2,209 +2,119 @@
 tags:
   - Kubernetes
 ---
-Kubernetes storage allows Pods to persist data beyond the container lifecycle and share data between containers.
+Kubernetes volumes provide storage to containers. PersistentVolumes (PVs), PersistentVolumeClaims (PVCs), and StorageClasses support storage lifecycle and dynamic provisioning.
 
----
+## Main concepts
 
-## Main idea
+- A container's writable layer is tied to that container instance; a volume can outlive an individual container restart.
+- A Pod volume is available to containers in that Pod when mounted.
+- A PV represents a storage resource in the cluster.
+- A PVC is a request for storage by a workload.
+- A StorageClass describes a provisioner and parameters for dynamic volume provisioning.
 
-- container filesystem is ephemeral — data is lost when the container restarts
-- volumes provide persistent or shared storage for Pods
-- PersistentVolumes (PV) are cluster-level storage resources
-- PersistentVolumeClaims (PVC) are requests for storage by Pods
-- StorageClass enables dynamic provisioning of volumes
+## `emptyDir`
 
----
-
-## Volume types
-
-### `emptyDir`
-
-- created when the Pod starts, deleted when the Pod is removed
-- shared between all containers in the same Pod
-- data survives container restarts but not Pod deletion
-- use for: temp files, caches, sharing data between sidecar and main container
+- Created for a Pod on the node where it is scheduled.
+- Shared by containers in that Pod when mounted.
+- Survives a container restart while the Pod remains, but is deleted when the Pod is removed from the node.
+- Can be memory-backed with `medium: Memory`; memory-backed data counts against memory limits/usage.
 
 ```yaml
 spec:
   volumes:
-    - name: temp-storage
+    - name: scratch
       emptyDir: {}
   containers:
     - name: app
       image: my-app:1.0
       volumeMounts:
-        - name: temp-storage
+        - name: scratch
           mountPath: /tmp/data
 ```
 
-### `hostPath`
+## `hostPath`
 
-- mounts a file or directory from the host node filesystem into the Pod
-- data persists as long as the node exists
-- not portable — Pod must land on the same node to see the same data
-- use for: node-level log access, running system agents (DaemonSets)
-- avoid in production for app data
+Mounts a file or directory from the node's filesystem into a Pod. It is node-specific and can expose host data or resources. Use it only when the workload genuinely requires host access (for example, some node agents); it is generally unsuitable for portable application data.
 
-```yaml
-spec:
-  volumes:
-    - name: host-logs
-      hostPath:
-        path: /var/log
-        type: Directory
-```
+## PersistentVolumes and Claims
 
----
+A PV can be provisioned statically by an administrator or dynamically through a StorageClass. A PVC requests capacity and access modes; Kubernetes binds it to a matching PV or triggers dynamic provisioning.
 
-## PersistentVolume (PV)
-
-- a cluster-level storage resource provisioned by an admin or dynamically
-- exists independently of any Pod
-- has a capacity, access mode, and reclaim policy
-
-```yaml
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: my-pv
-spec:
-  capacity:
-    storage: 10Gi
-  accessModes:
-    - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Retain
-  storageClassName: standard
-  hostPath:
-    path: /data/my-pv
-```
-
----
-
-## PersistentVolumeClaim (PVC)
-
-- a request for storage by a Pod
-- Kubernetes binds the PVC to a matching PV
-- the Pod uses the PVC, not the PV directly
+Example PVC:
 
 ```yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: my-pvc
+  name: app-data
 spec:
   accessModes:
     - ReadWriteOnce
+  storageClassName: gp3
   resources:
     requests:
-      storage: 5Gi
-  storageClassName: standard
+      storage: 10Gi
 ```
 
-### Using PVC in a Pod
+A Pod references the claim:
 
 ```yaml
 spec:
   volumes:
-    - name: my-storage
+    - name: app-data
       persistentVolumeClaim:
-        claimName: my-pvc
+        claimName: app-data
   containers:
     - name: app
       image: my-app:1.0
       volumeMounts:
-        - name: my-storage
+        - name: app-data
           mountPath: /data
 ```
 
----
-
 ## Access modes
 
-| Mode | Abbreviation | Meaning |
-|---|---|---|
-| `ReadWriteOnce` | RWO | one node can read and write |
-| `ReadOnlyMany` | ROX | many nodes can read |
-| `ReadWriteMany` | RWX | many nodes can read and write |
-| `ReadWriteOncePod` | RWOP | one Pod can read and write (K8s 1.22+) |
+| Mode | Meaning |
+|---|---|
+| `ReadWriteOnce` (RWO) | Volume can be mounted read-write by a single node. Multiple Pods on that same node may be able to use it. |
+| `ReadOnlyMany` (ROX) | Volume can be mounted read-only by many nodes, if the storage backend supports it. |
+| `ReadWriteMany` (RWX) | Volume can be mounted read-write by many nodes, if the backend supports it. |
+| `ReadWriteOncePod` (RWOP) | Volume can be mounted read-write by a single Pod; CSI support and Kubernetes version requirements apply. |
 
----
+Access modes are used for PV/PVC matching and do not universally enforce filesystem-level write protection after a volume is mounted. Check the CSI driver and storage backend capabilities.
 
 ## Reclaim policy
 
-| Policy | Behavior after PVC deleted |
+| Policy | Behavior after claim release |
 |---|---|
-| `Retain` | PV stays, data preserved, manual cleanup needed |
-| `Delete` | PV and underlying storage deleted automatically |
-| `Recycle` | deprecated — basic scrub and reuse |
+| `Retain` | PV and underlying data are retained for manual recovery/cleanup. |
+| `Delete` | PV and the provisioned storage asset are deleted by the provisioner, if supported. |
+| `Recycle` | Deprecated legacy behavior; do not use for new configurations. |
 
----
+## StorageClass example: Amazon EBS CSI
 
-## StorageClass
-
-- enables dynamic volume provisioning
-- when a PVC requests a StorageClass, Kubernetes automatically creates a PV
-- different classes can offer different performance tiers (SSD, HDD, etc.)
+For EKS with the Amazon EBS CSI driver, use the CSI provisioner name:
 
 ```yaml
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: fast-ssd
-provisioner: kubernetes.io/aws-ebs
+  name: gp3
+provisioner: ebs.csi.aws.com
 parameters:
   type: gp3
-reclaimPolicy: Delete
 volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Delete
 ```
 
----
+The old in-tree provisioner name `kubernetes.io/aws-ebs` is deprecated; use the EBS CSI driver. `WaitForFirstConsumer` delays binding/provisioning until a Pod is scheduled, helping the provisioner choose a topology compatible with the Pod.
 
-## Common mistakes
-
-- using emptyDir for data that must survive Pod restarts
-- using hostPath for application data (not portable across nodes)
-- not setting a reclaim policy (data may be deleted unexpectedly)
-- not matching access modes between PV and PVC
-- not using StorageClass for dynamic provisioning in cloud environments
-- forgetting that RWX is not supported by all storage backends (EBS only supports RWO)
-
----
+Amazon EBS volumes are block storage with attachment constraints; do not describe EBS as general multi-node RWX storage. For shared filesystem access across nodes, evaluate a backend such as Amazon EFS and its CSI driver.
 
 ## Good practices
 
-- use PVCs in Pod specs, never reference PVs directly
-- use StorageClass for dynamic provisioning in production
-- use `Retain` reclaim policy for important data
-- use `ReadWriteOnce` for most database workloads
-- use `ReadWriteMany` (NFS, EFS) when multiple Pods need the same data
-- use StatefulSets for stateful apps — they manage PVCs per Pod automatically
-
----
-
-## Must memorize
-
-```
-emptyDir    → ephemeral, shared within Pod
-hostPath    → node filesystem, not portable
-PV          → cluster-level storage resource
-PVC         → Pod's request for storage
-StorageClass → dynamic provisioning
-```
-
-```bash
-kubectl get pv
-kubectl get pvc
-kubectl get storageclass
-kubectl describe pvc <name>
-```
-
----
-
-## Key ideas
-
-- Container storage is ephemeral by default — use volumes for persistence.
-- Pods use PVCs to request storage; PVCs bind to PVs.
-- StorageClass enables dynamic PV provisioning without admin intervention.
-- Reclaim policy controls what happens to data after a PVC is deleted.
-- Use StatefulSets with volumeClaimTemplates for stateful apps.
+- Use PVCs for application storage and a StorageClass for dynamic provisioning.
+- Choose access modes based on the backend's real capabilities.
+- Understand the reclaim policy before deleting claims.
+- Use StatefulSets and `volumeClaimTemplates` when each replica needs its own claim.
+- Avoid `hostPath` for portable application data.

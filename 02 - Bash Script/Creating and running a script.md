@@ -44,11 +44,11 @@ or ./filename
 ---
 
 ### set -euo pipefail
-`set -euo pipefail` is a "strict mode" Bash declaration you put at the top of scripts to catch errors early and make them robust—perfect for your health check project.[](https://www.shkodenko.com/what-string-set-eeuo-pipefail-in-shell-script-does-mean/)
+`set -euo pipefail` is a commonly used Bash safety configuration, but it is not a complete error-handling system. Understand each option and handle expected failures explicitly.[](https://www.shkodenko.com/what-string-set-eeuo-pipefail-in-shell-script-does-mean/)
 
 ## Breakdown of Each Flag
 
-- **`-e`**: Exit immediately if _any_ command fails (non-zero exit code). Without it, errors are ignored and the script continues.[](https://www.shkodenko.com/what-string-set-eeuo-pipefail-in-shell-script-does-mean/)​
+- **`-e`**: Enables `errexit`. Bash exits in many unhandled non-zero command contexts, but there are important exceptions (for example, tests in `if`, most commands in `&&`/`||` lists, and non-final pipeline commands unless `pipefail` applies). Do not assume it exits after every failed command.[](https://www.shkodenko.com/what-string-set-eeuo-pipefail-in-shell-script-does-mean/)​
     
 - **`-u`**: Treat _unset variables_ as errors. If you reference `$foo` before setting it, the script exits—instead of silently expanding to empty.[](https://coderwall.com/p/fkfaqq/safer-bash-scripts-with-set-euxo-pipefail)​
     
@@ -57,6 +57,6 @@ or ./filename
 
 ## Why Use It in Your Script
 
-Combined, it prevents "silent failures" common in Bash: typos, missing files, bad pipes. Your health check will stop on the _first_ real problem (e.g., `df` fails on weird mount), making debugging trivial.[](https://gist.github.com/vncsna/64825d5609c146e80de8b1fd623011ca)​
+This configuration can help expose some failures, but behavior depends on command context. Use explicit `if`, `||`, and status checks for operations where failure handling matters.[](https://gist.github.com/vncsna/64825d5609c146e80de8b1fd623011ca)​
 
-**`set -euxo pipefail` produces trace output showing each command _before_ it runs, prefixed with `+`**
+**`set -x`** prints commands and expanded arguments before execution. Avoid enabling it when secrets may appear in arguments or environment-derived values, because traces can expose them in logs.

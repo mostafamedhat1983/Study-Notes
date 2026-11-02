@@ -10,7 +10,7 @@ The most common pattern is combining `file()`, `path.module`, `yamldecode`, and 
 
 ## `file()` — read a file
 
-`file()` reads the content of a file and returns it as a string.
+`file()` reads a UTF-8 text file that already exists at the beginning of the Terraform run and returns its contents as a string. It cannot read a file that another resource will create during the same apply because Terraform functions do not participate in the dependency graph.
 
 Syntax:
 
@@ -266,7 +266,7 @@ In most cases, `path.module` is what you want because it keeps file references t
 
 ## Rule of thumb
 
-- **`file()` + `path.module`** — always use together to safely load files from the module directory
+- **`file()` + `path.module`** — a robust pattern when loading files shipped with the current module; use `path.root` or another explicit path when that better matches the design
 - **`yamldecode`** — use for human-written YAML config files
 - **`jsondecode`** — use for JSON files from tools or APIs
 - **`jsonencode`** — use when a resource expects a JSON string as input
@@ -321,7 +321,7 @@ user_data = file("${path.module}/user-data.sh")
 
 - `file()` reads a file and returns its content as a plain string
 - `path.module` returns the directory of the current module's `.tf` file
-- always combine `file()` with `path.module` to make file paths safe and portable
+- use `path.module` when a file belongs to the current module; remember `file()` requires the file to exist before the run
 - `yamldecode` converts a YAML string into a Terraform value
 - `jsondecode` converts a JSON string into a Terraform value
 - `jsonencode` converts a Terraform value into a JSON string

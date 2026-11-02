@@ -251,7 +251,7 @@ rm [options] directory
 
 ---
 
-`netstat` and `ss` are both Linux tools to inspect active sockets, connections, and listening ports, but `ss` is the modern, faster replacement for the now‑deprecated `netstat`.
+`netstat` and `ss` both inspect sockets, connections, and listening ports. `ss` is the preferred modern Linux tool; `netstat` remains available on systems with the legacy net-tools package and is not a command that every distribution has removed.
 
 ## What they do
 
@@ -301,7 +301,7 @@ Typical quick checks:
 |Aspect|`netstat`|`ss`|
 |---|---|---|
 |Speed|Slower; parses `/proc` and other files|Faster; uses kernel Netlink interface|
-|Status|Deprecated; kept for backward compatibility|Recommended in modern Linux|
+|Status|Legacy net-tools utility; may need separate package|Preferred modern Linux utility|
 |Output control|More compact, “friendlier” layout|More verbose, richer filtering|
 |Feature depth|Limited socket‑level detail|More advanced (timers, filters, per‑socket details)|
 

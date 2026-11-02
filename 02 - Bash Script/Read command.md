@@ -30,11 +30,12 @@ bash
 
 |Option|Description|Use Case|
 |---|---|---|
-|`-r`|Disable backslash escapes|**Always use this** - prevents `\n` becoming newline |
+|`-r`|Disable backslash escapes|Use for ordinary text; it treats backslashes literally |
 |`-p "prompt"`|Display prompt before reading|Interactive input: `read -p "Enter name: " name` |
 |`-s`|Silent mode (no echo)|Password input |
 |`-t <seconds>`|Timeout after N seconds|Prevent infinite wait |
-|`-n <N>`|Read exactly N characters|Single keypress: `read -n 1` |
+|`-n <N>`|Read up to N characters, stopping at a delimiter such as newline|Read up to N characters: `read -n 1` |
+|`-N <N>`|Read exactly N characters unless EOF or timeout; delimiter is not special|Fixed-length input: `read -N 8` |
 |`-a <array>`|Read into array (word-by-word)|`read -a myarray` |
 |`-d <delim>`|Use custom delimiter instead of newline|`read -d ":"` stops at colon |
 |`-u <fd>`|Read from file descriptor|`read -u 9 var` reads from FD 9 |
@@ -100,7 +101,7 @@ bash
 
 bash
 
-`read input <<< "hello\tworld" echo "$input"  # Output: hello    world (tab interpreted)`
+`read input <<< "hello\tworld" echo "$input"  # Backslash can escape the following character; it does not translate `\t` into a tab`
 
 **With `-r` (SAFE):**
 
@@ -133,7 +134,7 @@ bash
 
 `IFS=':' read -r user pass uid gid <<< "root:x:0:0" # user="root", pass="x", uid="0", gid="0"`
 
-**Important:** When `IFS` is non-whitespace, fields are separated by **exactly one character** :
+**Important:** Non-whitespace IFS characters delimit fields and adjacent delimiters can produce empty fields; this is field splitting, not CSV parsing.
 
 bash
 
@@ -146,9 +147,9 @@ bash
 |Exit Code|Meaning|
 |---|---|
 |0|Success|
-|1|EOF reached or invalid file descriptor |
-|2|Invalid option |
-|>128|Timeout occurred |
+|Non-zero|EOF, timeout, or another read error. A timeout returns a status greater than 128; exact statuses depend on the condition.
+
+
 
 ---
 

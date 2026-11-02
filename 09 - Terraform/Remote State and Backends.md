@@ -84,10 +84,13 @@ The backend block tells Terraform where to store or read the state file. Backend
 
 ## Common S3 backend example
 
-A very common AWS pattern is:
+A common AWS pattern is:
 - S3 bucket for state storage
-- DynamoDB table for state locking
-- encryption enabled
+- S3 bucket versioning for state recovery
+- S3-native state locking with `use_lockfile = true`
+- encryption and tightly scoped IAM access
+
+**Current Terraform guidance:** S3-native locking is the recommended current approach. The S3 backend's DynamoDB locking arguments are deprecated in current HashiCorp documentation. DynamoDB locking may still appear in older configurations; treat it as a legacy configuration and plan migration rather than copying it into new projects.
 
 Example:
 
@@ -97,13 +100,13 @@ terraform {
     bucket         = "my-company-terraform-state-prod"
     key            = "environments/production/terraform.tfstate"
     region         = "us-east-1"
-    dynamodb_table = "terraform-state-locks"
+    use_lockfile   = true
     encrypt        = true
   }
 }
 ```
 
-This setup is widely used because S3 provides centralized storage, while DynamoDB locking helps prevent concurrent Terraform runs from corrupting state. 
+S3 stores the state object and the S3 backend can use a `.tflock` object for state locking. Enable bucket versioning so previous state object versions can be recovered. 
 
 ---
 

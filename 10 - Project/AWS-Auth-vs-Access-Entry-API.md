@@ -138,22 +138,21 @@ resource "kubernetes_config_map_v1_data" "aws_auth" {
 }
 ```
 
-Terraform will only create ONE resource. The last one wins.
+These are duplicate Terraform resource addresses and cannot be declared as two independent resources in one configuration. A single owner must combine the mappings; otherwise one team's update can overwrite another team's data.
 
 #### ❌ **Problem 2: Race Conditions**
 
-**Scenario:** EKS cluster creates aws-auth automatically for nodes. Your Terraform tries to create it simultaneously.
+**Scenario:** In clusters using ConfigMap authentication, EKS managed node groups may add node-role mappings to `aws-auth`. A Terraform configuration that also owns or replaces the ConfigMap can conflict with those mappings if ownership and ordering are not designed carefully.
 
 **What happens:**
 ```
 Time 0: EKS cluster created
-Time 1: EKS automatically creates aws-auth ConfigMap with node access
+Time 1: A managed node group may add its node-role mapping to aws-auth (when using ConfigMap authentication)
 Time 2: Your Terraform tries to create aws-auth ConfigMap
-Time 3: ERROR - ConfigMap already exists, or
-Time 3: Terraform overwrites it, nodes lose access
+Time 3: Terraform's create/update may conflict with the existing ConfigMap or replace mappings if the configuration does not preserve them
 ```
 
-**Solution required:** `depends_on`, `force = true`, or complex data merging logic.
+**Correct approach:** Use one clearly defined owner for the ConfigMap and merge all required mappings. `depends_on` controls ordering but does not merge data or prevent overwrites. Provider `force` controls field ownership conflicts; it is not a substitute for preserving node-role mappings. Prefer EKS Access Entries where supported.
 
 #### ❌ **Problem 3: Manual Editing Risk**
 
@@ -388,16 +387,15 @@ resource "aws_eks_access_policy_association" "dev_readonly" {
 | **Managed By** | Kubernetes API | AWS API |
 | **Mapping management** | Multiple mappings stored in one ConfigMap | Individual access-entry resources per IAM principal |
 
-Both methods can map IAM principals to Kubernetes groups that are then authorized through Kubernetes RBAC. Do not claim that `aws-auth` only supports cluster-wide permissions; namespace-scoped RBAC is possible with either approach.
-| **Terraform Approach** | One ConfigMap for all | One resource per principal |
+| **Terraform Approach** | One ConfigMap resource/owner containing all required mappings | One access-entry resource per IAM principal |
 | **Team Collaboration** | ❌ Conflicts, overwrites | ✅ Independent modules |
-| **Race Conditions** | ⚠️ Common (EKS auto-creates) | ✅ None |
+| **Race Conditions** | ⚠️ Possible when node-group mappings and Terraform both manage the ConfigMap | ⚠️ Possible if automation competes with an automatically created or existing access entry |
 | **Manual Editing** | ⚠️ kubectl edit (risky) | ✅ AWS API only |
 | **Version Control** | ⚠️ Export required | ✅ Native (Terraform) |
-| **Audit Trail** | ❌ No automatic logging | ✅ CloudTrail |
+| **Audit Trail** | Kubernetes audit logs can record ConfigMap changes when audit logging is enabled | CloudTrail records EKS access-entry API changes |
 | **Validation** | ❌ Apply first, fail later | ✅ API validates |
 | **Rollback** | ⚠️ Manual kubectl revert | ✅ Git revert |
-| **Namespace Scope** | ⚠️ Hard to implement | ✅ Built-in |
+| **Namespace Scope** | Supported through mapped Kubernetes RBAC groups | Supported through Kubernetes RBAC or scoped EKS access policies |
 | **Learning Curve** | Moderate (YAML, K8s) | Low (AWS API) |
 | **Terraform Complexity** | High (data merging) | Low (individual resources) |
 

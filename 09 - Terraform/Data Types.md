@@ -207,7 +207,7 @@ Simple rule:
 
 ### `any`
 
-Disables type enforcement. Terraform accepts any value without validation.
+`any` is a special placeholder type constraint. It lets Terraform infer the caller's actual value type instead of requiring one specific type. It does not disable all type checking or expression validation.
 
 ```hcl
 variable "flexible_input" {
@@ -216,7 +216,7 @@ variable "flexible_input" {
 ```
 
 Simple rule:
-- avoid `any` in production
+- avoid `any` when a specific input structure can be expressed more clearly
 - use specific types for clarity and validation
 
 ---

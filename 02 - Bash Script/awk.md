@@ -3,7 +3,7 @@ tags:
   - Bash_Script
   - Linux
 ---
-AWK is a powerful text-processing language built into bash that excels at extracting fields, performing calculations, and manipulating data in structured text files. It processes input line-by-line, applying patterns and actions to filter and transform data efficiently.[](https://www.geeksforgeeks.org/linux-unix/awk-command-unixlinux-examples/)
+AWK is a text-processing language and external command-line utility commonly used from Bash that excels at extracting fields, performing calculations, and manipulating data in structured text files. It processes input line-by-line, applying patterns and actions to filter and transform data efficiently.[](https://www.geeksforgeeks.org/linux-unix/awk-command-unixlinux-examples/)
 
 ## Basic Syntax
 
@@ -65,23 +65,23 @@ awk 'BEGIN {print "Processing started..."} {sum += $3} END {print "Total:", sum}
 
 ## Process Management
 
-Find and kill processes by name:[](https://funprojects.blog/2020/11/04/using-awk-in-bash-scripts/)​
+Find processes by name; verify the PID before signaling:[](https://funprojects.blog/2020/11/04/using-awk-in-bash-scripts/)​
 
 ``` bash 
-ps -e | grep "process_name" | awk '{print $1}' | xargs kill -9
+pgrep -a -x <process-name>  # identify the exact process before signaling it
 ```
 
 ## Log Analysis
 
-Filter processes with non-zero CPU time:[](https://funprojects.blog/2020/11/04/using-awk-in-bash-scripts/)​
+Inspect process CPU time using explicit output columns:[](https://funprojects.blog/2020/11/04/using-awk-in-bash-scripts/)​
 
 ``` bash 
-ps -e | awk '{if ($3 != "00:00:00") print $0}'
+ps -eo pid,comm,time
 ```
 
 ## Data Transformation
 
-Convert CSV to formatted output or add timestamps:[](https://funprojects.blog/2020/11/04/using-awk-in-bash-scripts/)​
+Transform simple delimited text; basic AWK field splitting is not a complete CSV parser:[](https://funprojects.blog/2020/11/04/using-awk-in-bash-scripts/)​
 
 ``` bash 
 cat data.txt | awk '{print strftime("%H:%M:%S ",systime()) $0}'
@@ -96,4 +96,4 @@ awk '{if ($3 < 4) {print $1 "\t small"} else {print $1 "\t medium"}}' data.txt
 
 ```
 
-AWK's combination of pattern matching, field processing, and built-in functions makes it indispensable for DevOps automation tasks involving log parsing, system monitoring, and data pipeline transformations.
+Note: `strftime()` and `systime()` are GNU awk extensions, not guaranteed by POSIX awk. Check the implementation before using them in portable scripts.\n\nAWK's combination of pattern matching, field processing, and built-in functions makes it indispensable for DevOps automation tasks involving log parsing, system monitoring, and data pipeline transformations.

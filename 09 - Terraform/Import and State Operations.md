@@ -60,25 +60,29 @@ That means after import:
 
 This is one of the most important things to understand about import.
 
-### Using `terraform import` with `-generate-config-out`
+### Generate configuration for an existing resource
 
-Sometimes writing the full resource block for an existing, complex resource is tedious. Terraform provides a helper flag `-generate-config-out` on `terraform import` to generate a starting configuration file for the imported resource.
+The `-generate-config-out` option belongs to `terraform plan`, not the legacy `terraform import` command. Use an `import` block to identify the object, then ask Terraform to generate a starting resource configuration.
 
 ```bash
-terraform import \
-  -generate-config-out=generated.tf \
-  aws_s3_bucket.logs my-logs-bucket
+terraform plan -generate-config-out=generated.tf
 ```
 
-What this does:
+Before running the plan, add an import block to configuration:
 
-- Imports the existing resource (`my-logs-bucket`) into Terraform state under `aws_s3_bucket.logs`.
-- Writes a suggested Terraform configuration for that resource into `generated.tf`.
-- The generated file contains a resource block with arguments based on what Terraform can detect from the real resource.
+```hcl
+import {
+  to = aws_s3_bucket.logs
+  id = "my-logs-bucket"
+}
+```
 
-Typical workflow with `-generate-config-out`:
+Terraform generates a draft resource configuration in `generated.tf` based on what it can detect from the remote object. Review and integrate the resource block, then run plan again.
 
-1. Run `terraform import` with `-generate-config-out=generated.tf`.
+Typical workflow:
+
+1. Add an `import` block for the existing resource.
+2. Run `terraform plan -generate-config-out=generated.tf`.
 2. Open `generated.tf` and review/clean up the generated resource:
    - remove read-only or computed attributes
    - rename the resource if needed
@@ -88,9 +92,9 @@ Typical workflow with `-generate-config-out`:
 
 Important points:
 
-- `-generate-config-out` does **not** remove the need to understand the resource; it only gives you a starting HCL template.
-- The imported resource is still added to state; the generated file is separate and must be integrated into your configuration.
-- You should treat the generated configuration as a draft, not as final production code.
+- `-generate-config-out` is used with `terraform plan` and an import block, not `terraform import`.
+- Review the generated configuration; it may contain computed or provider-specific attributes that need adjustment.
+- Treat generated HCL as a starting point, not production-ready code.
 
 ---
 

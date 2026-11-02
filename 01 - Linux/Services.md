@@ -40,7 +40,7 @@ In Linux, **services** (also called daemons) are background processes that sta
     
     - `systemctl enable <service>` — Runs the service automatically at boot.
         
-    - `systemctl disable <service>` — Prevents the service from starting at boot.
+    - `systemctl disable <service>` — Removes the unit's enablement links so it is not automatically started by the relevant boot target. It does not stop a service that is already running; use `systemctl disable --now <service>` to disable and stop it.
         
     - `systemctl mask <service>` — Completely blocks the service from starting (even manually); useful for disabling unwanted services.
         

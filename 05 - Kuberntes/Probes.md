@@ -52,7 +52,7 @@ readinessProbe:
 
 ## Startup probe
 
-Disables liveness and readiness probes until the startup probe succeeds.
+While a startup probe has not succeeded, Kubernetes does not run the container's liveness or readiness probes. After startup succeeds, the configured liveness and readiness probes take over.
 
 Use for: slow-starting applications (Java apps, apps with long initialization).
 
@@ -65,7 +65,7 @@ startupProbe:
   periodSeconds: 10
 ```
 
-This gives the app up to 30 x 10 = 300 seconds to start before liveness kicks in.
+With `failureThreshold: 30` and `periodSeconds: 10`, the configured startup failure budget is approximately 300 seconds (timing also depends on probe execution and timeout settings).
 
 ---
 
@@ -147,7 +147,7 @@ spec:
 
 ## Common mistakes
 
-- not setting probes at all (Kubernetes cannot detect unhealthy apps)
+- omitting probes where the workload needs explicit startup, readiness, or liveness handling; applications can still run without probes
 - using the same endpoint for liveness and readiness (wrong — they serve different purposes)
 - setting `initialDelaySeconds` too low (liveness kills container before it finishes starting)
 - not using a startup probe for slow-starting apps (liveness kills them too early)
@@ -158,10 +158,10 @@ spec:
 
 ## Good practices
 
-- always configure all three probes
+- configure only the probes that match the application's health model; a startup probe is especially useful for slow initialization
 - liveness probe: check only that the app process itself is alive (no external dependencies)
 - readiness probe: check that the app can actually serve requests (DB connection, etc.)
-- use startup probe for any app that takes more than 20-30 seconds to start
+- use a startup probe when startup duration is variable or could exceed the liveness probe's failure budget
 - expose `/healthz` and `/ready` endpoints in your application
 - tune `failureThreshold` and `periodSeconds` based on real app behavior
 

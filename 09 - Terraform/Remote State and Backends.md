@@ -87,7 +87,7 @@ The backend block tells Terraform where to store or read the state file. Backend
 A common AWS pattern is:
 - S3 bucket for state storage
 - S3 bucket versioning for state recovery
-- S3-native state locking with `use_lockfile = true`
+- S3-native state locking with `use_lockfile = true` (requires Terraform 1.10 or later; introduced in 1.10 and generally available in 1.11)
 - encryption and tightly scoped IAM access
 
 **Current Terraform guidance:** S3-native locking is the recommended current approach. The S3 backend's DynamoDB locking arguments are deprecated in current HashiCorp documentation. DynamoDB locking may still appear in older configurations; treat it as a legacy configuration and plan migration rather than copying it into new projects.

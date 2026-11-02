@@ -5,13 +5,13 @@ tags:
 ---
 Good mental model:
 
-- `docker` CLI sends requests to the Docker daemon (`dockerd`)
+- `docker` CLI sends requests to the Docker daemon (`dockerd`)
     
-- `dockerd` manages Docker’s higher-level features like images, containers, networks, and volumes
+- `dockerd` manages Docker’s higher-level features like images, containers, networks, and volumes
     
-- Docker uses **containerd**, a core container runtime daemon, to handle container lifecycle operations
+- Docker uses **containerd**, a core container runtime daemon, to handle container lifecycle operations
     
-- containerd uses a lower-level OCI runtime such as **runc** to actually create and start containers
+- containerd uses a lower-level OCI runtime such as **runc** to actually create and start containers
     
 - The Linux kernel provides the real isolation and resource control through namespaces, cgroups, mounts, and networking primitives
     
@@ -42,21 +42,21 @@ runc is typically invoked to create/start a container and then exits, rather tha
 - **containerd** is a long-running daemon. - **runc** is a low-level runtime executable invoked by containerd. - The application inside the container is the long-running process that actually runs after startup.
 ## Simplified flow
 
-1. I run `docker run`
+1. I run `docker run`
     
-2. The Docker CLI sends the request to `dockerd`
+2. The Docker CLI sends the request to `dockerd`
     
-3. `dockerd` checks whether the image exists locally
+3. `dockerd` checks whether the image exists locally
     
 4. If needed, Docker pulls image content from a registry
     
-5. `dockerd` asks containerd to perform the runtime work
+5. `dockerd` asks containerd to perform the runtime work
     
 6. containerd prepares the container filesystem from image layers using snapshots
     
 7. containerd creates the container and starts its task
     
-8. containerd uses `runc` to create the isolated process
+8. containerd uses `runc` to create the isolated process
     
 9. The Linux kernel enforces isolation and resource limits
     
@@ -67,7 +67,7 @@ runc is typically invoked to create/start a container and then exits, rather tha
 
 ## What containerd is
 
-**containerd** is a core container runtime daemon used by Docker and other container platforms.
+**containerd** is a core container runtime daemon used by Docker and other container platforms.
 
 Its job includes:
 
@@ -92,22 +92,22 @@ containerd is not mainly a developer UX tool like Docker.
 
 Instead:
 
-- **Docker** provides the user-facing workflow and commands
+- **Docker** provides the user-facing workflow and commands
     
-- **containerd** provides the core runtime backend
+- **containerd** provides the core runtime backend
     
-- **runc** performs the low-level container process creation
+- **runc** performs the low-level container process creation
     
 
 ## Easy mental model
 
-- **Docker** = platform and workflow
+- **Docker** = platform and workflow
     
-- **containerd** = runtime manager
+- **containerd** = runtime manager
     
-- **runc** = process launcher
+- **runc** = process launcher
     
-- **kernel** = actual isolation and limits
+- **kernel** = actual isolation and limits
     
 
 This is a very good way to explain the stack in interviews.
@@ -118,11 +118,11 @@ This is a very good way to explain the stack in interviews.
 
 Important interview point:
 
-- A container is **not** a lightweight VM
+- A container is **not** a lightweight VM
     
-- A container is an **isolated process** on the host
+- A container is an **isolated process** on the host
     
-- Containers **share the host kernel**
+- Containers **share the host kernel**
     
 - VMs virtualize hardware and run separate guest operating systems and kernels
     
@@ -135,9 +135,9 @@ This wording is better than saying “containers are like lightweight VMs.”
 
 ---
 
-## What happens in `docker run`
+## What happens in `docker run`
 
-`docker run` combines several steps:
+`docker run` combines several steps:
 
 - pull image if missing
     
@@ -152,7 +152,7 @@ This wording is better than saying “containers are like lightweight VMs.”
 - start the main process
     
 
-`docker run` can fail at different stages:
+`docker run` can fail at different stages:
 
 - image pull fails
     
@@ -173,11 +173,11 @@ This wording is better than saying “containers are like lightweight VMs.”
 
 Always ask:
 
-- Did the **image** fail?
+- Did the **image** fail?
     
-- Did the **runtime setup** fail?
+- Did the **runtime setup** fail?
     
-- Did the **application process** fail after container start?
+- Did the **application process** fail after container start?
     
 
 This gives a much stronger troubleshooting approach than trying random commands.
@@ -246,13 +246,13 @@ If a container crashes under load, the issue may be cgroup-enforced memory or CP
 
 ## Filesystem and image layers
 
-Docker images are built from **read-only layers**.
+Docker images are built from **read-only layers**.
 
 Key points:
 
 - many Dockerfile instructions create new image layers
     
-- containers add a **writable layer** on top of the image
+- containers add a **writable layer** on top of the image
     
 - the writable layer is usually ephemeral
     
@@ -383,9 +383,9 @@ Common problems:
 
 Example:
 
-- On the host, a folder may be owned by user `1000`
+- On the host, a folder may be owned by user `1000`
     
-- Inside the container, the app may run as user `1001`
+- Inside the container, the app may run as user `1001`
     
 - The container can mount the path successfully, but the app may get “permission denied” when trying to write
     
@@ -416,13 +416,13 @@ This is the default network mode for containers on a single Docker host.
 
 How it works:
 
-- the container gets its **own network namespace**
+- the container gets its **own network namespace**
     
-- the container usually gets its **own private IP**
+- the container usually gets its **own private IP**
     
 - that IP is usually reachable by other containers on the same bridge network
     
-- it is **not directly reachable from outside the host** unless I publish ports with `-p`
+- it is **not directly reachable from outside the host** unless I publish ports with `-p`
     
 
 So in bridge mode:
@@ -431,18 +431,18 @@ So in bridge mode:
     
 - **host has its own IP**
     
-- traffic from outside usually reaches the container through **port publishing/NAT**
+- traffic from outside usually reaches the container through **port publishing/NAT**
     
 
 ## Host
 
-In host mode, the container **does not get its own separate network namespace**.
+In host mode, the container **does not get its own separate network namespace**.
 
 How it works:
 
-- the container shares the **host network stack**
+- the container shares the **host network stack**
     
-- the container does **not get its own separate container IP**
+- the container does **not get its own separate container IP**
     
 - if the app listens on port 8080, it is listening directly on the host’s network
     
@@ -460,13 +460,13 @@ This can improve simplicity or performance, but it reduces network isolation.
 
 ## Overlay
 
-Overlay networking is used for **multi-host container communication**, such as in orchestration environments.
+Overlay networking is used for **multi-host container communication**, such as in orchestration environments.
 
 How it works:
 
-- containers still get their **own network namespace**
+- containers still get their **own network namespace**
     
-- containers get their **own IP addresses** on the overlay network
+- containers get their **own IP addresses** on the overlay network
     
 - the overlay network connects containers across multiple hosts as if they are on one logical network
     
@@ -482,18 +482,18 @@ So in overlay mode:
 
 ## None
 
-In `none` mode:
+In `none` mode:
 
-- the container gets its **own network namespace**
+- the container gets its **own network namespace**
     
-- but Docker does **not configure network interfaces for normal communication**
+- but Docker does **not configure network interfaces for normal communication**
     
-- the container does **not have a usable external network connection**
+- the container does **not have a usable external network connection**
     
 - typically, only the loopback interface (`lo`) exists
     
 
-So in `none` mode:
+So in `none` mode:
 
 - **container does not have a normal network IP for communication**
     
@@ -506,13 +506,13 @@ This is the mode you were thinking of when asking whether there is a network whe
 
 ## Simple summary
 
-- **Bridge**: container has **its own private IP**
+- **Bridge**: container has **its own private IP**
     
-- **Host**: container uses the **host IP/network stack**
+- **Host**: container uses the **host IP/network stack**
     
-- **Overlay**: container has **its own IP** on a multi-host virtual network
+- **Overlay**: container has **its own IP** on a multi-host virtual network
     
-- **None**: container has **no normal external network interface/IP**
+- **None**: container has **no normal external network interface/IP**
     
 
 ---
@@ -524,11 +524,11 @@ This is the mode you were thinking of when asking whether there is a network whe
 
 ## Very important distinction
 
-- `EXPOSE` does **not** publish a port
+- `EXPOSE` does **not** publish a port
     
-- `EXPOSE` is metadata/documentation
+- `EXPOSE` is metadata/documentation
     
-- `-p hostPort:containerPort` actually publishes the port
+- `-p hostPort:containerPort` actually publishes the port
     
 
 ## Common networking problems
@@ -537,7 +537,7 @@ A container can be healthy but unreachable because:
 
 - the port is not published
     
-- the app listens on `127.0.0.1` instead of `0.0.0.0`
+- the app listens on `127.0.0.1` instead of `0.0.0.0`
     
 - the wrong port is mapped
     
@@ -550,7 +550,7 @@ A container can be healthy but unreachable because:
 
 ## PID 1 and signal handling
 
-Inside the container, the main process becomes **PID 1** in that PID namespace.
+Inside the container, the main process becomes **PID 1** in that PID namespace.
 
 Why this matters:
 
@@ -563,7 +563,7 @@ Why this matters:
 
 ## Practical impact
 
-If `docker stop` hangs or the container does not shut down cleanly, one possible reason is that PID 1 is not handling signals correctly.
+If `docker stop` hangs or the container does not shut down cleanly, one possible reason is that PID 1 is not handling signals correctly.
 
 ## Interview-ready explanation
 
@@ -594,69 +594,69 @@ Important concepts:
     
 - **Build context**
     
-- `COPY` vs `ADD`
+- `COPY` vs `ADD`
     
-- `CMD` vs `ENTRYPOINT`
+- `CMD` vs `ENTRYPOINT`
     
 
-## `COPY` vs `ADD`
+## `COPY` vs `ADD`
 
-Both `COPY` and `ADD` place files into a Docker image, but `COPY` is the simpler and safer default.
+Both `COPY` and `ADD` place files into a Docker image, but `COPY` is the simpler and safer default.
 
 ## `COPY`
 
-Use `COPY` when I just want to copy files or directories from the build context into the image.
+Use `COPY` when I just want to copy files or directories from the build context into the image.
 
 Example:
 
-text
-
-`COPY app/ /app/`
+```text
+COPY app/ /app/
+```
 
 This does only one thing: it copies files from my local build context into the image.
 
 ## `ADD`
 
-`ADD` can also copy files, but it has extra behavior.
+`ADD` can also copy files, but it has extra behavior.
 
 Its extra behavior includes:
 
-- copying files like `COPY`
+- copying files like `COPY`
     
-- automatically extracting local archive files such as `.tar`
+- automatically extracting local archive files such as `.tar`
     
 - supporting remote URLs in some cases
     
 
 That is why the common best practice is:
 
-> Use `COPY` by default, and use `ADD` only when I specifically need its extra behavior.
+> Use `COPY` by default, and use `ADD` only when I specifically need its extra behavior.
 
-## Why `COPY` is preferred
+## Why `COPY` is preferred
 
-`COPY` is usually better because it is explicit and predictable.
+`COPY` is usually better because it is explicit and predictable.
 
 If I write:
 
-text
-
-`COPY . /app`
+```text
+COPY . /app
+```
 
 it is clear that Docker will only copy files.
 
 But if I write:
 
-text
+```text
+ADD app.tar.gz /app/
+```
 
-`ADD app.tar.gz /app/`
-
-Docker may extract that archive into `/app/` instead of storing it as a normal file. That can surprise people and make the Dockerfile harder to reason about.
+Docker may extract that archive into `/app/` instead of storing it as a normal file. That can surprise people and make the Dockerfile harder to reason about.
 
 ## Security comparison
 
-`COPY` is generally safer than `ADD` because it only copies local files from the build context and does not perform extra actions automatically.
+`COPY` is generally safer than `ADD` because it only copies local files from the build context and does not perform extra actions automatically.
 
-`ADD` can introduce more risk because:
+`ADD` can introduce more risk because:
 
 - it may fetch remote content "**remote URL**"
     
@@ -667,53 +667,53 @@ Docker may extract that archive into `/app/` instead of storing it as a normal
 - it can introduce archive-related risks if the input is untrusted
     
 
-For example, if I use `ADD` with an untrusted archive, Docker may unpack files into the image in unexpected ways. That is one reason `COPY` is the safer default.
+For example, if I use `ADD` with an untrusted archive, Docker may unpack files into the image in unexpected ways. That is one reason `COPY` is the safer default.
 
 ## Better secure pattern
 
-If I need to bring files into the image, I should usually use `COPY`.
+If I need to bring files into the image, I should usually use `COPY`.
 
-If I need remote content, a clearer pattern is to download it explicitly in a `RUN` step and validate it if needed, instead of relying on `ADD` to do more than plain copying.
+If I need remote content, a clearer pattern is to download it explicitly in a `RUN` step and validate it if needed, instead of relying on `ADD` to do more than plain copying.
 
 ## Rule of thumb
 
-- use **`COPY`** for normal file and directory copying
+- use **`COPY`** for normal file and directory copying
     
-- use **`ADD`** only when I intentionally want its special behavior
+- use **`ADD`** only when I intentionally want its special behavior
     
-- prefer **explicit steps** over hidden magic
+- prefer **explicit steps** over hidden magic
     
 
 ## Interview-friendly explanation
 
-> `COPY` is the safer default because it only copies files and is easy to understand. `ADD` has extra behavior, such as automatic archive extraction and remote-source support, so it should only be used when that behavior is actually needed.
-## `CMD` vs `ENTRYPOINT`
+> `COPY` is the safer default because it only copies files and is easy to understand. `ADD` has extra behavior, such as automatic archive extraction and remote-source support, so it should only be used when that behavior is actually needed.
+## `CMD` vs `ENTRYPOINT`
 
-`CMD` vs `ENTRYPOINT`:
+`CMD` vs `ENTRYPOINT`:
 
-- **`ENTRYPOINT`** = the main command the container is meant to run.
+- **`ENTRYPOINT`** = the main command the container is meant to run.
     
-- **`CMD`** = the default command or default arguments for that main command.
+- **`CMD`** = the default command or default arguments for that main command.
     
 
-The easiest way to remember it is: **ENTRYPOINT sets the executable, CMD sets the default behavior**.
+The easiest way to remember it is: **ENTRYPOINT sets the executable, CMD sets the default behavior**.
 
 ## Simple explanation
 
-Use **`ENTRYPOINT`** when the container should always run a specific program.  
-Use **`CMD`** when you want to provide defaults that the user can easily override at runtime.
+Use **`ENTRYPOINT`** when the container should always run a specific program.  
+Use **`CMD`** when you want to provide defaults that the user can easily override at runtime.
 
 So:
 
-- `ENTRYPOINT` is more **fixed**
+- `ENTRYPOINT` is more **fixed**
     
-- `CMD` is more **flexible**
+- `CMD` is more **flexible**
     
 
 ## What gets overridden
 
-If you pass extra arguments to `docker run image ...`, Docker usually treats them as replacing **CMD**, not `ENTRYPOINT`.  
-If you want to override `ENTRYPOINT`, you usually need to use the `--entrypoint` flag explicitly.
+If you pass extra arguments to `docker run image ...`, Docker usually treats them as replacing **CMD**, not `ENTRYPOINT`.  
+If you want to override `ENTRYPOINT`, you usually need to use the `--entrypoint` flag explicitly.
 
 That is the key behavioral difference in practice.
 
@@ -721,48 +721,49 @@ That is the key behavioral difference in practice.
 
 Think of it like this:
 
-- **ENTRYPOINT** = “what this container is”
+- **ENTRYPOINT** = “what this container is”
     
-- **CMD** = “what this container does by default”
+- **CMD** = “what this container does by default”
     
 
-For example, if the container is meant to always run `python`, then `ENTRYPOINT` can be `python`, and `CMD` can be `app.py`.
+For example, if the container is meant to always run `python`, then `ENTRYPOINT` can be `python`, and `CMD` can be `app.py`.
 
 ## Example
 
-text
-
-`ENTRYPOINT ["python"] CMD ["app.py"]`
-
-If I run:
-
-bash
-
-`docker run myimage`
-
-Docker runs:
-
-bash
-
-`python app.py`
+```text
+ENTRYPOINT ["python"]
+CMD ["app.py"]
+```
 
 If I run:
 
-bash
-
-`docker run myimage other.py`
+```bash
+docker run myimage
+```
 
 Docker runs:
 
-bash
+```bash
+python app.py
+```
 
-`python other.py`
+If I run:
 
-Here, `ENTRYPOINT` stayed the same, but `CMD` was overridden by the runtime argument.
+```bash
+docker run myimage other.py
+```
+
+Docker runs:
+
+```bash
+python other.py
+```
+
+Here, `ENTRYPOINT` stayed the same, but `CMD` was overridden by the runtime argument.
 
 ## When to use each
 
-## Use `CMD` when:
+## Use `CMD` when:
 
 - I want a default command
     
@@ -771,7 +772,7 @@ Here, `ENTRYPOINT` stayed the same, but `CMD` was overridden by the runtime 
 - the image is more general-purpose
     
 
-## Use `ENTRYPOINT` when:
+## Use `ENTRYPOINT` when:
 
 - the image is built for one main executable
     
@@ -784,38 +785,40 @@ Here, `ENTRYPOINT` stayed the same, but `CMD` was overridden by the runtime 
 
 A very common and clean pattern is:
 
-- `ENTRYPOINT` for the fixed executable
+- `ENTRYPOINT` for the fixed executable
     
-- `CMD` for default arguments
+- `CMD` for default arguments
     
 
 Example:
 
-text
+```text
+ENTRYPOINT ["nginx"]
+CMD ["-g", "daemon off;"]
+```
 
-`ENTRYPOINT ["nginx"] CMD ["-g", "daemon off;"]`
-
-That means the container always runs `nginx`, and `CMD` provides the default startup arguments.
+That means the container always runs `nginx`, and `CMD` provides the default startup arguments.
 
 ## Exec form vs shell form
 
-Prefer the **exec form**:
+Prefer the **exec form**:
 
-text
-
-`ENTRYPOINT ["python", "app.py"] CMD ["--help"]`
+```text
+ENTRYPOINT ["python", "app.py"]
+CMD ["--help"]
+```
 
 instead of shell form like:
 
-text
-
-`ENTRYPOINT python app.py`
+```text
+ENTRYPOINT python app.py
+```
 
 The exec form is usually better because signal handling and argument passing are cleaner, especially for PID 1 behavior in containers.
 
 ## Interview-friendly explanation
 
-> `ENTRYPOINT` defines the main executable that always runs, while `CMD` provides the default command or arguments that can be overridden when the container starts
+> `ENTRYPOINT` defines the main executable that always runs, while `CMD` provides the default command or arguments that can be overridden when the container starts
 
 ---
 
@@ -827,7 +830,7 @@ Important topics:
 
 - avoid running as root when possible
     
-- avoid `--privileged`
+- avoid `--privileged`
     
 - understand Linux capabilities
     
@@ -845,9 +848,9 @@ When debugging Docker, follow a structured workflow.
 
 ## 1. Check container state
 
-bash
-
-`docker ps -a`
+```bash
+docker ps -a
+```
 
 Look for:
 
@@ -860,9 +863,9 @@ Look for:
 
 ## 2. Check logs
 
-bash
-
-`docker logs <container>`
+```bash
+docker logs <container>
+```
 
 Look for:
 
@@ -877,9 +880,9 @@ Look for:
 
 ## 3. Inspect configuration
 
-bash
-
-`docker inspect <container>`
+```bash
+docker inspect <container>
+```
 
 Check:
 
@@ -919,7 +922,7 @@ Ask:
     
 - Is the app listening on the expected port?
     
-- Is it bound to `0.0.0.0`?
+- Is it bound to `0.0.0.0`?
     
 - Is DNS working?
     
@@ -978,13 +981,13 @@ Ask:
     
 - **Volumes persist data; the container writable layer is ephemeral.**
     
-- **`EXPOSE` documents ports; `-p` publishes them.**
+- **`EXPOSE` documents ports; `-p` publishes them.**
     
 - **PID 1 behavior affects signal handling and clean shutdown.**
     
 - **Good Docker troubleshooting means identifying which layer is failing: image, runtime setup, network, storage, resources, or app process.**
   
-- **You cant delete a Docker image if a running container is using it, Stop and remove the container first, then remove the image. Docker’s container removal command also supports `-f` to force removal of a running container .**
+- **You cant delete a Docker image if a running container is using it, Stop and remove the container first, then remove the image. Docker’s container removal command also supports `-f` to force removal of a running container .**
  
 
 ---

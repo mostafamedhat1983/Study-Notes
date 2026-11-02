@@ -25,7 +25,7 @@ A NetworkPolicy is a Kubernetes resource that controls traffic flow at the IP/po
 
 - **Ingress**: controls incoming traffic TO the selected pods
 - **Egress**: controls outgoing traffic FROM the selected pods
-- You must explicitly specify `policyTypes` or both are implied by what you define
+- If `policyTypes` is omitted, Kubernetes defaults to `Ingress`; `Egress` is also included when egress rules are specified. For clarity, explicitly list the policy types you intend to isolate.
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -85,7 +85,7 @@ ingress:
             kubernetes.io/metadata.name: monitoring
 ```
 
-### Allow DNS egress (required for most apps)
+### Allow DNS egress (only when the workload needs DNS resolution)
 ```yaml
 egress:
   - ports:
@@ -100,9 +100,9 @@ egress:
 ## Best Practices
 
 - Start with **default deny all** in each namespace, then open only what's needed
-- Always allow **DNS egress** (port 53) or apps will break
+- Allow DNS egress when the workload needs DNS resolution; account for the actual DNS destination, protocol, and cluster configuration.
 - Label namespaces with `kubernetes.io/metadata.name` to use `namespaceSelector`
-- Use Calico or Cilium for full NetworkPolicy support
+- Use a network implementation that supports and enforces Kubernetes NetworkPolicy. Options include Calico, Cilium, and the Amazon VPC CNI network-policy feature when explicitly enabled and configured.
 - Test policies with `kubectl exec` + `curl` or `nc` to verify traffic is blocked/allowed
 - Keep policies in version control alongside your app manifests
 

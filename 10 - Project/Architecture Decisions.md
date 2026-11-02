@@ -2302,12 +2302,13 @@ resource "aws_instance" "mysql" {
 
 ### 7.2 SSL/TLS for RDS Connections
 
-**What We Used:** SSL/TLS encryption for MySQL connections
+**Security design note (not the verified deployed implementation):** RDS for MySQL supports TLS, but the reviewed project backend code uses `aiomysql.create_pool()` without TLS parameters. Do not claim backend-to-RDS TLS is deployed until the application is configured to verify the RDS CA and server-side enforcement is enabled and tested.
 
 **Requirements:**
 - RDS instance with SSL enabled (default)
-- Application configured to use SSL
-- RDS CA certificate (optional, for verification)
+- The client explicitly negotiates TLS
+- The client verifies the RDS server certificate using the current AWS RDS CA bundle (recommended for server identity verification)
+- Configure `require_secure_transport=ON` when the database must reject non-TLS connections; confirm the parameter is supported by the selected engine/version.
 
 **RDS Configuration:**
 ```terraform
@@ -2332,7 +2333,7 @@ resource "aws_db_parameter_group" "this" {
 }
 ```
 
-**Application Configuration (Python):**
+**Illustrative Python example (mysql-connector-python, not the project's aiomysql implementation):**
 ```python
 # backend/main.py
 import mysql.connector
@@ -3490,7 +3491,7 @@ livenessProbe:
 
 ### 10.1 AWS Bedrock vs Self-Hosted LLM
 
-**What We Used:** AWS Bedrock with DeepSeek V3.1
+**Project integration:** AWS Bedrock with DeepSeek V3.1 (`deepseek.v3-v1:0`). AWS currently documents a 128K context window and an EOL date of March 30, 2027; verify model lifecycle and regional availability before new deployments.
 
 **Requirements:**
 - AWS account with Bedrock access
@@ -3665,22 +3666,17 @@ response = openai.ChatCompletion.create(
 
 | Option | Cost (1M tokens) | Fixed Cost/Month | Latency | Control | Privacy |
 |--------|-----------------|------------------|---------|---------|---------|
-| **Bedrock** | $0.27 | ✅ $0 | ✅ Fast | ⚠️ Medium | ✅ AWS-only |
+| **Bedrock** | Pay-per-token; region/model/service-tier dependent | No dedicated endpoint capacity for standard on-demand invocation | Model/service dependent | AWS-managed | Region/inference option dependent |
 | **Self-Hosted** | ✅ $0 | ❌ $720+ | ✅ Fast | ✅ Full | ✅ Full |
 | **SageMaker** | ✅ $0 | ❌ $828+ | ✅ Fast | ✅ High | ✅ AWS-only |
-| **OpenAI GPT-4** | $45 avg | ✅ $0 | ⚠️ Variable | ❌ None | ❌ External |
-| **OpenAI GPT-3.5** | $1.00 | ✅ $0 | ✅ Fast | ❌ None | ❌ External |
+| **Hosted OpenAI models** | Check current provider pricing | No dedicated endpoint capacity for standard API usage | Model/service dependent | Provider-managed | External provider |
 
-**Cost Example (10M tokens/month):**
-- **Bedrock:** $2.70
-- **Self-Hosted:** $720 (fixed)
-- **SageMaker:** $828 (fixed)
-- **OpenAI GPT-4:** $450
-- **OpenAI GPT-3.5:** $10
+
+**Cost estimation:** Do not use the historical figures above as current quotes. Bedrock costs depend on model, Region, service tier, and input/output token mix. GPU instance and SageMaker endpoint costs depend on Region, instance type, hours, storage, and scaling configuration. Recalculate with the current provider pricing pages and the workload's measured token mix.
 
 **Why We Chose Bedrock:**
 - ✅ **Pay-per-use:** $0 when not using
-- ✅ **Cost-effective:** $0.27/1M tokens (DeepSeek)
+- ✅ **Cost model:** on-demand token pricing; calculate using current regional input/output rates
 - ✅ **Serverless:** No infrastructure to manage
 - ✅ **Scalable:** Handles burst traffic
 - ✅ **AWS integration:** Works with Pod Identity

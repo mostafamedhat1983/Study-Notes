@@ -4,58 +4,60 @@ tags:
   - Kubernetes
   - EKS
 ---
-Direct Answer/Solution
+# IRSA (OIDC) vs Amazon EKS Pod Identity
 
-OIDC with IRSA (IAM Roles for Service Accounts) and EKS Pod Identity are both mechanisms to grant AWS IAM permissions to pods in EKS without using long-lived credentials, but they differ significantly in how identity mapping, setup, and scalability work. EKS Pod Identity is AWS's newer feature that provides simpler, more scalable pod-to-IAM role mapping by removing the explicit OIDC dependency at the cluster level, while IRSA relies on an OIDC trust relationship for every cluster.
+Both IRSA and EKS Pod Identity let Kubernetes workloads in Amazon EKS obtain temporary AWS credentials for an IAM role without embedding long-term AWS access keys in container images or manifests.
 
-Source of Truth (Official Doc Links)
+They use different identity and credential-delivery flows. Neither is universally superior; choose based on cluster support, trust requirements, SDK compatibility, and operational design.
 
-- AWS EKS Pod Identity overview: https://docs.aws.amazon.com/eks/latest/userguide/pod-identities.html
-- AWS EKS Identity & Access Management: https://docs.aws.amazon.com/eks/latest/best-practices/identity-and-access-management.html
-- OIDC for EKS (IRSA): https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html
+## IRSA — IAM Roles for Service Accounts
 
-Architectural Reasoning (Why this? What are the alternatives?)
+- Uses the EKS cluster's OIDC issuer and an IAM OIDC identity provider.
+- A Kubernetes ServiceAccount is annotated with an IAM role ARN.
+- The Pod receives a projected service-account OIDC token.
+- A supported AWS SDK uses the web identity token flow (STS `AssumeRoleWithWebIdentity`) to obtain temporary role credentials.
+- IAM role trust policies can constrain the OIDC provider, audience, namespace, and ServiceAccount subject.
 
-### IRSA (OIDC-based)
+IRSA is a well-established option and can be appropriate when OIDC-based trust conditions are important or when workloads/platforms already use it.
 
-- Associates a Kubernetes service account with an IAM role by leveraging an OIDC provider configured per EKS cluster.
-- The service account is annotated with the IAM role ARN; when a pod uses this service account, the AWS SDK uses a projected OIDC JWT to obtain credentials via AssumeRoleWithWebIdentity.
-- Setup requires creating an OIDC provider for every EKS cluster, and updating the IAM role's trust relationship.
-- Common limits: AWS has a default global account limit of 100 OIDC providers. Managing multiple clusters can quickly exhaust this.
-- Best suited for existing clusters that already use IRSA, and where OIDC-based fine-grained identity controls (e.g., via claims) are in place.
+## EKS Pod Identity
 
-### EKS Pod Identity (2024+)
+- Uses an EKS Pod Identity association to map a cluster, namespace, and ServiceAccount to an IAM role.
+- Requires the EKS Pod Identity Agent add-on on supported EC2-backed nodes/environments.
+- EKS configures the Pod to use the container credential provider endpoint and a Pod Identity token.
+- The agent calls the EKS Auth API (`AssumeRoleForPodIdentity`) and supplies temporary credentials to supported AWS SDKs.
+- The IAM role trust policy must allow the `pods.eks.amazonaws.com` service principal and the required STS actions, including `sts:AssumeRole` and `sts:TagSession`.
+- A role can be associated with ServiceAccounts across multiple clusters without adding a separate OIDC provider for each cluster; use association/session tags and IAM conditions to scope access.
 
-- Removes the need for OIDC providers: roles are associated with a pod or service account via EKS's pod identity APIs.
-- Deploys a Pod Identity agent/add-on to the EKS cluster, which handles the association between pods and assigned IAM roles without modifying the pod's manifest.
-- Simplifies setup: no need to manage trust policies with OIDC subject condition, and the feature scales with clusters without hitting global OIDC limits.
-- Enables more granular assignment, improved management, and better operational separation (IAM admin vs. EKS admin).
-- Recommended for new clusters, large/federated EKS environments, or when onboarding new workloads.
+The agent does **not** proxy or intercept the workload's normal AWS service API requests. The SDK obtains credentials from the local credential endpoint and then calls AWS services directly.
 
-#### Example Differences Table
+## Comparison
 
-| Feature                          | IRSA (OIDC)                                        | EKS Pod Identity                      |
-|-----------------------------------|----------------------------------------------------|---------------------------------------|
-| OIDC Provider per cluster         | Required, counts toward global AWS limit           | Not required                          |
-| IAM trust policy updates          | Each role must trust cluster's OIDC provider       | Managed by EKS API, not manual        |
-| Service account mapping           | Service account annotation                         | EKS API/console association           |
-| Operational complexity            | Higher (OIDC, annotations, trust policy updates)   | Lower (declarative EKS API calls)     |
-| OIDC Claim customization          | Full OIDC support for fine-grained trust           | ABAC-style, cluster and SA-based tags |
-| Scale for large orgs/clusters     | Painful (OIDC limit, multi-cluster ops)            | Scales smoothly                       |
-| Security                         | Mature, but trust policy drift risk                | Simpler, better least-privilege by pod|
-| Availability                     | Long-established, well-integrated                  | Newer, rapidly being adopted          |
+| Area | IRSA | EKS Pod Identity |
+|---|---|---|
+| Identity mapping | ServiceAccount annotation + OIDC trust | EKS Pod Identity association |
+| Token/credential flow | Projected OIDC token; STS web identity | Pod Identity token; node agent and EKS Auth API |
+| OIDC provider | Required for the cluster | Not required for Pod Identity |
+| IAM role trust | OIDC provider and subject/audience conditions | `pods.eks.amazonaws.com` principal and STS session actions; scope with supported conditions |
+| Node agent | Not required | Pod Identity Agent required where applicable |
+| SDK support | SDK must support web identity token credentials | SDK must support container credential provider |
+| Cross-cluster reuse | Trust configuration must account for each cluster issuer | Associations can use a role across clusters; use session tags/conditions for scoping |
+| Non-EKS Kubernetes | IRSA is EKS-specific OIDC integration; other platforms have their own federation setup | Not supported outside Amazon EKS |
 
-Trade-offs
+## Important corrections to common claims
 
-- IRSA is mature, OIDC-based, and supports granular trust customization, but brings higher operational overhead and scale issues with many clusters.
-- EKS Pod Identity lowers complexity, eliminates the OIDC provider limit, and is easier to maintain, but is newer and may not fit regulated environments that require explicit OIDC claims or non-EKS clusters.
+- Pod Identity does not remove the need for an IAM role trust policy. The trust policy still needs the EKS Pod Identity service principal and required STS actions.
+- Pod Identity does not make IAM permissions automatically “pod-specific” unless roles, ServiceAccounts, associations, and policies are scoped correctly.
+- IRSA is not inherently insecure or obsolete; it remains supported.
+- Pod Identity's operational simplicity is not proof that it is always the better choice for every regulated or multi-platform environment.
+- Both mechanisms provide temporary credentials to workload processes through supported SDK credential providers. Do not claim that credentials never exist in the Pod.
 
-Security & Best Practice Check
+## Choosing between them
 
-- Prefer EKS Pod Identity for new EKS clusters and when multi-cluster scalability or operational simplicity is a priority.
-- If you already have a mature IRSA deployment with OIDC-based security controls and audit requirements, IRSA remains viable and compliant.
-- In either model: avoid excess privilege, scope IAM roles to the smallest set of actions, use pod-specific roles, and rotate roles as needed.
+Consider EKS Pod Identity for new EKS workloads when the cluster and add-on support it and the application uses a compatible AWS SDK. Consider retaining IRSA when existing trust conditions, integrations, or operational controls depend on OIDC. Evaluate actual requirements rather than choosing solely because one mechanism is newer.
 
-Reference Guidance
+## Official references
 
-- Official EKS Pod Identity docs: https://docs.aws.amazon.com/eks/latest/userguide/pod-identities.html
+- https://docs.aws.amazon.com/eks/latest/userguide/pod-identities.html
+- https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html
+- https://docs.aws.amazon.com/eks/latest/best-practices/identity-and-access-management.html

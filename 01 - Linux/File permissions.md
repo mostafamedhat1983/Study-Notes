@@ -96,9 +96,9 @@ If you want:
 
 you get **`461`**:
 
-bash
-
-`chmod 461 myfile.sh`
+```bash
+chmod 461 myfile.sh
+```
 
 Now:
 

@@ -19,9 +19,9 @@ Multi-repository AWS cloud platform demonstrating enterprise-grade DevOps practi
 
 ### Infrastructure (terraform-aws-eks)
 - **Multi-Environment Setup**: Development (~$207/mo) and Production (~$289/mo) with strategic cost optimization
-- **Regional NAT Gateway (Dec 2024)**: Single NAT Gateway with built-in HA across all AZs ($35/mo), replacing zonal NAT architecture
+- **Regional NAT Gateway**: One regional resource that automatically expands/contracts across workload AZs for supported public NAT use cases. It is not a fixed $35/month service; use current regional AWS pricing and processed traffic for estimates. It does not support private NAT.
 - **S3 Native State Locking (2024)**: `use_lockfile = true` instead of legacy DynamoDB approach
-- **EKS Access Entry API (2023)**: Modern user/role access management, replacing deprecated `aws-auth` ConfigMap
+- **EKS Access Entry API**: Recommended AWS-managed IAM principal access method. `aws-auth` remains a legacy/deprecated mechanism in supported configurations; do not assume it has already been removed.
 - **AWS EKS 1.34 Cluster**: Pod Identity, EBS CSI Driver with Pod Identity authentication, modern access management
   - Dev: 5x t3.small nodes (55 pod capacity, 56-58% steady state utilization with ~31-32 pods)
   - Prod: 4x t3.medium nodes (68 pod capacity, 47-49% steady state utilization with ~32-33 pods)

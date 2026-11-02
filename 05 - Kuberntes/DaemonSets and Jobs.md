@@ -2,77 +2,57 @@
 tags:
   - Kubernetes
 ---
-DaemonSets ensure one Pod runs on every node. Jobs run tasks to completion.
-
----
+DaemonSets manage node-local workloads; Jobs manage finite tasks that run to completion; CronJobs create Jobs on a schedule.
 
 ## DaemonSet
 
-### Main idea
+A DaemonSet ensures that a Pod runs on each node that matches its scheduling rules. It does **not** necessarily mean every node in the cluster: node selectors, affinity, taints/tolerations, and other scheduling constraints can limit eligible nodes.
 
-- runs exactly one Pod on every node in the cluster
-- when a new node joins, a Pod is automatically created on it
-- when a node is removed, the Pod is garbage collected
-- you cannot scale a DaemonSet manually — it scales with the cluster
+- When an eligible node is added, the DaemonSet controller creates a Pod for it.
+- When a node is removed, the Pod associated with that node is garbage-collected.
+- You normally change DaemonSet coverage through scheduling configuration and the cluster's eligible nodes, rather than setting a replica count.
+- Common uses include log collectors, monitoring agents, network components, and node-level storage/security agents.
 
-### DaemonSet use cases
-
-- log collection agents (Fluentd, Filebeat)
-- monitoring agents (Datadog, Node Exporter)
-- network plugins (Calico, Cilium, Weave)
-- storage drivers (Ceph, Longhorn)
-- security agents
-
-### DaemonSet manifest
+Example:
 
 ```yaml
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: fluentd
-  namespace: logging
+  name: node-agent
+  namespace: monitoring
 spec:
   selector:
     matchLabels:
-      app: fluentd
+      app: node-agent
   template:
     metadata:
       labels:
-        app: fluentd
+        app: node-agent
     spec:
       containers:
-        - name: fluentd
-          image: fluentd:v1.16
-          volumeMounts:
-            - name: varlog
-              mountPath: /var/log
-      volumes:
-        - name: varlog
-          hostPath:
-            path: /var/log
+        - name: agent
+          image: example/agent:1.0
 ```
 
-### DaemonSet commands
+Commands:
 
 ```bash
-kubectl get daemonsets
-kubectl get daemonsets -n kube-system    # view system DaemonSets
-kubectl describe daemonset <name>
+kubectl get daemonsets -A
+kubectl describe daemonset <name> -n <namespace>
 ```
-
----
 
 ## Job
 
-### Main idea
+A Job creates Pods and tracks successful completion of a finite task.
 
-- runs one or more Pods to completion
-- tracks successful completions
-- retries on failure up to `backoffLimit`
-- once all completions succeed, the Job is done
-- Pods are kept after completion (for log inspection) but not restarted
+- `completions`: number of successful completions required.
+- `parallelism`: maximum number of Pods running concurrently.
+- `backoffLimit`: number of retries before the Job is considered failed. If omitted, the default is 6; it does not retry forever.
+- `activeDeadlineSeconds`: optional time limit for the Job. When exceeded, the Job and its running Pods are terminated.
+- Job Pods may remain after completion so their logs can be inspected; cleanup can be managed with TTL or other retention settings.
 
-### Job manifest
+Example:
 
 ```yaml
 apiVersion: batch/v1
@@ -83,35 +63,21 @@ spec:
   completions: 1
   parallelism: 1
   backoffLimit: 3
+  activeDeadlineSeconds: 600
   template:
     spec:
-      restartPolicy: OnFailure
+      restartPolicy: Never
       containers:
         - name: migration
           image: my-app:1.0
           command: ["python", "manage.py", "migrate"]
 ```
 
-### Job parameters
-
-| Parameter | Meaning |
-|---|---|
-| `completions` | total successful runs required |
-| `parallelism` | how many Pods run at the same time |
-| `backoffLimit` | retries before Job is marked failed |
-| `activeDeadlineSeconds` | max time before Job is terminated |
-
----
+For Job Pods, `restartPolicy` must be `Never` or `OnFailure`; `Always` is not allowed. Retry behavior depends on this setting and the Job controller's backoff policy.
 
 ## CronJob
 
-### Main idea
-
-- creates Jobs on a schedule (like Linux cron)
-- uses standard cron syntax
-- manages Job history automatically
-
-### CronJob manifest
+A CronJob creates Jobs according to a schedule. It uses cron syntax and supports controls such as concurrency policy, starting deadline, and Job history limits.
 
 ```yaml
 apiVersion: batch/v1
@@ -119,84 +85,55 @@ kind: CronJob
 metadata:
   name: backup
 spec:
-  schedule: "0 2 * * *"     # every day at 2am
+  schedule: "0 2 * * *"
+  timeZone: "Etc/UTC"
+  concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
       template:
         spec:
-          restartPolicy: OnFailure
+          restartPolicy: Never
           containers:
             - name: backup
               image: backup-tool:1.0
               command: ["/bin/backup.sh"]
 ```
 
-### CronJob schedule examples
+The schedule's timezone should be explicit when timing matters. Use `.spec.timeZone` where supported; if it is omitted, the controller manager's local timezone is used. Do not assume it is always UTC.
 
-```
-"0 * * * *"      every hour
-"0 2 * * *"      every day at 2am
-"0 2 * * 0"      every Sunday at 2am
-"*/5 * * * *"    every 5 minutes
-"0 0 1 * *"      first day of every month
+Examples:
+
+```text
+0 * * * *      every hour
+0 2 * * *      daily at 02:00 in the configured timezone
+0 2 * * 0      Sundays at 02:00
+*/5 * * * *    every five minutes
+0 0 1 * *      first day of each month
 ```
 
-### CronJob commands
+Commands:
 
 ```bash
 kubectl get cronjobs
 kubectl get jobs
 kubectl describe cronjob <name>
-# manually trigger a CronJob
 kubectl create job --from=cronjob/<name> manual-run
 ```
 
----
-
 ## Common mistakes
 
-- using a Deployment for one-time tasks instead of a Job
-- not setting `backoffLimit` (Job retries forever by default)
-- not setting `activeDeadlineSeconds` (stuck Jobs run forever)
-- not setting `restartPolicy: OnFailure` or `Never` in Job Pods (required — `Always` is not allowed)
-- not setting `successfulJobsHistoryLimit` (old Jobs accumulate)
-- CronJob schedule in wrong timezone (Kubernetes uses UTC by default)
-
----
-
-## Good practices
-
-- use Jobs for database migrations, batch processing, one-time tasks
-- use CronJobs for scheduled backups, cleanup tasks, reports
-- set `activeDeadlineSeconds` to prevent runaway jobs
-- set `successfulJobsHistoryLimit` and `failedJobsHistoryLimit` to keep history clean
-- use DaemonSets for any per-node agent — never manually place Pods on nodes
-
----
-
-## Must memorize
-
-```
-DaemonSet  → one Pod per node automatically
-Job        → run to completion, retry on failure
-CronJob    → Job on a schedule (cron syntax)
-```
-
-```bash
-kubectl get daemonsets
-kubectl get jobs
-kubectl get cronjobs
-kubectl create job --from=cronjob/<name> <job-name>
-```
-
----
+- Using a Deployment for a finite batch task when a Job is the appropriate controller.
+- Assuming a Job retries forever: the default `backoffLimit` is 6.
+- Omitting a sensible deadline for tasks that must not run indefinitely.
+- Using `restartPolicy: Always` in a Job Pod template.
+- Assuming a DaemonSet always runs on every node, regardless of taints or scheduling rules.
+- Assuming CronJobs use UTC when no timezone is specified.
 
 ## Key ideas
 
-- DaemonSets run one Pod per node automatically — used for cluster-wide agents.
-- Jobs run tasks to completion with retry logic.
-- CronJobs schedule Jobs using standard cron syntax.
-- Always set restartPolicy, backoffLimit, and activeDeadlineSeconds for Jobs.
-- DaemonSets are not scaled manually — they follow the cluster node count.
+- DaemonSet: one Pod on each eligible node.
+- Job: run a finite task and track successful completions.
+- CronJob: create Jobs on a schedule.
+- Job retries are bounded by `backoffLimit`; deadlines and retention should be chosen for the workload.

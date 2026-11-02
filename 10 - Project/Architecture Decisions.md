@@ -169,13 +169,13 @@ Only works if pods run on EC2 nodes with instance profile, but:
 |---------|-------------|-----------|-------------|------------------|
 | **Complexity** | ✅ Simple | ❌ Complex | ✅ Simple | ✅ Simple |
 | **Security** | ✅ Temporary credentials | ✅ Temporary credentials | ❌ Long-lived | ⚠️ Shared |
-| **Per-pod permissions** | ✅ Yes | ✅ Yes | ✅ Yes | ❌ No |
+| **Workload identity scope** | Pod/ServiceAccount | Pod/ServiceAccount | Depends on how keys are distributed | Node role shared by workloads on node unless isolated |
 | **Setup steps** | ✅ 3 steps | ❌ 5+ steps | ⚠️ Manual rotation | ✅ 2 steps |
 | **Credential rotation** | ✅ Automatic | ✅ Automatic | ❌ Manual | ✅ Automatic |
-| **AWS recommendation** | ✅ Latest (2023) | ⚠️ Legacy | ❌ Not recommended | ❌ Not recommended |
+| **AWS recommendation** | Supported EKS-native option | Supported OIDC federation option | Avoid long-lived static keys | Avoid broad node-role access for app permissions |
 | **Debugging** | ✅ Clear errors | ⚠️ OIDC errors cryptic | ✅ Clear | ⚠️ Unclear |
 
-**Decision:** Pod Identity is AWS's modern approach (released 2023), simpler than OIDC, and more secure than static keys.
+**Decision:** Pod Identity is an EKS-native option that simplifies role association and avoids per-cluster OIDC provider setup. IRSA remains supported and can be appropriate for existing integrations or trust requirements. Both provide temporary credentials to processes in the Pod; Pod Identity is not a per-container isolation boundary.
 
 ---
 
@@ -258,7 +258,7 @@ data:
 | **Fine-grained control** | ✅ Namespace-scoped policies | ⚠️ All or nothing |
 
 **Why We Chose Access Entry API:**
-- AWS's modern approach (aws-auth ConfigMap will be removed eventually)
+- AWS's recommended access-management approach for supported clusters; do not claim a removal date for aws-auth unless AWS publishes one
 - Fully managed in Terraform (no manual kubectl commands)
 - Better error handling and validation
 - Supports fine-grained namespace-scoped permissions
@@ -3544,7 +3544,7 @@ def chat_with_ai(user_message: str) -> str:
 }
 ```
 
-**Cost:** $0.27 per 1M tokens (pay-per-use)
+**Pricing note:** Do not use a fixed universal token price here. Bedrock pricing varies by Region, model, service tier, and input/output token type. Check the current [Amazon Bedrock pricing page](https://aws.amazon.com/bedrock/pricing/) before estimating costs. AWS currently documents DeepSeek-V3.1 with a 128K context window and an EOL date of March 30, 2027; confirm lifecycle status before using it for a new deployment.
 
 **Alternative 1: Self-Hosted LLM (GPU Instance)**
 

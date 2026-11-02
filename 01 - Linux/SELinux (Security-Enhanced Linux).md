@@ -2,32 +2,53 @@
 tags:
   - Linux
 ---
-## SELinux, which stands for Security-Enhanced Linux, is a security module built into the Linux kernel
+# SELinux (Security-Enhanced Linux)
 
-### The key concept behind SELinux is Mandatory Access Control (MAC). Here’s how it differs from the standard Linux security model:
+SELinux is a Linux Security Module (LSM) that provides mandatory access control (MAC). It adds policy-based access decisions to the traditional Linux discretionary access control (DAC) checks.
 
-  
+## DAC compared with MAC
 
-   * Standard Linux (Discretionary Access Control - DAC): Access is based on user and group ownership. If you own a file, you can change its permissions and decide who gets to see or modify it. The root user is all-powerful and can access anything.
+- **DAC:** traditional ownership and permission checks (user, group, mode bits, and related mechanisms). A privileged process such as root can bypass many ordinary DAC restrictions, but root is not universally unconstrained: Linux capabilities, namespaces, other LSMs, and kernel restrictions can still apply.
+- **SELinux MAC:** policy evaluates security contexts (labels) and rules governing interactions between subjects (such as processes) and objects (such as files, ports, and other resources). SELinux policy can restrict even privileged processes.
 
-   * SELinux (Mandatory Access Control - MAC): Access is determined by a system-wide security policy created by the administrator. Every single process, file, and port is assigned a security
-     "label" or "context." SELinux then enforces rules about which labels can interact with which other labels. Access is denied by default and only allowed if a specific policy rule permits it. Crucially, these rules apply to all users, including root.
+An access is allowed only when the applicable Linux security checks permit it. SELinux is one layer of those checks; it does not replace DAC.
 
-  SElinux can operate in three modes:
-   1. Enforcing: (Default) The security policy is actively enforced. Any action that violates the policy is blocked and logged.
-   2. Permissive: The policy is not enforced, but any violations are logged. This is useful for troubleshooting or developing new policies without breaking functionality.
-   3. Disabled: SELinux is completely turned off.
+## SELinux modes
 
-### Install
+1. **Enforcing:** policy is enforced; denied actions are blocked and may be logged.
+2. **Permissive:** policy decisions are logged, but SELinux does not block the actions.
+3. **Disabled:** SELinux is not enforcing policy. The exact procedure and implications of changing to or from this mode are distribution-specific.
 
-sudo yum install selinux-policy selinux-policy-targeted policycoreutils policycoreutils-python-utils setools setroubleshoot
+Do not assume Enforcing is the default on every Linux distribution or image. Check the actual host.
 
-### disable
+## Useful commands
 
-sudo vi /etc/selinux/config
-
-SELINUX=disabled 
-
-sudo reboot
-
+```bash
+getenforce
 sestatus
+ls -Z /path/to/file
+ps -eZ
+ausearch -m AVC -ts recent
+```
+
+- `getenforce` reports the current mode.
+- `sestatus` reports SELinux status and policy information.
+- `ls -Z` displays file security contexts.
+- `ps -eZ` displays process contexts.
+- `ausearch` can help locate SELinux access-vector-cache (AVC) denials when audit tooling is installed and configured.
+
+## Troubleshooting approach
+
+1. Confirm the current SELinux mode and policy.
+2. Inspect AVC denials and identify the process, target, and denied operation.
+3. Check whether the file or process has the expected context.
+4. Correct labeling or policy using distribution-supported tools and documented policy mechanisms.
+5. Re-test in Enforcing mode.
+
+Do not solve an access problem by blindly disabling SELinux or generating and applying an allow policy for every denial. A denial may indicate incorrect labeling, an application configuration problem, or a real policy gap.
+
+## Configuration warning
+
+The location and supported method for changing SELinux mode depend on the distribution and release. On systems using `/etc/selinux/config`, changing the configured mode may require a reboot, and disabling SELinux can have relabeling and policy implications. Follow the official documentation for the specific distribution before changing it.
+
+**Interview takeaway:** DAC controls access using ownership and permissions; SELinux adds policy-based MAC using security contexts. SELinux can confine processes even when they run with elevated Unix privileges.

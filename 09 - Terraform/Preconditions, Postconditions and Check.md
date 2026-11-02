@@ -16,7 +16,7 @@ Variable `validation` only checks input values before anything runs.
 But sometimes you need to validate:
 - assumptions about existing infrastructure (before apply)
 - results after a resource is created (after apply)
-- ongoing health of infrastructure (independently of any resource)
+- non-blocking assertions about infrastructure or external systems evaluated during Terraform plan/apply
 
 That is what `precondition`, `postcondition`, and `check` are for.
 
@@ -27,7 +27,7 @@ That is what `precondition`, `postcondition`, and `check` are for.
 | | `precondition` | `postcondition` | `check` |
 |---|---|---|---|
 | Lives inside | `lifecycle` block | `lifecycle` block | top-level `check` block |
-| Runs | Before create/update | After create/update | After apply, independently |
+| Runs | During planning/apply before the relevant resource operation | After the relevant resource operation | During plan/apply evaluation; not a continuous background monitor |
 | Validates | Assumptions going in | Results coming out | Ongoing assertions |
 | On failure | Stops apply | Stops apply | Warning only (does not stop) |
 | Can reference | `var`, `data`, other resources | `self` (the resource itself) | anything |
@@ -164,11 +164,9 @@ Simple rule:
 
 ## `check` block
 
-A `check` block is a **top-level** block that runs assertions independently of any resource.
+A `check` block is a **top-level** block that defines assertions. Terraform evaluates checks during plan/apply operations; it does not run a continuous background health-monitoring service.
 
-Unlike `precondition` and `postcondition`, a failed `check` does **not** stop the apply. It only produces a warning.
-
-This makes it useful for ongoing health monitoring and soft assertions.
+Unlike `precondition` and `postcondition`, a failed `check` does **not** stop the operation. It reports a warning. This makes it useful for non-blocking validation of infrastructure assumptions or external conditions when Terraform runs.
 
 ### Syntax
 
@@ -208,7 +206,7 @@ check "ami_is_available" {
 
 Use `check` when:
 - you want to assert something about your infrastructure without blocking apply on failure
-- you want continuous health assertions that run after every apply
+- you want non-blocking assertions evaluated as part of Terraform plan/apply
 - you want to monitor assumptions about data sources or existing resources
 
 ---
@@ -252,7 +250,7 @@ resource "aws_instance" "web" {
 
 - `precondition` checks assumptions before a resource is created or updated
 - `postcondition` checks results after a resource is created or updated using `self`
-- `check` is a top-level block that runs assertions independently and only warns on failure
+- `check` is a top-level block evaluated during plan/apply; it is not continuous monitoring and only warns on failure
 - `precondition` and `postcondition` live inside `lifecycle` blocks
 - `check` does not stop apply — it is for soft ongoing assertions
 - use `validation` for variable inputs, `precondition` for environment assumptions, `postcondition` for resource results

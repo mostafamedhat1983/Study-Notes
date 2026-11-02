@@ -110,13 +110,17 @@ Internet
 
 ### ⚠️ CNI Plugin Check:
 
-**EKS uses Amazon VPC CNI by default**, which **supports Network Policies** starting from:
-- **EKS 1.25+** with VPC CNI plugin
-- Your cluster is **EKS 1.34** ✅ (confirmed from infra repo)
+**Amazon VPC CNI supports Kubernetes NetworkPolicy enforcement, but support is not enabled merely because the cluster uses VPC CNI.** AWS requires a supported EKS/Kubernetes platform version, a compatible VPC CNI version (currently documented as 1.21 or later for standard/admin network policies), policy enforcement at Pod startup, and the VPC CNI add-on's `enableNetworkPolicy` configuration.
 
-**No additional CNI installation needed!** Amazon VPC CNI natively supports Network Policies in your EKS version.
+For this project, EKS 1.34 satisfies the Kubernetes-version requirement, but the repository must also verify the actual VPC CNI add-on configuration and node agent settings before claiming NetworkPolicies are enforced. Check:
 
-> **Note**: Older guides mention Calico, but **it's no longer required** for EKS 1.25+. VPC CNI now has built-in support.
+```bash
+aws eks describe-addon --cluster-name <cluster> --addon-name vpc-cni
+kubectl get daemonset aws-node -n kube-system -o yaml
+kubectl get configmap amazon-vpc-cni -n kube-system -o yaml
+```
+
+Do not claim that NetworkPolicies are active until `enableNetworkPolicy` and the node policy agent are configured and tested. Calico/Cilium are alternative policy-capable networking solutions, but are not required when using the AWS VPC CNI network-policy feature.
 
 ### 📊 What We'll Create:
 

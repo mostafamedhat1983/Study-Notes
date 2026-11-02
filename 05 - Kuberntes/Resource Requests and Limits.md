@@ -2,37 +2,24 @@
 tags:
   - Kubernetes
 ---
-Resource requests and limits tell Kubernetes how much CPU and memory a container needs and how much it is allowed to use.
+Resource requests and limits describe the CPU and memory resources a container requests for scheduling and the limits enforced at runtime.
 
----
+## Requests and limits
 
-## Main idea
+- **Request:** used by the scheduler when selecting a node. It is the amount Kubernetes accounts for when placing the Pod; it is not a hard runtime cap.
+- **Limit:** an upper bound enforced by the runtime/kernel where supported.
+- A container can use more than its request if resources are available, up to its limit.
+- If a container exceeds its memory limit, it may be terminated by the OOM killer. The exact observed Pod/container status depends on the circumstances.
+- CPU is compressible: exceeding a CPU limit results in throttling rather than an OOM kill.
 
-- **request** = the minimum guaranteed amount (used for scheduling)
-- **limit** = the maximum allowed amount (enforced at runtime)
-- the scheduler uses requests to decide which node to place the Pod on
-- if a container exceeds its memory limit, it is OOM killed
-- if a container exceeds its CPU limit, it is throttled (not killed)
+## CPU and memory units
 
----
+- `1` CPU = one logical CPU core.
+- `500m` CPU = 0.5 CPU.
+- `100m` CPU = 0.1 CPU.
+- `Mi` and `Gi` are binary memory units; `M` and `G` are decimal units.
 
-## CPU units
-
-- `1` = 1 full CPU core
-- `500m` = 0.5 cores (500 millicores)
-- `100m` = 0.1 cores
-- CPU is compressible — exceeding the limit causes throttling, not termination
-
-## Memory units
-
-- `Mi` = mebibytes (1 Mi = 1,048,576 bytes)
-- `Gi` = gibibytes
-- `M` = megabytes
-- Memory is not compressible — exceeding the limit causes OOM kill
-
----
-
-## Setting requests and limits
+Example:
 
 ```yaml
 spec:
@@ -48,34 +35,27 @@ spec:
           memory: "256Mi"
 ```
 
----
-
 ## QoS classes
 
-Kubernetes assigns a QoS class to each Pod based on its resource settings.
+Kubernetes assigns a Pod a QoS class based on the CPU and memory requests and limits of its containers.
 
-| QoS Class | Condition | Eviction priority |
-|---|---|---|
-| `Guaranteed` | requests == limits for all containers | last to be evicted |
-| `Burstable` | requests set but less than limits | evicted after BestEffort |
-| `BestEffort` | no requests or limits set | first to be evicted |
+| Class | Simplified condition |
+|---|---|
+| `Guaranteed` | Every container has CPU and memory requests and limits, and each request equals its corresponding limit. |
+| `Burstable` | The Pod does not qualify as Guaranteed, but at least one container has a CPU or memory request/limit. |
+| `BestEffort` | No container in the Pod has CPU or memory requests or limits. |
 
-Simple rule:
-- set requests == limits for critical production Pods (Guaranteed)
-- set requests < limits for normal apps (Burstable)
-- never leave both unset in production (BestEffort)
+QoS class influences eviction decisions under node pressure, but it is not an absolute promise that every Guaranteed Pod is always protected or that eviction order is determined by QoS alone. Kubernetes also considers whether usage exceeds requests and Pod priority.
 
----
+## LimitRange
 
-## LimitRange (namespace-level defaults)
-
-Sets default requests and limits for all Pods in a namespace.
+A LimitRange can provide default requests/limits and enforce minimums or maximums for containers or Pods in a namespace.
 
 ```yaml
 apiVersion: v1
 kind: LimitRange
 metadata:
-  name: default-limits
+  name: container-defaults
   namespace: production
 spec:
   limits:
@@ -91,76 +71,29 @@ spec:
         memory: "2Gi"
 ```
 
----
-
-## Checking resource usage
+## Inspect resource use and scheduling
 
 ```bash
-# Node resource usage
 kubectl top nodes
-
-# Pod resource usage
 kubectl top pods
 kubectl top pods -n <namespace>
-
-# Describe a node to see allocatable vs requested
 kubectl describe node <node-name>
 ```
 
----
+`kubectl top` requires the resource metrics pipeline (commonly Metrics Server). It reports observed usage, not the scheduler's full accounting. Use `kubectl describe node` and Pod specs to inspect allocatable resources and requests.
 
-## Common mistakes
+## Practical guidance
 
-- not setting resource requests (Pods may land on overloaded nodes)
-- not setting memory limits (one Pod can consume all node memory)
-- setting limits much higher than requests (node can be massively overcommitted)
-- setting CPU limits too low (causes unnecessary throttling and slow apps)
-- setting memory requests too low (Pod gets evicted under pressure)
-- running production Pods as BestEffort (first to be evicted)
+- Set realistic requests based on observed workload behavior; they affect scheduling and capacity planning.
+- Set limits when you need to bound resource consumption, while understanding the trade-offs (especially CPU throttling).
+- Avoid arbitrarily setting requests equal to limits for every workload. Guaranteed QoS has specific criteria and may reduce flexibility.
+- Use LimitRange for namespace defaults and ResourceQuota for aggregate namespace constraints.
+- Monitor usage over time before tuning resource values.
 
----
+## Quick reference
 
-## Good practices
-
-- always set both requests and limits
-- for production critical Pods, set requests == limits (Guaranteed QoS)
-- use LimitRange to set safe defaults per namespace
-- use ResourceQuota to cap total usage per namespace
-- use `kubectl top` to gather real usage data before setting limits
-- review and tune limits based on actual usage, not guesses
-
----
-
-## Must memorize
-
-```yaml
-resources:
-  requests:
-    cpu: "100m"
-    memory: "128Mi"
-  limits:
-    cpu: "500m"
-    memory: "256Mi"
-```
-
-```bash
-kubectl top pods
-kubectl top nodes
-kubectl describe node <name>
-```
-
-```
-QoS: Guaranteed > Burstable > BestEffort
-CPU over limit = throttled
-Memory over limit = OOM killed
-```
-
----
-
-## Key ideas
-
-- Requests are for scheduling; limits are for runtime enforcement.
-- CPU is throttled when exceeded; memory causes OOM kill.
-- QoS class determines eviction priority under node pressure.
-- Always set both requests and limits in production.
-- Set requests == limits for critical Pods to get Guaranteed QoS.
+- Requests: scheduling and resource accounting.
+- Limits: runtime ceilings.
+- CPU limit exceeded: throttling.
+- Memory limit exceeded: possible OOM termination.
+- QoS: Guaranteed, Burstable, BestEffort; eviction behavior also depends on Pod priority and usage relative to requests.

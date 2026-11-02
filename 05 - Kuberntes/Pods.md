@@ -46,7 +46,7 @@ spec:
 | Phase | Meaning |
 |---|---|
 | `Pending` | Pod accepted but containers not yet running (scheduling or image pull) |
-| `Running` | At least one container is running |
+| `Running` | Pod is bound to a node and all containers have been created; at least one container is running or starting. It does not mean every container is Ready. |
 | `Succeeded` | All containers exited with code 0 (Jobs) |
 | `Failed` | All containers exited, at least one with non-zero code |
 | `Unknown` | Node unreachable, status cannot be determined |
@@ -60,7 +60,7 @@ Controls what happens when a container exits.
 | Policy | Behavior |
 |---|---|
 | `Always` | Always restart (default for Deployments) |
-| `OnFailure` | Restart only on non-zero exit (Jobs) |
+| `OnFailure` | Restart containers that exit with a non-zero status (commonly used by Jobs) |
 | `Never` | Never restart |
 
 ```yaml
@@ -149,7 +149,7 @@ kubectl exec -it <pod-name> -c <c> -- sh  # shell into specific container
 ## Common mistakes
 
 - creating Pods directly instead of using Deployments (orphan Pods are not rescheduled)
-- not setting resource requests and limits
+- omitting resource requests/limits without considering scheduling and workload requirements
 - not using init containers to handle startup dependencies
 - forgetting that containers in the same Pod share localhost
 - using `latest` image tag (unpredictable behavior)
@@ -159,8 +159,8 @@ kubectl exec -it <pod-name> -c <c> -- sh  # shell into specific container
 
 ## Good practices
 
-- always set resource requests and limits
-- always set liveness and readiness probes
+- set appropriate resource requests and, where needed, limits
+- configure readiness/liveness/startup probes when they provide meaningful health signals
 - use specific image tags, never `latest` in production
 - use init containers for startup ordering
 - use Deployments instead of raw Pods

@@ -44,6 +44,9 @@ grep -o 'version>.*<' pom.xml | sed 's/version>\(.*\)<\/version>/\1/'
 # Lines 5-10 only
 sed '5,10s/old/new/g' file.txt
 
-# Every 3rd line
-sed '0,3s/old/new/g' file.txt
+# GNU sed: lines 3, 6, 9, ...
+sed '3~3s/old/new/g' file.txt
+
+# Portable awk alternative
+awk 'NR % 3 == 0 { gsub(/old/, "new") } { print }' file.txt
 ```

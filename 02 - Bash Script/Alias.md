@@ -23,7 +23,7 @@ Aliases are typically defined in shell configuration files like `~/.bashrc` or
 
 ## Limitations in Scripts
 
-Aliases have an important limitation: they cannot be used effectively in bash scripts that you execute. When a script finishes execution, any aliases defined within it are lost because they only exist in that shell process. However, if you define aliases in a separate file and **source** it (rather than execute it), the aliases become available in your current shell.[](https://stackoverflow.com/questions/24054154/how-do-create-an-alias-in-shell-scripts)​
+Bash does not expand aliases in non-interactive shells by default, so aliases defined in ~/.bashrc normally are not available to a script executed as bash script.sh. Enabling shopt -s expand_aliases changes this behavior, but shell functions are generally clearer for reusable script logic. Alias expansion occurs when Bash reads commands, not when it executes them. Sourcing a file makes its definitions available in the current shell; executing a file runs it in a separate process.[](https://stackoverflow.com/questions/24054154/how-do-create-an-alias-in-shell-scripts)​
 
 ## Common Use Cases
 

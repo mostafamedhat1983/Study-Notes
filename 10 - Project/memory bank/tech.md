@@ -21,7 +21,7 @@ tags:
 - **Amazon ECR**: Private container registry with IAM authentication
 
 ### Infrastructure as Code
-- **Terraform >= 1.0**: Resource provisioning with S3 native state locking
+- **Terraform >= 1.10**: Required for S3-native state locking with `use_lockfile = true` (introduced in 1.10; generally available in 1.11)
 - **AWS Provider**: Pin a version that explicitly supports the Regional NAT Gateway availability-mode argument; verify the provider resource documentation and lockfile.
 - **Packer >= 1.8**: Immutable AMI builds with vulnerability scanning
 - **Ansible >= 2.9**: Configuration management and software provisioning

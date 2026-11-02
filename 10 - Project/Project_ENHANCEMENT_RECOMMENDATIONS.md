@@ -591,7 +591,7 @@ kubectl port-forward -n monitoring svc/kube-prometheus-stack-grafana 3000:80
 
 ## 🌍 Regional NAT Gateway Alternatives
 
-Since AWS Regional NAT Gateway isn't yet supported in Terraform, consider these alternatives:
+AWS Regional NAT Gateway is now an available VPC feature. Before implementing it with Terraform, verify that the selected AWS provider version exposes the required regional availability-mode argument for `aws_nat_gateway`. If it does, manage it directly with Terraform rather than treating it as unsupported. Regional NAT Gateway is not a private NAT replacement and has different behavior and pricing from zonal NAT gateways.
 
 ### 1. **AWS VPC Lattice** (Service Networking)
 - Service-to-service connectivity across VPCs/accounts

@@ -60,9 +60,9 @@ For each problem below:
 
 ## 5. EC2 instance cannot reach the internet
 
-- **Why it happens:** The subnet lacks an internet gateway route, the instance has no public IP, or security/NACL rules block traffic.
+- **Why it happens:** For IPv4 internet access, an instance in a public subnet needs a route to an attached Internet Gateway and a public IPv4 address (or Elastic IP). An instance in a private subnet typically uses a NAT gateway in a public subnet for outbound internet access. Security groups or network ACLs can also block traffic.
 - **Quick sign:** Package downloads and external API calls fail while internal VPC access may work.
-- **Solution:** Trace route tables, internet/NAT gateway configuration, security groups, and NACLs in order.
+- **Solution:** Check the subnet's route table, Internet Gateway or NAT gateway path, the instance's public IPv4 address when using an Internet Gateway, and security-group/network-ACL rules. A subnet is not public merely because of its name; its route table determines the routing.
 - **Useful commands:** `aws ec2 describe-route-tables --filters Name=association.subnet-id,Values=<subnet-id>`, `aws ec2 describe-instances --instance-ids <instance-id>`, `aws ec2 describe-security-groups --group-ids <sg-id>`
 
 ---
@@ -150,9 +150,9 @@ For each problem below:
 
 ## 15. Lambda cannot reach a VPC resource
 
-- **Why it happens:** The function is attached to private subnets without a NAT route, or security-group rules block the destination.
-- **Quick sign:** Internet or VPC-resource calls time out.
-- **Solution:** Verify subnet routing, NAT/internet gateway design, security groups, and DNS configuration. Separate private-destination failures from internet-destination failures.
+- **Why it happens:** After a Lambda function is attached to your VPC, its outbound traffic uses the VPC network configuration. Access to private VPC resources depends on valid routes and security controls. Internet-bound IPv4 traffic needs a route through a NAT gateway; selecting a public subnet alone does not give the function a public IP address or internet access. Access to supported AWS services can also use VPC endpoints.
+- **Quick sign:** Calls to a private resource or an internet endpoint time out.
+- **Solution:** First identify whether the destination is a private VPC resource, a public internet endpoint, or an AWS service. Then verify the relevant route tables, security groups, network ACLs, DNS, NAT gateway, or VPC endpoint. Do not add a NAT gateway just to reach a private resource inside the VPC.
 - **Useful commands:** `aws lambda get-function-configuration --function-name <name>`, `aws ec2 describe-route-tables`, `aws ec2 describe-security-groups --group-ids <sg-id>`
 
 ---
